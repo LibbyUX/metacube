@@ -145,31 +145,39 @@ export function CubeMap({
         dataOrgans={dataOrgans}
       />
 
-      {/* Phantom slots — only render within a distance threshold to keep mesh count down */}
-      {allOrganisms.map((org, oi) =>
-        allModalities.map((mod, mi) =>
-          allOrgans.map((organ, ti) => {
-            const key = `${org}|${mod}|${organ}`;
-            if (dataKeys.has(key)) return null;
-            const dist = distanceFromOrigin(oi, mi, ti, allOrganisms, allModalities, allOrgans);
-            // Pseudo-random selection: hash the indices to scatter phantoms
-            const hash = ((oi * 7 + mi * 13 + ti * 23) * 2654435761) >>> 0;
-            const rand = (hash & 0xffff) / 0xffff; // 0..1
-            // Keep ~15% of cells, biased toward low-index corner
-            const normDist = dist / maxDist;
-            if (rand > 0.15 + 0.3 * (1 - normDist)) return null;
-            const phantomOpacity = Math.max(0.01, 0.1 * (1 - normDist * 0.8));
-            return (
-              <PhantomSlot
-                key={`p-${key}`}
-                position={[xFor(oi), yFor(mi), zFor(ti)]}
-                dimensions={[cellSize, cellSize, cellSize]}
-                opacity={phantomOpacity}
-              />
-            );
-          })
-        )
-      )}
+      {/* Phantom slots — precompute a limited set to avoid GPU overload */}
+      {useMemo(() => {
+        const MAX_PHANTOMS = 40;
+        const phantoms: { key: string; pos: [number, number, number]; opacity: number }[] = [];
+        for (let oi = 0; oi < allOrganisms.length; oi++) {
+          for (let mi = 0; mi < allModalities.length; mi++) {
+            for (let ti = 0; ti < allOrgans.length; ti++) {
+              const key = `${allOrganisms[oi]}|${allModalities[mi]}|${allOrgans[ti]}`;
+              if (dataKeys.has(key)) continue;
+              const dist = distanceFromOrigin(oi, mi, ti, allOrganisms, allModalities, allOrgans);
+              const hash = ((oi * 7 + mi * 13 + ti * 23) * 2654435761) >>> 0;
+              const rand = (hash & 0xffff) / 0xffff;
+              const normDist = dist / maxDist;
+              if (rand > 0.12 + 0.25 * (1 - normDist)) continue;
+              phantoms.push({
+                key,
+                pos: [xFor(oi), yFor(mi), zFor(ti)],
+                opacity: Math.max(0.01, 0.1 * (1 - normDist * 0.8)),
+              });
+            }
+          }
+        }
+        // Sort by distance, keep only closest MAX_PHANTOMS
+        phantoms.sort((a, b) => a.opacity - b.opacity);
+        return phantoms.slice(0, MAX_PHANTOMS).map((p) => (
+          <PhantomSlot
+            key={`p-${p.key}`}
+            position={p.pos}
+            dimensions={[cellSize, cellSize, cellSize]}
+            opacity={p.opacity}
+          />
+        ));
+      }, [allOrganisms, allModalities, allOrgans, dataKeys, maxDist, cellSize])}
 
       {/* Origin markers */}
       {allOrganisms.map((org, oi) =>
