@@ -11,7 +11,10 @@ Axes:
 import csv
 import json
 import sys
+import numpy as np
 from collections import defaultdict
+from scipy.cluster.hierarchy import linkage, leaves_list
+from scipy.spatial.distance import pdist
 
 
 def main():
@@ -37,29 +40,62 @@ def main():
     assays = sorted(set(c["assay"] for c in cells))
     organs = sorted(set(c["organ"] for c in cells))
 
-    # Sort organs/assays by total cell count (descending) for better layout
+    # Cluster axes so similar categories are adjacent
+    def cluster_axis(axis_values, axis_key, other_keys):
+        """Reorder axis by hierarchical clustering on co-occurrence profiles."""
+        if len(axis_values) <= 2:
+            return axis_values
+        # Build feature matrix: axis_value × (other combinations) → total count
+        combos = sorted(set(
+            "|".join(str(c[k]) for k in other_keys) for c in cells
+        ))
+        combo_idx = {k: i for i, k in enumerate(combos)}
+        mat = np.zeros((len(axis_values), len(combos)))
+        for c in cells:
+            ai = axis_values.index(c[axis_key]) if c[axis_key] in axis_values else -1
+            if ai == -1:
+                continue
+            ck = "|".join(str(c[k]) for k in other_keys)
+            ci = combo_idx.get(ck)
+            if ci is not None:
+                mat[ai, ci] += c["total"]
+        # Normalize
+        norms = np.linalg.norm(mat, axis=1, keepdims=True)
+        norms[norms == 0] = 1
+        mat = mat / norms
+        if mat.shape[0] < 3:
+            return axis_values
+        dist = pdist(mat, metric="cosine")
+        dist = np.nan_to_num(dist, nan=1.0)
+        Z = linkage(dist, method="average")
+        return [axis_values[i] for i in leaves_list(Z)]
+
+    # Sort by total cell count (descending) for trimming
     organ_totals = defaultdict(int)
     assay_totals = defaultdict(int)
     for c in cells:
         organ_totals[c["organ"]] += c["total"]
         assay_totals[c["assay"]] += c["total"]
+    assays_by_count = sorted(assays, key=lambda a: assay_totals[a], reverse=True)
+    organs_by_count = sorted(organs, key=lambda o: organ_totals[o], reverse=True)
 
-    organs = sorted(organs, key=lambda o: organ_totals[o], reverse=True)
-    assays = sorted(assays, key=lambda a: assay_totals[a], reverse=True)
-
-    print(f"Organisms: {len(organisms)}")
-    print(f"Assays: {len(assays)}")
-    print(f"Organs: {len(organs)}")
-    print(f"Cube cells: {len(cells)}")
-    print(f"Total cells: {sum(c['total'] for c in cells):,}")
-
-    # Top 30 assays and organs for manageable cube
+    # Trim to top N first
     TOP_ASSAYS = 15
     TOP_ORGANS = 20
-    top_assays = assays[:TOP_ASSAYS]
-    top_organs = organs[:TOP_ORGANS]
+    top_assays = assays_by_count[:TOP_ASSAYS]
+    top_organs = organs_by_count[:TOP_ORGANS]
 
-    print(f"\nTrimmed to top {TOP_ASSAYS} assays, top {TOP_ORGANS} organs")
+    # Then cluster the trimmed sets for spatial coherence
+    top_assays = cluster_axis(top_assays, "assay", ["organism", "organ"])
+    top_organs = cluster_axis(top_organs, "organ", ["organism", "assay"])
+    organisms = cluster_axis(organisms, "organism", ["assay", "organ"])
+
+    print(f"Organisms: {len(organisms)}")
+    print(f"Assays: {len(top_assays)}")
+    print(f"Organs: {len(top_organs)}")
+    print(f"Cube cells: {len(cells)}")
+    print(f"Total cells: {sum(c['total'] for c in cells):,}")
+    print(f"Trimmed to top {TOP_ASSAYS} assays, top {TOP_ORGANS} organs")
 
     # Filter cells to trimmed axes
     filtered = [
@@ -106,9 +142,15 @@ def main():
     lines.append('')
 
     # Axes
-    lines.append(f'export const TRIMMED_ORGANISMS = {json.dumps(organisms)} as const;')
-    lines.append(f'export const TRIMMED_MODALITIES = {json.dumps(top_assays)} as const;')
-    lines.append(f'export const TRIMMED_ORGANS = {json.dumps(top_organs)} as const;')
+    lines.append(f'export let TRIMMED_ORGANISMS: readonly string[] = {json.dumps(organisms)};')
+    lines.append(f'export let TRIMMED_MODALITIES: readonly string[] = {json.dumps(top_assays)};')
+    lines.append(f'export let TRIMMED_ORGANS: readonly string[] = {json.dumps(top_organs)};')
+    lines.append('')
+    lines.append('export function setAxes(organisms: string[], modalities: string[], organs: string[]) {')
+    lines.append('  TRIMMED_ORGANISMS = organisms;')
+    lines.append('  TRIMMED_MODALITIES = modalities;')
+    lines.append('  TRIMMED_ORGANS = organs;')
+    lines.append('}')
     lines.append('')
 
     # Keep the existing interfaces/functions

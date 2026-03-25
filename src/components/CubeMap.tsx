@@ -34,6 +34,9 @@ interface CubeMapProps {
   selectedCell: CubeCell | null;
   onHover: (c: CubeCell | null) => void;
   onSelect: (c: CubeCell) => void;
+  axisOrganisms?: string[];
+  axisModalities?: string[];
+  axisOrgans?: string[];
 }
 
 const CUBE_SIZE = 3.8;
@@ -51,24 +54,31 @@ export function CubeMap({
   selectedCell,
   onHover,
   onSelect,
+  axisOrganisms,
+  axisModalities,
+  axisOrgans,
 }: CubeMapProps) {
   const filteredRecords = useMemo(
-    () =>
-      records.filter(
+    () => {
+      const filtered = records.filter(
         (r) =>
           organismFilter.has(r.organism) &&
           modalityFilter.has(r.modality) &&
           organFilter.has(r.organ)
-      ),
+      );
+      // If filters eliminated everything, skip them (stale filters from dataset switch)
+      if (filtered.length === 0 && records.length > 0) return records;
+      return filtered;
+    },
     [records, organismFilter, modalityFilter, organFilter]
   );
 
   const cells = useMemo(() => buildCubeCells(filteredRecords), [filteredRecords]);
 
-  // Fixed spatial ordering — center-out
-  const allOrganisms = useMemo(() => [...TRIMMED_ORGANISMS] as string[], []);
-  const allModalities = useMemo(() => [...TRIMMED_MODALITIES] as string[], []);
-  const allOrgans = useMemo(() => [...TRIMMED_ORGANS] as string[], []);
+  // Spatial ordering — from props or static defaults
+  const allOrganisms = useMemo(() => axisOrganisms ?? [...TRIMMED_ORGANISMS] as string[], [axisOrganisms]);
+  const allModalities = useMemo(() => axisModalities ?? [...TRIMMED_MODALITIES] as string[], [axisModalities]);
+  const allOrgans = useMemo(() => axisOrgans ?? [...TRIMMED_ORGANS] as string[], [axisOrgans]);
 
   const dataKeys = useMemo(
     () => new Set(cells.map((c) => `${c.organism}|${c.modality}|${c.organ}`)),
@@ -142,9 +152,13 @@ export function CubeMap({
             const key = `${org}|${mod}|${organ}`;
             if (dataKeys.has(key)) return null;
             const dist = distanceFromOrigin(oi, mi, ti, allOrganisms, allModalities, allOrgans);
-            if (dist > maxDist * 0.6) return null; // cull distant phantoms
+            // Pseudo-random selection: hash the indices to scatter phantoms
+            const hash = ((oi * 7 + mi * 13 + ti * 23) * 2654435761) >>> 0;
+            const rand = (hash & 0xffff) / 0xffff; // 0..1
+            // Keep ~15% of cells, biased toward low-index corner
             const normDist = dist / maxDist;
-            const phantomOpacity = Math.max(0.008, 0.12 * (1 - normDist * 1.2));
+            if (rand > 0.15 + 0.3 * (1 - normDist)) return null;
+            const phantomOpacity = Math.max(0.01, 0.1 * (1 - normDist * 0.8));
             return (
               <PhantomSlot
                 key={`p-${key}`}

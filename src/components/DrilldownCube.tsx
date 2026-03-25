@@ -259,7 +259,7 @@ export function DrilldownCube({
 
   useEffect(() => {
     const key = `${organism}|${organ}|${assay}`;
-    fetch("/census_drilldown.json")
+    fetch(`${import.meta.env.BASE_URL}census_drilldown.json`)
       .then((r) => r.json())
       .then((data) => {
         const rows = data[key];

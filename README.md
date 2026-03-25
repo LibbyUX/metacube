@@ -1,71 +1,108 @@
 # Cube — 3D Dataset Explorer
 
-Interactive 3D cubic map for exploring biomedical datasets across three categorical dimensions. Built for systematically mapping data landscapes in Parkinson's disease research.
+Interactive 3D cubic map for exploring datasets across three categorical dimensions. Click any cell to drill down into a nested treemap of studies and cell types.
 
-![Cube visualization](https://img.shields.io/badge/React-Three.js-blue)
+**Live demo:** [maflot.github.io/cube](https://maflot.github.io/cube/)
 
-## What it does
+## Examples
 
-Datasets are positioned inside a transparent cube:
-- **X axis:** Organism (Mouse, Human, Macaque, ...)
-- **Y axis:** Modality (scRNA-seq, WGS, Multiome, bulk RNA-seq, ...)
-- **Z axis:** Organ / Tissue (Brain, Blood, CSF, ...)
-
-Color encodes dataset size. Click any cell to drill down into a treemap of its sub-datasets.
-
-## Pages
-
-| Route | Description |
-|-------|-------------|
-| `/` | Interactive 3D cube explorer with filters, tooltips, treemap drill-down |
-| `/abstract.html` | Static graphical abstract (cube + UMAP side-by-side) |
-| `/video.html` | Animated video: cube → brain point cloud → 2D UMAP |
+| Example | Axes | Size | Sources |
+|---------|------|------|---------|
+| **Cell x Gene Census** | Organism × Assay × Organ | 214M cells, 5 organisms | [CZ CELLxGENE](https://cellxgene.cziscience.com/), [Census API](https://chanzuckerberg.github.io/cellxgene-census/) |
+| **Multi-site Microbiome** | Host × Body Site × Genus | 5,166 genome bins, 12 hosts | [Human study](https://doi.org/10.1038/s41467-024-52598-7), [Zoo study](https://doi.org/10.1038/s41467-024-52669-9) |
 
 ## Quick Start
 
-Requires [Pixi](https://pixi.sh) (conda-based package manager).
-
 ```bash
-pixi install && pixi run npm install
-pixi run dev
+npm install
+npm run dev
 ```
 
-Open http://localhost:5173
+Open http://localhost:5173/cube/
+
+## Deploy Your Own Data
+
+Fork this repo and add your dataset:
+
+### 1. Prepare your data as two JSON files
+
+**`public/my_data.json`** — cube records:
+```json
+{
+  "records": [
+    {
+      "organism": "Category A value",
+      "modality": "Category B value",
+      "organ": "Category C value",
+      "datasetSize": 1234,
+      "datasets": ["sub-item 1 (500)", "sub-item 2 (734)"],
+      "priority": 1
+    }
+  ],
+  "organisms": ["Cat A val 1", "Cat A val 2"],
+  "modalities": ["Cat B val 1", "Cat B val 2"],
+  "organs": ["Cat C val 1", "Cat C val 2"]
+}
+```
+
+**`public/my_drilldown.json`** — drill-down data (optional):
+```json
+{
+  "Cat A val|Cat C val|Cat B val": [
+    { "d": "Study name", "c": "Sub-category", "n": 100 }
+  ]
+}
+```
+
+Note: the drilldown key format is `organism|organ|modality`.
+
+### 2. Register your example
+
+Edit `src/data/examples.ts`:
+```ts
+{
+  id: "my-dataset",
+  title: "My Dataset",
+  description: "Short description",
+  axisLabels: { x: "Category A", y: "Category B", z: "Category C" },
+  drilldownPath: "my_drilldown.json",
+  dataPath: "my_data.json",
+  links: [{ label: "Publication", url: "https://..." }],
+}
+```
+
+### 3. Add the loader
+
+In `src/data/loadExample.ts`, add a case for your `id`:
+```ts
+if (id === "my-dataset") {
+  const resp = await fetch(`${import.meta.env.BASE_URL}my_data.json`);
+  // ... same pattern as microbiome
+}
+```
+
+### 4. Deploy
+
+Push to `main` — GitHub Actions builds and deploys automatically. Or run locally:
+
+```bash
+npm run build
+npx vite preview
+```
+
+### Custom domain / repo name
+
+Change `base` in `vite.config.ts` to match your repo name:
+```ts
+base: "/your-repo-name/"
+```
 
 ## Tech Stack
 
-- **React 19** + **TypeScript**
-- **Three.js** via react-three-fiber + drei
-- **d3-scale** / **d3-hierarchy** for data normalization and treemap layouts
-- **Vite 8** for dev/build
-- **Pixi** for environment management (Node.js 22+)
-
-## Data
-
-Source data lives in `data/Datasets(Priority).csv` with verified numbers in `data/dataset_sources.csv`.
-
-Dataset records are defined in `src/data/datasets.ts` — each record has organism, modality, organ, size, and priority. Sub-dataset details (per-study cell counts, access levels) are in `src/data/subDatasets.ts`.
-
-## Architecture
-
-```
-src/
-  data/
-    datasets.ts        # Data model, axes, aggregation
-    subDatasets.ts      # Per-study metadata
-    colors.ts           # Color scales (size, organism, modality)
-  hooks/
-    useStore.ts         # App state (filters, selection, opacity)
-  components/
-    Scene.tsx            # R3F Canvas, camera, lighting
-    CubeMap.tsx          # Core layout: data → 3D grid positions
-    CubeCellMesh.tsx     # Individual cuboid with interactions
-    ControlPanel.tsx     # Filter sidebar
-    TreemapOverlay.tsx   # Drill-down treemap view
-    ...
-  abstract/              # Graphical abstract (static)
-  video/                 # Animated video sequence
-```
+- React 19 + TypeScript + Three.js (react-three-fiber)
+- d3-scale + d3-hierarchy for data mapping and treemaps
+- Vite 8 for build
+- GitHub Actions for deployment
 
 ## License
 

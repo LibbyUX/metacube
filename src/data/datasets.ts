@@ -161,9 +161,15 @@ export const rawRecords: DatasetRecord[] = [
   { organism: "Mus musculus", modality: "10x 3' transcription profiling", organ: "kidney", datasetSize: 22, datasets: ["epithelial cell of proximal tubule (13)", "kidney distal convoluted tubule epithelial cell (3)", "kidney loop of Henle medullary thick ascending limb epithelial cell (2)", "kidney collecting duct principal cell (1)", "kidney connecting tubule epithelial cell (1)"], priority: 4 },
 ];
 
-export const TRIMMED_ORGANISMS = ["Callithrix jacchus", "Homo sapiens", "Macaca mulatta", "Mus musculus", "Pan troglodytes"] as const;
-export const TRIMMED_MODALITIES = ["10x 3' v3", "sci-RNA-seq3", "10x 3' v2", "10x 5' v2", "10x 5' v1", "10x multiome", "10x 5' transcription profiling", "Drop-seq", "ScaleBio single cell RNA sequencing", "10x 3' transcription profiling", "microwell-seq", "Smart-seq2", "inDrop", "BD Rhapsody Whole Transcriptome Analysis", "10x 3' v1"] as const;
-export const TRIMMED_ORGANS = ["embryo", "blood", "dorsolateral prefrontal cortex", "lung", "breast", "cerebral cortex", "telencephalon", "middle temporal gyrus", "cerebellum", "peripheral region of retina", "kidney", "liver", "primary motor cortex", "hippocampal formation", "macula lutea", "thymus", "heart left ventricle", "prefrontal cortex", "primary visual cortex", "chorioretinal region"] as const;
+export let TRIMMED_ORGANISMS: readonly string[] = ["Mus musculus", "Macaca mulatta", "Homo sapiens", "Callithrix jacchus", "Pan troglodytes"];
+export let TRIMMED_MODALITIES: readonly string[] = ["sci-RNA-seq3", "10x multiome", "10x 3' v1", "Drop-seq", "inDrop", "10x 3' v2", "10x 5' transcription profiling", "10x 3' v3", "10x 5' v1", "10x 5' v2", "ScaleBio single cell RNA sequencing", "10x 3' transcription profiling", "microwell-seq", "Smart-seq2", "BD Rhapsody Whole Transcriptome Analysis"];
+export let TRIMMED_ORGANS: readonly string[] = ["embryo", "telencephalon", "cerebellum", "thymus", "lung", "liver", "prefrontal cortex", "primary visual cortex", "primary motor cortex", "kidney", "cerebral cortex", "hippocampal formation", "middle temporal gyrus", "peripheral region of retina", "chorioretinal region", "dorsolateral prefrontal cortex", "macula lutea", "blood", "breast", "heart left ventricle"];
+
+export function setAxes(organisms: string[], modalities: string[], organs: string[]) {
+  TRIMMED_ORGANISMS = organisms;
+  TRIMMED_MODALITIES = modalities;
+  TRIMMED_ORGANS = organs;
+}
 
 
 export interface CubeCell {

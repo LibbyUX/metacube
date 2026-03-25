@@ -1,0 +1,1285 @@
+{
+  "records": [
+    {
+      "organism": "Acinonyx jubatus",
+      "modality": "Saliva",
+      "organ": "Eubacteriales",
+      "datasetSize": 1,
+      "datasets": [
+        "Eubacteriales bacterium (1)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Acinonyx jubatus",
+      "modality": "Saliva",
+      "organ": "Other",
+      "datasetSize": 21,
+      "datasets": [
+        "Firmicutes bacterium (3)",
+        "Candidatus Saccharibacteria bacterium (3)",
+        "Brachymonas sp. (2)",
+        "Flavobacteriaceae bacterium (1)",
+        "Fretibacterium sp. (1)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Acinonyx jubatus",
+      "modality": "Saliva",
+      "organ": "Porphyromonas",
+      "datasetSize": 2,
+      "datasets": [
+        "Porphyromonas sp. (2)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Camelus bactrianus",
+      "modality": "Stool",
+      "organ": "Eubacteriales",
+      "datasetSize": 3,
+      "datasets": [
+        "Eubacteriales bacterium (3)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Camelus bactrianus",
+      "modality": "Stool",
+      "organ": "Other",
+      "datasetSize": 27,
+      "datasets": [
+        "Candidatus Saccharibacteria bacterium (6)",
+        "Lachnospiraceae bacterium (3)",
+        "Firmicutes bacterium (3)",
+        "Coriobacteriales bacterium (3)",
+        "bacterium (2)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Chaetophractus vilosus",
+      "modality": "Saliva",
+      "organ": "Other",
+      "datasetSize": 6,
+      "datasets": [
+        "Staphylococcus rostri (1)",
+        "Streptococcus dysgalactiae (1)",
+        "Paracoccus sp. (1)",
+        "Kocuria sp. (1)",
+        "Jeotgalicoccus sp. (1)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Chaetophractus vilosus",
+      "modality": "Stool",
+      "organ": "Eubacteriales",
+      "datasetSize": 6,
+      "datasets": [
+        "Eubacteriales bacterium (6)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Chaetophractus vilosus",
+      "modality": "Stool",
+      "organ": "Other",
+      "datasetSize": 16,
+      "datasets": [
+        "bacterium (3)",
+        "Clostridia bacterium (2)",
+        "Lachnospiraceae bacterium (2)",
+        "Acidaminococcaceae bacterium (1)",
+        "Bacteroidales bacterium (1)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Gorilla gorilla",
+      "modality": "Saliva",
+      "organ": "Neisseria",
+      "datasetSize": 1,
+      "datasets": [
+        "Neisseria sp. (1)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Gorilla gorilla",
+      "modality": "Saliva",
+      "organ": "Other",
+      "datasetSize": 8,
+      "datasets": [
+        "bacterium (2)",
+        "Candidatus Saccharibacteria bacterium (2)",
+        "Carnobacterium sp. (1)",
+        "Capnocytophaga sp. (1)",
+        "Candidatus Gracilibacteria bacterium (1)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Gorilla gorilla",
+      "modality": "Saliva",
+      "organ": "Rothia",
+      "datasetSize": 1,
+      "datasets": [
+        "Rothia sp. (1)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Gorilla gorilla",
+      "modality": "Stool",
+      "organ": "Eubacteriales",
+      "datasetSize": 1,
+      "datasets": [
+        "Eubacteriales bacterium (1)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Gorilla gorilla",
+      "modality": "Stool",
+      "organ": "Other",
+      "datasetSize": 27,
+      "datasets": [
+        "Clostridia bacterium (7)",
+        "Firmicutes bacterium (4)",
+        "Oscillospiraceae bacterium (2)",
+        "Coriobacteriia bacterium (2)",
+        "Methanobrevibacter sp. (2)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Human",
+      "modality": "Eye",
+      "organ": "Lancefieldella",
+      "datasetSize": 3,
+      "datasets": [
+        "Lancefieldella sp000564995 (3)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Eye",
+      "organ": "Neisseria",
+      "datasetSize": 2,
+      "datasets": [
+        "Neisseria perflava_A (1)",
+        "Neisseria perflava (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Eye",
+      "organ": "Other",
+      "datasetSize": 40,
+      "datasets": [
+        "Xanthomonas_B massiliensis (11)",
+        "Haemophilus_D parainfluenzae_K (2)",
+        "Moraxella_A cinereus (2)",
+        "Ruminococcus_E bromii_B (2)",
+        "Haemophilus_D sp900755445 (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Eye",
+      "organ": "Pauljensenia",
+      "datasetSize": 1,
+      "datasets": [
+        "Pauljensenia sp902373545 (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Eye",
+      "organ": "Porphyromonas",
+      "datasetSize": 2,
+      "datasets": [
+        "Porphyromonas pasteri (2)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Eye",
+      "organ": "Rothia",
+      "datasetSize": 3,
+      "datasets": [
+        "Rothia sp001808955 (1)",
+        "Rothia mucilaginosa_A (1)",
+        "Rothia mucilaginosa (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Eye",
+      "organ": "Unknown",
+      "datasetSize": 3,
+      "datasets": [],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Plaque",
+      "organ": "Campylobacter_A",
+      "datasetSize": 12,
+      "datasets": [
+        "Campylobacter_A rectus (4)",
+        "Campylobacter_A sp902387145 (1)",
+        "Campylobacter_A sp905372745 (1)",
+        "Campylobacter_A concisus_S (1)",
+        "Campylobacter_A concisus_R (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Plaque",
+      "organ": "Lancefieldella",
+      "datasetSize": 45,
+      "datasets": [
+        "Lancefieldella rimae (22)",
+        "Lancefieldella parvula (19)",
+        "Lancefieldella sp000564995 (2)",
+        "Lancefieldella sp015258485 (1)",
+        "Lancefieldella sp000411555 (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Plaque",
+      "organ": "Neisseria",
+      "datasetSize": 14,
+      "datasets": [
+        "Neisseria elongata (5)",
+        "Neisseria bacilliformis (3)",
+        "Neisseria subflava (3)",
+        "Neisseria sp000090875 (2)",
+        "Neisseria macacae (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Plaque",
+      "organ": "Oribacterium",
+      "datasetSize": 30,
+      "datasets": [
+        "Oribacterium sp000160135 (24)",
+        "Oribacterium sp015258095 (2)",
+        "Oribacterium sp013394775 (2)",
+        "Oribacterium sinus (2)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Plaque",
+      "organ": "Other",
+      "datasetSize": 680,
+      "datasets": [
+        "Eikenella corrodens (27)",
+        "Corynebacterium matruchotii (19)",
+        "Treponema_D buccale (18)",
+        "Kingella_B oralis (17)",
+        "Bulleidia moorei (16)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Plaque",
+      "organ": "Pauljensenia",
+      "datasetSize": 7,
+      "datasets": [
+        "Pauljensenia sp000308055 (3)",
+        "Pauljensenia meyeri (2)",
+        "Pauljensenia hongkongensis (1)",
+        "Pauljensenia cardiffensis (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Plaque",
+      "organ": "Porphyromonas",
+      "datasetSize": 51,
+      "datasets": [
+        "Porphyromonas endodontalis (14)",
+        "Porphyromonas pasteri (11)",
+        "Porphyromonas sp000467855 (7)",
+        "Porphyromonas catoniae (6)",
+        "Porphyromonas sp018127745 (5)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Plaque",
+      "organ": "Prevotella",
+      "datasetSize": 107,
+      "datasets": [
+        "Prevotella conceptionensis (16)",
+        "Prevotella oris (15)",
+        "Prevotella denticola (12)",
+        "Prevotella pleuritidis (8)",
+        "Prevotella nigrescens (8)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Plaque",
+      "organ": "Rothia",
+      "datasetSize": 24,
+      "datasets": [
+        "Rothia dentocariosa (9)",
+        "Rothia mucilaginosa (8)",
+        "Rothia aeria (4)",
+        "Rothia mucilaginosa_A (2)",
+        "Rothia sp024294905 (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Plaque",
+      "organ": "Unknown",
+      "datasetSize": 387,
+      "datasets": [],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Saliva",
+      "organ": "Campylobacter_A",
+      "datasetSize": 48,
+      "datasets": [
+        "Campylobacter_A concisus_C (18)",
+        "Campylobacter_A concisus_T (17)",
+        "Campylobacter_A rectus (5)",
+        "Campylobacter_A concisus_R (3)",
+        "Campylobacter_A concisus_F (3)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Saliva",
+      "organ": "Lancefieldella",
+      "datasetSize": 47,
+      "datasets": [
+        "Lancefieldella sp000564995 (32)",
+        "Lancefieldella rimae (12)",
+        "Lancefieldella sp916438965 (2)",
+        "Lancefieldella parvula (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Saliva",
+      "organ": "Neisseria",
+      "datasetSize": 19,
+      "datasets": [
+        "Neisseria perflava (4)",
+        "Neisseria sp000186165 (4)",
+        "Neisseria bacilliformis (1)",
+        "Neisseria sp001815675 (1)",
+        "Neisseria sp000090875 (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Saliva",
+      "organ": "Oribacterium",
+      "datasetSize": 35,
+      "datasets": [
+        "Oribacterium sinus (26)",
+        "Oribacterium sp015258095 (6)",
+        "Oribacterium parvum (2)",
+        "Oribacterium sp000160135 (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Saliva",
+      "organ": "Other",
+      "datasetSize": 474,
+      "datasets": [
+        "Centipeda sp015265235 (26)",
+        "Lautropia mirabilis (21)",
+        "Anaeroglobus micronuciformis (16)",
+        "Stomatobaculum longum_A (16)",
+        "Olsenella_F sp001189515 (14)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Saliva",
+      "organ": "Pauljensenia",
+      "datasetSize": 34,
+      "datasets": [
+        "Pauljensenia sp000758755 (10)",
+        "Pauljensenia sp000308055 (9)",
+        "Pauljensenia sp000411415 (4)",
+        "Pauljensenia marseillensis (3)",
+        "Pauljensenia pyogenes_A (3)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Saliva",
+      "organ": "Porphyromonas",
+      "datasetSize": 25,
+      "datasets": [
+        "Porphyromonas pasteri (16)",
+        "Porphyromonas endodontalis (7)",
+        "Porphyromonas sp000467855 (1)",
+        "Porphyromonas gingivalis (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Saliva",
+      "organ": "Prevotella",
+      "datasetSize": 26,
+      "datasets": [
+        "Prevotella melaninogenica (10)",
+        "Prevotella histicola (3)",
+        "Prevotella pallens (2)",
+        "Prevotella sp015256945 (2)",
+        "Prevotella intermedia (2)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Saliva",
+      "organ": "Rothia",
+      "datasetSize": 23,
+      "datasets": [
+        "Rothia dentocariosa (16)",
+        "Rothia aeria (4)",
+        "Rothia sp001808955 (1)",
+        "Rothia mucilaginosa_B (1)",
+        "Rothia mucilaginosa_A (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Saliva",
+      "organ": "Unknown",
+      "datasetSize": 118,
+      "datasets": [],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Skin Arm",
+      "organ": "Campylobacter_A",
+      "datasetSize": 1,
+      "datasets": [
+        "Campylobacter_A concisus_C (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Skin Arm",
+      "organ": "Lancefieldella",
+      "datasetSize": 2,
+      "datasets": [
+        "Lancefieldella sp000564995 (2)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Skin Arm",
+      "organ": "Neisseria",
+      "datasetSize": 10,
+      "datasets": [
+        "Neisseria perflava (4)",
+        "Neisseria subflava_B (2)",
+        "Neisseria subflava (1)",
+        "Neisseria perflava_A (1)",
+        "Neisseria flavescens_B (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Skin Arm",
+      "organ": "Oribacterium",
+      "datasetSize": 1,
+      "datasets": [
+        "Oribacterium sinus (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Skin Arm",
+      "organ": "Other",
+      "datasetSize": 97,
+      "datasets": [
+        "Xanthomonas_B massiliensis (12)",
+        "Cutibacterium acnes (7)",
+        "Micrococcus luteus (4)",
+        "Bifidobacterium adolescentis (3)",
+        "Gemmiger qucibialis (3)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Skin Arm",
+      "organ": "Pauljensenia",
+      "datasetSize": 2,
+      "datasets": [
+        "Pauljensenia sp000308055 (1)",
+        "Pauljensenia bouchesdurhonensis (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Skin Arm",
+      "organ": "Porphyromonas",
+      "datasetSize": 1,
+      "datasets": [
+        "Porphyromonas pasteri (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Skin Arm",
+      "organ": "Prevotella",
+      "datasetSize": 2,
+      "datasets": [
+        "Prevotella copri (1)",
+        "Prevotella melaninogenica (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Skin Arm",
+      "organ": "Rothia",
+      "datasetSize": 12,
+      "datasets": [
+        "Rothia mucilaginosa (8)",
+        "Rothia dentocariosa (3)",
+        "Rothia sp001808955 (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Skin Arm",
+      "organ": "Unknown",
+      "datasetSize": 16,
+      "datasets": [],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Skin Diseased",
+      "organ": "Neisseria",
+      "datasetSize": 1,
+      "datasets": [
+        "Neisseria sp000186165 (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Skin Diseased",
+      "organ": "Other",
+      "datasetSize": 59,
+      "datasets": [
+        "Peptococcus niger (3)",
+        "Corynebacterium aurimucosum_E (3)",
+        "Slackia exigua (2)",
+        "Porphyromonas_A sp001808555 (2)",
+        "Jonquetella anthropi (2)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Skin Diseased",
+      "organ": "Pauljensenia",
+      "datasetSize": 2,
+      "datasets": [
+        "Pauljensenia radingae_A (1)",
+        "Pauljensenia turicensis (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Skin Diseased",
+      "organ": "Prevotella",
+      "datasetSize": 3,
+      "datasets": [
+        "Prevotella brunnea (1)",
+        "Prevotella colorans (1)",
+        "Prevotella sp900548585 (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Skin Diseased",
+      "organ": "Unknown",
+      "datasetSize": 27,
+      "datasets": [],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Skin Forehead",
+      "organ": "Neisseria",
+      "datasetSize": 6,
+      "datasets": [
+        "Neisseria sicca_A (2)",
+        "Neisseria perflava (2)",
+        "Neisseria flavescens_B (1)",
+        "Neisseria subflava_B (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Skin Forehead",
+      "organ": "Other",
+      "datasetSize": 126,
+      "datasets": [
+        "Xanthomonas_B massiliensis (11)",
+        "Cutibacterium acnes (7)",
+        "Staphylococcus epidermidis (4)",
+        "Haemophilus_D parainfluenzae_K (4)",
+        "Actinomyces graevenitzii (4)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Skin Forehead",
+      "organ": "Pauljensenia",
+      "datasetSize": 7,
+      "datasets": [
+        "Pauljensenia sp000411415 (1)",
+        "Pauljensenia sp000466265 (1)",
+        "Pauljensenia sp000758755 (1)",
+        "Pauljensenia sp001064145 (1)",
+        "Pauljensenia sp902373545 (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Skin Forehead",
+      "organ": "Porphyromonas",
+      "datasetSize": 1,
+      "datasets": [
+        "Porphyromonas pasteri (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Skin Forehead",
+      "organ": "Prevotella",
+      "datasetSize": 3,
+      "datasets": [
+        "Prevotella corporis (1)",
+        "Prevotella melaninogenica (1)",
+        "Prevotella pleuritidis (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Skin Forehead",
+      "organ": "Rothia",
+      "datasetSize": 14,
+      "datasets": [
+        "Rothia mucilaginosa (12)",
+        "Rothia mucilaginosa_A (1)",
+        "Rothia sp001808955 (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Skin Forehead",
+      "organ": "Unknown",
+      "datasetSize": 16,
+      "datasets": [],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Stool",
+      "organ": "Other",
+      "datasetSize": 946,
+      "datasets": [
+        "Agathobaculum butyriciproducens (12)",
+        "Escherichia coli (11)",
+        "Parabacteroides distasonis (10)",
+        "Fusicatenibacter saccharivorans (10)",
+        "CAG-41 sp900066215 (10)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Stool",
+      "organ": "Pauljensenia",
+      "datasetSize": 10,
+      "datasets": [
+        "Pauljensenia sp000278725 (3)",
+        "Pauljensenia sp000466265 (2)",
+        "Pauljensenia sp902373545 (2)",
+        "Pauljensenia sp916439125 (1)",
+        "Pauljensenia bouchesdurhonensis (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Stool",
+      "organ": "Porphyromonas",
+      "datasetSize": 1,
+      "datasets": [
+        "Porphyromonas sp900539765 (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Stool",
+      "organ": "Prevotella",
+      "datasetSize": 7,
+      "datasets": [
+        "Prevotella rara (2)",
+        "Prevotella avicola (1)",
+        "Prevotella copri_A (1)",
+        "Prevotella copri_B (1)",
+        "Prevotella massiliensis (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Stool",
+      "organ": "Rothia",
+      "datasetSize": 3,
+      "datasets": [
+        "Rothia mucilaginosa (2)",
+        "Rothia sp001808955 (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Stool",
+      "organ": "Unknown",
+      "datasetSize": 53,
+      "datasets": [],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Throat",
+      "organ": "Campylobacter_A",
+      "datasetSize": 54,
+      "datasets": [
+        "Campylobacter_A concisus_C (21)",
+        "Campylobacter_A concisus_T (19)",
+        "Campylobacter_A concisus_A (4)",
+        "Campylobacter_A concisus_F (3)",
+        "Campylobacter_A concisus_R (3)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Throat",
+      "organ": "Lancefieldella",
+      "datasetSize": 30,
+      "datasets": [
+        "Lancefieldella sp000564995 (19)",
+        "Lancefieldella rimae (10)",
+        "Lancefieldella parvula (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Throat",
+      "organ": "Neisseria",
+      "datasetSize": 31,
+      "datasets": [
+        "Neisseria perflava (7)",
+        "Neisseria sp000186165 (6)",
+        "Neisseria flavescens_B (4)",
+        "Neisseria flavescens_A (3)",
+        "Neisseria mucosa_A (3)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Throat",
+      "organ": "Oribacterium",
+      "datasetSize": 21,
+      "datasets": [
+        "Oribacterium sinus (16)",
+        "Oribacterium sp015258095 (4)",
+        "Oribacterium asaccharolyticum (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Throat",
+      "organ": "Other",
+      "datasetSize": 373,
+      "datasets": [
+        "Lachnoanaerobaculum orale (21)",
+        "Anaeroglobus micronuciformis (15)",
+        "Centipeda sp015265235 (11)",
+        "Actinomyces graevenitzii (11)",
+        "Peptostreptococcus sp900759325 (10)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Throat",
+      "organ": "Pauljensenia",
+      "datasetSize": 28,
+      "datasets": [
+        "Pauljensenia sp000758755 (9)",
+        "Pauljensenia sp000308055 (5)",
+        "Pauljensenia pyogenes_A (3)",
+        "Pauljensenia marseillensis (2)",
+        "Pauljensenia sp001072465 (2)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Throat",
+      "organ": "Porphyromonas",
+      "datasetSize": 14,
+      "datasets": [
+        "Porphyromonas pasteri (7)",
+        "Porphyromonas endodontalis (3)",
+        "Porphyromonas sp018127745 (2)",
+        "Porphyromonas sp003640335 (1)",
+        "Porphyromonas sp000467855 (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Throat",
+      "organ": "Prevotella",
+      "datasetSize": 19,
+      "datasets": [
+        "Prevotella melaninogenica (5)",
+        "Prevotella salivae (3)",
+        "Prevotella histicola (3)",
+        "Prevotella multisaccharivorax (2)",
+        "Prevotella pallens (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Throat",
+      "organ": "Rothia",
+      "datasetSize": 12,
+      "datasets": [
+        "Rothia dentocariosa (7)",
+        "Rothia mucilaginosa (3)",
+        "Rothia aeria (1)",
+        "Rothia mucilaginosa_A (1)"
+      ],
+      "priority": 1
+    },
+    {
+      "organism": "Human",
+      "modality": "Throat",
+      "organ": "Unknown",
+      "datasetSize": 109,
+      "datasets": [],
+      "priority": 1
+    },
+    {
+      "organism": "Leptailurus serval",
+      "modality": "Saliva",
+      "organ": "Neisseria",
+      "datasetSize": 1,
+      "datasets": [
+        "Neisseria sp. (1)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Leptailurus serval",
+      "modality": "Saliva",
+      "organ": "Other",
+      "datasetSize": 22,
+      "datasets": [
+        "Porphyromonadaceae bacterium (3)",
+        "Candidatus Saccharibacteria bacterium (2)",
+        "Comamonadaceae bacterium (2)",
+        "Peptostreptococcaceae bacterium (2)",
+        "Propionibacteriaceae bacterium (1)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Leptailurus serval",
+      "modality": "Saliva",
+      "organ": "Porphyromonas",
+      "datasetSize": 2,
+      "datasets": [
+        "Porphyromonas sp. (1)",
+        "Porphyromonas circumdentaria (1)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Leptailurus serval",
+      "modality": "Stool",
+      "organ": "Eubacteriales",
+      "datasetSize": 1,
+      "datasets": [
+        "Eubacteriales bacterium (1)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Leptailurus serval",
+      "modality": "Stool",
+      "organ": "Other",
+      "datasetSize": 10,
+      "datasets": [
+        "Aerococcus sp. (2)",
+        "Anaerobiospirillum succiniciproducens (1)",
+        "Tissierellia bacterium (1)",
+        "Porphyromonadaceae bacterium (1)",
+        "Plesiomonas sp. (1)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Macaca fascicularis",
+      "modality": "Stool",
+      "organ": "Eubacteriales",
+      "datasetSize": 4,
+      "datasets": [
+        "Eubacteriales bacterium (4)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Macaca fascicularis",
+      "modality": "Stool",
+      "organ": "Other",
+      "datasetSize": 25,
+      "datasets": [
+        "Clostridia bacterium (11)",
+        "bacterium (5)",
+        "Bacteroidales bacterium (1)",
+        "Clostridiaceae bacterium (1)",
+        "Clostridium sp. (1)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Phaecochoerus aethipicus",
+      "modality": "Stool",
+      "organ": "Eubacteriales",
+      "datasetSize": 2,
+      "datasets": [
+        "Eubacteriales bacterium (2)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Phaecochoerus aethipicus",
+      "modality": "Stool",
+      "organ": "Other",
+      "datasetSize": 28,
+      "datasets": [
+        "Firmicutes bacterium (6)",
+        "Clostridia bacterium (5)",
+        "Lachnospiraceae bacterium (5)",
+        "Bacteroidales bacterium (3)",
+        "Erysipelotrichaceae bacterium (2)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Spheniscus humboldti",
+      "modality": "Stool",
+      "organ": "Eubacteriales",
+      "datasetSize": 4,
+      "datasets": [
+        "Eubacteriales bacterium (4)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Spheniscus humboldti",
+      "modality": "Stool",
+      "organ": "Other",
+      "datasetSize": 23,
+      "datasets": [
+        "Tissierellia bacterium (6)",
+        "Actinomycetaceae bacterium (4)",
+        "Bowdeniella nasicola (2)",
+        "Corynebacterium sphenisci (1)",
+        "Psychrobacter sp. (1)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Suricata suricatta",
+      "modality": "Saliva",
+      "organ": "Eubacteriales",
+      "datasetSize": 1,
+      "datasets": [
+        "Eubacteriales bacterium (1)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Suricata suricatta",
+      "modality": "Saliva",
+      "organ": "Neisseria",
+      "datasetSize": 3,
+      "datasets": [
+        "Neisseria animaloris (1)",
+        "Neisseria sp. (1)",
+        "Neisseria zoodegmatis (1)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Suricata suricatta",
+      "modality": "Saliva",
+      "organ": "Other",
+      "datasetSize": 25,
+      "datasets": [
+        "Lautropia sp. (2)",
+        "Peptostreptococcaceae bacterium (2)",
+        "Propionibacteriaceae bacterium (2)",
+        "Corynebacterium sp. (2)",
+        "Moraxella equi (1)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Suricata suricatta",
+      "modality": "Stool",
+      "organ": "Eubacteriales",
+      "datasetSize": 3,
+      "datasets": [
+        "Eubacteriales bacterium (3)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Suricata suricatta",
+      "modality": "Stool",
+      "organ": "Other",
+      "datasetSize": 17,
+      "datasets": [
+        "Tissierellia bacterium (3)",
+        "Actinomycetaceae bacterium (2)",
+        "Corynebacterium sp. (2)",
+        "Anaerococcus sp. (1)",
+        "Lagierella massiliensis (1)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Suricata suricatta",
+      "modality": "Stool",
+      "organ": "Porphyromonas",
+      "datasetSize": 2,
+      "datasets": [
+        "Porphyromonas sp. (2)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Tapirus terrestris",
+      "modality": "Saliva",
+      "organ": "Neisseria",
+      "datasetSize": 3,
+      "datasets": [
+        "Neisseria sp. (3)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Tapirus terrestris",
+      "modality": "Saliva",
+      "organ": "Other",
+      "datasetSize": 14,
+      "datasets": [
+        "Deinococcus sp. (2)",
+        "Acinetobacter sp. (1)",
+        "Actinomyces sp. (1)",
+        "Actinomycetaceae bacterium (1)",
+        "Bergeyella zoohelcum (1)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Tapirus terrestris",
+      "modality": "Saliva",
+      "organ": "Rothia",
+      "datasetSize": 1,
+      "datasets": [
+        "Rothia sp. (1)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Tapirus terrestris",
+      "modality": "Stool",
+      "organ": "Eubacteriales",
+      "datasetSize": 5,
+      "datasets": [
+        "Eubacteriales bacterium (5)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Tapirus terrestris",
+      "modality": "Stool",
+      "organ": "Other",
+      "datasetSize": 48,
+      "datasets": [
+        "Bacteroidales bacterium (11)",
+        "bacterium (5)",
+        "Clostridia bacterium (4)",
+        "Candidatus Saccharibacteria bacterium (4)",
+        "Prevotellaceae bacterium (3)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Tapirus terrestris",
+      "modality": "Stool",
+      "organ": "Prevotella",
+      "datasetSize": 1,
+      "datasets": [
+        "Prevotella sp. (1)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Unknown",
+      "modality": "Unknown",
+      "organ": "Eubacteriales",
+      "datasetSize": 1,
+      "datasets": [
+        "Eubacteriales bacterium (1)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Unknown",
+      "modality": "Unknown",
+      "organ": "Neisseria",
+      "datasetSize": 2,
+      "datasets": [
+        "Neisseria sp. (2)"
+      ],
+      "priority": 3
+    },
+    {
+      "organism": "Unknown",
+      "modality": "Unknown",
+      "organ": "Other",
+      "datasetSize": 93,
+      "datasets": [
+        "Planctomycetia bacterium (10)",
+        "Clostridia bacterium (9)",
+        "Paracoccus sp. (9)",
+        "bacterium (8)",
+        "Firmicutes bacterium (4)"
+      ],
+      "priority": 3
+    }
+  ],
+  "organisms": [
+    "Unknown",
+    "Acinonyx jubatus",
+    "Suricata suricatta",
+    "Leptailurus serval",
+    "Human",
+    "Macaca fascicularis",
+    "Spheniscus humboldti",
+    "Phaecochoerus aethipicus",
+    "Camelus bactrianus",
+    "Chaetophractus vilosus",
+    "Tapirus terrestris",
+    "Gorilla gorilla"
+  ],
+  "modalities": [
+    "Unknown",
+    "Plaque",
+    "Skin Diseased",
+    "Saliva",
+    "Throat",
+    "Stool",
+    "Eye",
+    "Skin Arm",
+    "Skin Forehead"
+  ],
+  "organs": [
+    "Eubacteriales",
+    "Neisseria",
+    "Campylobacter_A",
+    "Pauljensenia",
+    "Other",
+    "Porphyromonas",
+    "Unknown",
+    "Prevotella",
+    "Rothia",
+    "Lancefieldella",
+    "Oribacterium"
+  ]
+}

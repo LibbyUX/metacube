@@ -22,9 +22,11 @@ interface SceneProps {
   onSelect: (c: CubeCell) => void;
   onZoomComplete?: () => void;
   zoomTarget?: [number, number, number] | null;
-  /** True when camera should animate back to default */
   zoomingBack?: boolean;
   onZoomBackDone?: () => void;
+  axisOrganisms?: string[];
+  axisModalities?: string[];
+  axisOrgans?: string[];
 }
 
 export interface SceneHandle {
@@ -190,6 +192,9 @@ export const Scene = forwardRef<SceneHandle, SceneProps>(function Scene(props, r
         selectedCell={props.selectedCell}
         onHover={props.onHover}
         onSelect={props.onSelect}
+        axisOrganisms={props.axisOrganisms}
+        axisModalities={props.axisModalities}
+        axisOrgans={props.axisOrgans}
       />
     </Canvas>
   );

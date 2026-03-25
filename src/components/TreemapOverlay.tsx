@@ -11,6 +11,7 @@ import { CubeCell } from "../data/datasets";
 interface TreemapOverlayProps {
   cell: CubeCell;
   onClose: () => void;
+  drilldownPath?: string;
 }
 
 interface DrilldownEntry {
@@ -33,29 +34,30 @@ function fmt(n: number): string {
   return String(n);
 }
 
-let drilldownCache: Record<string, DrilldownEntry[]> | null = null;
+const drilldownCaches = new Map<string, Record<string, DrilldownEntry[]>>();
 
 type TreeNode = { name: string; children?: TreeNode[]; value?: number };
 
-export function TreemapOverlay({ cell, onClose }: TreemapOverlayProps) {
+export function TreemapOverlay({ cell, onClose, drilldownPath = "census_drilldown.json" }: TreemapOverlayProps) {
   const [entries, setEntries] = useState<DrilldownEntry[] | null>(null);
   const [hoveredCT, setHoveredCT] = useState<string | null>(null);
 
   const key = `${cell.organism}|${cell.organ}|${cell.modality}`;
 
   useEffect(() => {
-    if (drilldownCache) {
-      setEntries(drilldownCache[key] || []);
+    const cached = drilldownCaches.get(drilldownPath);
+    if (cached) {
+      setEntries(cached[key] || []);
       return;
     }
-    fetch("/census_drilldown.json")
+    fetch(`${import.meta.env.BASE_URL}${drilldownPath}`)
       .then((r) => r.json())
       .then((data) => {
-        drilldownCache = data;
+        drilldownCaches.set(drilldownPath, data);
         setEntries(data[key] || []);
       })
       .catch(() => setEntries([]));
-  }, [key]);
+  }, [key, drilldownPath]);
 
   const W = Math.min(window.innerWidth - 80, 900);
   const H = Math.min(window.innerHeight - 240, 520);
