@@ -1,0 +1,15 @@
+[workspace]
+authors = ["Matthias Flotho <mat.flotho@gmail.com>"]
+channels = ["conda-forge"]
+name = "03-23-26_cube-prototype"
+platforms = ["osx-arm64"]
+version = "0.1.0"
+
+[tasks]
+dev = "npx vite"
+build = "npx vite build"
+preview = "npx vite preview"
+
+[dependencies]
+python = ">=3.14.3,<3.15"
+nodejs = ">=22,<23"

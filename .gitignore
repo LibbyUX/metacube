@@ -1,0 +1,13 @@
+# pixi environments
+.pixi/*
+!.pixi/config.toml
+
+# node
+node_modules/
+dist/
+
+# OS
+.DS_Store
+
+# large binary assets (tracked via LFS or downloaded separately)
+*.glb
