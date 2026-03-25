@@ -5,9 +5,9 @@ import * as THREE from "three";
 import {
   rawRecords,
   buildCubeCells,
-  FULL_ORGANISMS,
-  FULL_MODALITIES,
-  FULL_ORGANS,
+  TRIMMED_ORGANISMS,
+  TRIMMED_MODALITIES,
+  TRIMMED_ORGANS,
   isOriginCell,
   distanceFromOrigin,
 } from "../data/datasets";
@@ -19,9 +19,9 @@ const GAP = 0.025;
 function AbstractCube() {
   const cells = useMemo(() => buildCubeCells(rawRecords), []);
 
-  const allOrganisms = [...FULL_ORGANISMS] as string[];
-  const allModalities = [...FULL_MODALITIES] as string[];
-  const allOrgans = [...FULL_ORGANS] as string[];
+  const allOrganisms = [...TRIMMED_ORGANISMS] as string[];
+  const allModalities = [...TRIMMED_MODALITIES] as string[];
+  const allOrgans = [...TRIMMED_ORGANS] as string[];
 
   const dataKeys = new Set(cells.map((c) => `${c.organism}|${c.modality}|${c.organ}`));
   const maxSize = Math.max(...cells.map((c) => c.size), 1);

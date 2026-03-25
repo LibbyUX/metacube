@@ -1,7 +1,7 @@
 /**
- * Dataset records extracted from Datasets(Priority).csv.
- * Three categorical axes: organism, modality, organ.
- * Dataset size is encoded as color, not geometry.
+ * Cell x Gene Census dataset records.
+ * 145 cube cells across 5 organisms, 15 assays, 20 organs.
+ * Generated from census_nested_cell_type_counts.csv
  */
 
 export interface DatasetRecord {
@@ -14,139 +14,158 @@ export interface DatasetRecord {
 }
 
 export const rawRecords: DatasetRecord[] = [
-  // Priority 1: Human brain RNA/small RNA
-  // Total scRNA-seq/Brain: 1.77M + 22M + 2.1M + 2.8M + 1.2M ≈ 29.87M nuclei
-  {
-    organism: "Human",
-    modality: "scRNA-seq",
-    organ: "Brain",
-    datasetSize: 29_870_000,
-    datasets: [
-      "Organoid Atlas (10x v3)",       // 1.77M cells (Nature 2024)
-      "ROSMAP Compass (10x v3)",       // ~22M nuclei total (bioRxiv 2025)
-      "AMP PD (snRNA-seq)",            // 2.1M nuclei (Sci Data 2024)
-      "ASAP (snRNA-seq)",              // 2.8M nuclei (Allen Institute)
-      "SEAAD (snRNA-seq)",             // 1.2M nuclei (Nat Neurosci 2024)
-    ],
-    priority: 1,
-  },
-  {
-    organism: "Human",
-    modality: "Multiome",
-    organ: "Brain",
-    datasetSize: 109_255,
-    datasets: [
-      "Organoid Atlas (multiome)",     // 109K cells (cellxgene)
-      // ROSMAP Compass multiome included in the 22M total above
-    ],
-    priority: 1,
-  },
-  {
-    organism: "Human",
-    modality: "small RNA-seq",
-    organ: "Multi-region",
-    datasetSize: 46_997,               // 46,997 samples (NAR 2025)
-    datasets: ["miRNA Tissue Atlas"],
-    priority: 1,
-  },
-  // Priority 2: Blood
-  {
-    organism: "Human",
-    modality: "bulk RNA-seq",
-    organ: "Blood",
-    datasetSize: 4_756,                // 4,756 samples / 1,570 participants (medRxiv 2021)
-    datasets: ["PPMI (RNA-seq)", "AMP PD (bulk RNA-seq)"],
-    priority: 2,
-  },
-  {
-    organism: "Human",
-    modality: "bulk RNA-seq",
-    organ: "Brain",
-    datasetSize: 211,                  // ~211 donors (Allen/ASAP PMDBS)
-    datasets: ["ASAP (bulk RNA-seq)"],
-    priority: 2,
-  },
-  {
-    organism: "Human",
-    modality: "small RNA-seq",
-    organ: "Blood",
-    datasetSize: 5_450,                // 5,450 samples / 1,614 participants (Nat Aging 2021)
-    datasets: ["PPMI (smallRNAseq)"],
-    priority: 2,
-  },
-  {
-    organism: "Human",
-    modality: "scRNA (blood)",
-    organ: "Blood",
-    datasetSize: 172_639,              // 10,466 + 103,365 + 58,808 cells
-    datasets: [
-      "Wang et al. B-cells",           // 10,466 cells (Front Immunol 2022)
-      "Wang et al. T-cells",           // 103,365 cells (Cell Discov 2021)
-      "Xiong et al. PBMCs",            // 58,808 cells (npj Park Dis 2024)
-    ],
-    priority: 2,
-  },
-  // Priority 3: Other species
-  {
-    organism: "Mouse",
-    modality: "scRNA-seq",
-    organ: "Brain",
-    datasetSize: 420_000,              // unverified — ASAP mouse brain
-    datasets: ["ASAP (mouse brain)"],
-    priority: 3,
-  },
-  {
-    organism: "Mouse",
-    modality: "small RNA-seq",
-    organ: "Multi-region",
-    datasetSize: 14_596,               // 14,596 samples (NAR 2025)
-    datasets: ["miRNA Tissue Atlas (mouse)"],
-    priority: 3,
-  },
-  {
-    organism: "Macaque",
-    modality: "scRNA-seq",
-    organ: "Brain",
-    datasetSize: 2_584_000,            // 2,584,000 nuclei (Sci Adv 2024)
-    datasets: ["BGI Macaque (snRNA-seq)"],
-    priority: 3,
-  },
-  {
-    organism: "Macaque",
-    modality: "small RNA-seq",
-    organ: "Multi-region",
-    datasetSize: 18,                   // 18 tissues profiled (Nat Commun 2026)
-    datasets: ["miRNA Tissue Atlas (macaque)"],
-    priority: 3,
-  },
-  // Priority 4: DNA & Proteomics (sizes = samples/participants)
-  {
-    organism: "Human",
-    modality: "WGS",
-    organ: "Blood",
-    datasetSize: 12_157,               // PPMI 1,667 + AMP PD 10,490 participants
-    datasets: ["PPMI (WGS)", "AMP PD (WGS blood)"],
-    priority: 4,
-  },
-  {
-    organism: "Human",
-    modality: "WGS",
-    organ: "Brain",
-    datasetSize: 100,                  // 100 postmortem brain WGS (AMP PD)
-    datasets: ["AMP PD (WGS brain)"],
-    priority: 4,
-  },
-  {
-    organism: "Human",
-    modality: "Proteomics",
-    organ: "CSF",
-    datasetSize: 2_348,                // ~2,348 samples across CSF/plasma/urine
-    datasets: ["PPMI (MS proteomics)"],
-    priority: 4,
-  },
+  { organism: "Mus musculus", modality: "sci-RNA-seq3", organ: "embryo", datasetSize: 34324221, datasets: ["neural cell (4,502,289)", "mesodermal cell (4,389,318)", "erythroid progenitor cell (3,100,227)", "lateral mesodermal cell (2,236,482)", "glutamatergic neuron (2,175,684)"], priority: 1 },
+  { organism: "Homo sapiens", modality: "10x 3' v3", organ: "blood", datasetSize: 20099581, datasets: ["naive thymus-derived CD4-positive, alpha-beta T cell (3,738,459)", "CD14-positive, CD16-negative classical monocyte (2,633,239)", "central memory CD4-positive, alpha-beta T cell (1,783,191)", "effector memory CD8-positive, alpha-beta T cell (1,606,280)", "effector memory CD4-positive, alpha-beta T cell (1,394,933)"], priority: 1 },
+  { organism: "Homo sapiens", modality: "10x 3' v3", organ: "dorsolateral prefrontal cortex", datasetSize: 10681442, datasets: ["oligodendrocyte (3,032,357)", "L2/3-6 intratelencephalic projecting glutamatergic neuron (1,804,154)", "astrocyte (937,495)", "L2/3 intratelencephalic projecting glutamatergic neuron (905,408)", "VIP GABAergic cortical interneuron (563,163)"], priority: 1 },
+  { organism: "Homo sapiens", modality: "10x 3' v3", organ: "breast", datasetSize: 5069018, datasets: ["fibroblast of mammary gland (740,991)", "luminal adaptive secretory precursor cell of mammary gland (650,258)", "luminal hormone-sensing cell of mammary gland (454,799)", "fibroblast (437,366)", "perivascular cell (331,757)"], priority: 2 },
+  { organism: "Homo sapiens", modality: "10x 5' v2", organ: "blood", datasetSize: 4385695, datasets: ["B cell (415,851)", "CD14-positive monocyte (402,157)", "CD8-positive, alpha-beta T cell (389,448)", "naive thymus-derived CD4-positive, alpha-beta T cell (336,606)", "CD16-positive, CD56-dim natural killer cell, human (325,885)"], priority: 2 },
+  { organism: "Homo sapiens", modality: "10x 3' v3", organ: "cerebral cortex", datasetSize: 4026552, datasets: ["neuron (3,468,146)", "oligodendrocyte (198,528)", "astrocyte (121,596)", "unknown (94,303)", "oligodendrocyte precursor cell (76,662)"], priority: 2 },
+  { organism: "Homo sapiens", modality: "10x 3' v2", organ: "lung", datasetSize: 3250980, datasets: ["unknown (537,148)", "alveolar macrophage (444,828)", "CD4-positive, alpha-beta T cell (217,941)", "CD8-positive, alpha-beta T cell (207,126)", "macrophage (174,524)"], priority: 2 },
+  { organism: "Homo sapiens", modality: "10x 3' v3", organ: "middle temporal gyrus", datasetSize: 2892240, datasets: ["L2/3-6 intratelencephalic projecting glutamatergic neuron (1,466,600)", "oligodendrocyte (221,748)", "VIP GABAergic cortical interneuron (218,708)", "pvalb GABAergic cortical interneuron (195,794)", "sst GABAergic cortical interneuron (149,641)"], priority: 2 },
+  { organism: "Homo sapiens", modality: "10x 3' v2", organ: "blood", datasetSize: 2749679, datasets: ["CD4-positive, alpha-beta T cell (381,250)", "classical monocyte (359,717)", "central memory CD4-positive, alpha-beta T cell (327,489)", "naive thymus-derived CD4-positive, alpha-beta T cell (272,442)", "natural killer cell (271,121)"], priority: 2 },
+  { organism: "Homo sapiens", modality: "10x 3' v3", organ: "peripheral region of retina", datasetSize: 2464617, datasets: ["retinal rod cell (737,399)", "GABAergic amacrine cell (339,117)", "amacrine cell (173,932)", "glycinergic amacrine cell (169,930)", "flat midget bipolar cell (150,551)"], priority: 2 },
+  { organism: "Homo sapiens", modality: "10x 5' v1", organ: "blood", datasetSize: 2253999, datasets: ["classical monocyte (379,684)", "CD4-positive, alpha-beta T cell (314,260)", "naive thymus-derived CD4-positive, alpha-beta T cell (177,256)", "natural killer cell (165,708)", "CD8-positive, alpha-beta T cell (138,669)"], priority: 2 },
+  { organism: "Homo sapiens", modality: "sci-RNA-seq3", organ: "telencephalon", datasetSize: 2182619, datasets: ["glutamatergic neuron (1,568,955)", "GABAergic neuron (436,970)", "neuron (76,102)", "astrocyte (61,162)", "oligodendrocyte (21,984)"], priority: 2 },
+  { organism: "Homo sapiens", modality: "10x 3' v3", organ: "macula lutea", datasetSize: 2073693, datasets: ["OFF midget ganglion cell (494,572)", "ON midget ganglion cell (371,645)", "GABAergic amacrine cell (324,100)", "retinal rod cell (266,379)", "invaginating midget bipolar cell (60,938)"], priority: 2 },
+  { organism: "Homo sapiens", modality: "10x 3' v3", organ: "chorioretinal region", datasetSize: 1921217, datasets: ["fibroblast (639,917)", "retinal pigment epithelial cell (367,032)", "melanocyte (176,369)", "endothelial cell of venule (121,269)", "macrophage (105,640)"], priority: 2 },
+  { organism: "Homo sapiens", modality: "10x 3' v3", organ: "hippocampal formation", datasetSize: 1869471, datasets: ["neuron (741,406)", "oligodendrocyte (382,941)", "hippocampal pyramidal neuron (129,647)", "hippocampal granule cell (106,659)", "oligodendrocyte precursor cell (102,111)"], priority: 2 },
+  { organism: "Homo sapiens", modality: "10x 3' v3", organ: "heart left ventricle", datasetSize: 1468760, datasets: ["cardiac muscle cell (299,571)", "mural cell (192,457)", "fibroblast of cardiac tissue (179,787)", "regular ventricular cardiac myocyte (122,484)", "endothelial cell (117,232)"], priority: 2 },
+  { organism: "Homo sapiens", modality: "sci-RNA-seq3", organ: "cerebellum", datasetSize: 1360946, datasets: ["Purkinje cell (370,751)", "astrocyte (361,309)", "inhibitory interneuron (161,616)", "granule cell (113,617)", "neuron associated cell (sensu Vertebrata) (79,325)"], priority: 2 },
+  { organism: "Homo sapiens", modality: "10x 3' v2", organ: "breast", datasetSize: 1221967, datasets: ["malignant cell (255,764)", "basal-myoepithelial cell of mammary gland (103,533)", "fibroblast of mammary gland (92,542)", "luminal adaptive secretory precursor cell of mammary gland (80,791)", "luminal hormone-sensing cell of mammary gland (73,670)"], priority: 2 },
+  { organism: "Homo sapiens", modality: "10x 3' v3", organ: "lung", datasetSize: 1210864, datasets: ["unknown (134,955)", "alveolar macrophage (129,716)", "pulmonary alveolar type 2 cell (123,221)", "macrophage (99,196)", "pulmonary alveolar type 1 cell (40,908)"], priority: 2 },
+  { organism: "Homo sapiens", modality: "10x 3' v3", organ: "telencephalon", datasetSize: 976114, datasets: ["radial glial cell (250,517)", "neuroblast (sensu Vertebrata) (167,452)", "cerebral cortex pyramidal neuron (160,370)", "pyramidal neuron (138,824)", "extratelencephalic-projecting glutamatergic cortical neuron (101,396)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "10x 3' v3", organ: "liver", datasetSize: 945902, datasets: ["malignant cell (213,119)", "hepatocyte (120,315)", "T cell (92,795)", "neoplastic cell (52,431)", "macrophage (41,856)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "10x 3' v3", organ: "primary visual cortex", datasetSize: 918891, datasets: ["L2/3-6 intratelencephalic projecting glutamatergic neuron (332,934)", "oligodendrocyte (172,291)", "glutamatergic neuron (153,016)", "astrocyte (44,674)", "GABAergic neuron (42,664)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "10x 3' v3", organ: "kidney", datasetSize: 868166, datasets: ["epithelial cell of proximal tubule (191,046)", "kidney loop of Henle thick ascending limb epithelial cell (157,486)", "kidney collecting duct principal cell (85,805)", "endothelial cell (60,176)", "kidney collecting duct intercalated cell (44,651)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "10x 3' v3", organ: "cerebellum", datasetSize: 850110, datasets: ["neuron (419,568)", "neuroblast (sensu Vertebrata) (88,665)", "oligodendrocyte (68,451)", "radial glial cell (31,300)", "glioblast (28,345)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "10x 3' v2", organ: "liver", datasetSize: 829151, datasets: ["erythrocyte (143,176)", "macrophage (127,176)", "T cell (59,389)", "natural killer cell (53,491)", "malignant cell (53,229)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "10x 5' v1", organ: "lung", datasetSize: 813817, datasets: ["unknown (104,121)", "epithelial cell of lung (67,146)", "goblet cell (57,650)", "alveolar macrophage (56,938)", "fibroblast of lung (45,735)"], priority: 3 },
+  { organism: "Macaca mulatta", modality: "sci-RNA-seq3", organ: "primary visual cortex", datasetSize: 809188, datasets: ["glutamatergic neuron (578,831)", "GABAergic neuron (104,306)", "oligodendrocyte (59,598)", "astrocyte (27,021)", "brain vascular cell (15,006)"], priority: 3 },
+  { organism: "Macaca mulatta", modality: "sci-RNA-seq3", organ: "prefrontal cortex", datasetSize: 766132, datasets: ["glutamatergic neuron (438,044)", "GABAergic neuron (134,211)", "astrocyte (59,418)", "oligodendrocyte (52,295)", "brain vascular cell (39,060)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "10x 3' v3", organ: "primary motor cortex", datasetSize: 764292, datasets: ["oligodendrocyte (258,943)", "L2/3-6 intratelencephalic projecting glutamatergic neuron (130,368)", "glutamatergic neuron (96,786)", "GABAergic neuron (65,672)", "astrocyte (60,607)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "10x 3' v2", organ: "thymus", datasetSize: 756581, datasets: ["double-positive, alpha-beta thymocyte (244,271)", "double negative thymocyte (135,227)", "thymocyte (57,922)", "capillary endothelial cell (28,120)", "fibroblast (22,056)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "ScaleBio single cell RNA sequencing", organ: "blood", datasetSize: 700524, datasets: ["central memory CD4-positive, alpha-beta T cell (218,252)", "CD14-positive monocyte (136,512)", "naive B cell (92,305)", "natural killer cell (46,578)", "naive thymus-derived CD8-positive, alpha-beta T cell (39,549)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "10x 5' v2", organ: "lung", datasetSize: 698659, datasets: ["macrophage (202,857)", "ciliated cell (81,905)", "classical monocyte (45,899)", "lung secretory cell (43,562)", "pulmonary alveolar type 2 cell (43,004)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "10x 3' v2", organ: "telencephalon", datasetSize: 683231, datasets: ["radial glial cell (216,666)", "cerebral cortex pyramidal neuron (100,880)", "pyramidal neuron (68,948)", "glutamatergic neuron (63,470)", "neuroblast (sensu Vertebrata) (47,920)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "10x 5' transcription profiling", organ: "blood", datasetSize: 661013, datasets: ["classical monocyte (175,705)", "CD4-positive, alpha-beta T cell (155,575)", "CD8-positive, alpha-beta T cell (107,780)", "natural killer cell (69,567)", "B cell (62,607)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "10x 3' transcription profiling", organ: "blood", datasetSize: 647366, datasets: ["CD14-positive monocyte (120,843)", "CD16-positive, CD56-dim natural killer cell, human (92,848)", "naive thymus-derived CD4-positive, alpha-beta T cell (63,096)", "effector CD8-positive, alpha-beta T cell (53,534)", "central memory CD4-positive, alpha-beta T cell (49,904)"], priority: 3 },
+  { organism: "Mus musculus", modality: "10x 3' v3", organ: "cerebellum", datasetSize: 638637, datasets: ["cerebellar granule cell (483,201)", "inhibitory interneuron (32,716)", "Purkinje cell (21,112)", "Bergmann glial cell (17,560)", "astrocyte of the cerebellum (16,717)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "10x 3' v3", organ: "prefrontal cortex", datasetSize: 618188, datasets: ["oligodendrocyte (267,925)", "glutamatergic neuron (102,563)", "astrocyte (96,534)", "GABAergic neuron (60,139)", "oligodendrocyte precursor cell (29,343)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "10x 5' v1", organ: "thymus", datasetSize: 614682, datasets: ["double-positive, alpha-beta thymocyte (248,034)", "double negative thymocyte (77,631)", "unknown (39,373)", "T cell (28,232)", "CD4-positive, alpha-beta T cell (24,783)"], priority: 3 },
+  { organism: "Mus musculus", modality: "10x 3' v3", organ: "primary motor cortex", datasetSize: 564410, datasets: ["glutamatergic neuron (369,686)", "GABAergic neuron (69,965)", "oligodendrocyte (43,430)", "astrocyte (37,339)", "macrophage (16,608)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "10x 5' transcription profiling", organ: "lung", datasetSize: 500929, datasets: ["unknown (359,613)", "multiciliated columnar cell of tracheobronchial tree (13,746)", "alveolar macrophage (10,653)", "conventional dendritic cell (9,856)", "natural killer cell (8,492)"], priority: 3 },
+  { organism: "Mus musculus", modality: "10x 3' v2", organ: "primary motor cortex", datasetSize: 490432, datasets: ["glutamatergic neuron (281,543)", "GABAergic neuron (82,759)", "L4/5 intratelencephalic projecting glutamatergic neuron of the primary motor cortex (44,630)", "L6 corticothalamic-projecting glutamatergic cortical neuron (23,374)", "L2/3-6 intratelencephalic projecting glutamatergic neuron (12,242)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "10x 5' v2", organ: "thymus", datasetSize: 446639, datasets: ["double-positive, alpha-beta thymocyte (204,242)", "immature alpha-beta T cell (41,786)", "CD4-positive, alpha-beta T cell (33,640)", "unknown (29,936)", "double negative thymocyte (21,788)"], priority: 3 },
+  { organism: "Callithrix jacchus", modality: "10x 3' v3", organ: "prefrontal cortex", datasetSize: 435760, datasets: ["glutamatergic neuron (242,492)", "GABAergic neuron (92,951)", "astrocyte (48,811)", "oligodendrocyte (38,670)", "microglial cell (6,533)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "10x 3' v2", organ: "heart left ventricle", datasetSize: 416239, datasets: ["regular ventricular cardiac myocyte (102,578)", "cardiac muscle cell (77,917)", "fibroblast (46,452)", "pericyte (29,658)", "fibroblast of cardiac tissue (26,395)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "Drop-seq", organ: "cerebral cortex", datasetSize: 404180, datasets: ["cerebral cortex neuron (141,390)", "astrocyte (60,650)", "glial cell (47,064)", "neural progenitor cell (34,034)", "radial glial cell (32,934)"], priority: 3 },
+  { organism: "Mus musculus", modality: "10x multiome", organ: "kidney", datasetSize: 395755, datasets: ["epithelial cell of proximal tubule segment 1 (51,951)", "epithelial cell of proximal tubule segment 2 (43,416)", "epithelial cell of proximal tubule segment 3 (33,087)", "fibroblast (31,985)", "endothelial cell (24,688)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "10x 5' transcription profiling", organ: "breast", datasetSize: 373796, datasets: ["malignant cell (115,952)", "T cell (70,344)", "fibroblast (53,443)", "myeloid cell (22,492)", "endothelial cell (14,412)"], priority: 3 },
+  { organism: "Mus musculus", modality: "10x 3' v3", organ: "cerebral cortex", datasetSize: 352271, datasets: ["L2/3 intratelencephalic projecting glutamatergic neuron (55,831)", "oligodendrocyte precursor cell (47,692)", "L4/5 intratelencephalic projecting glutamatergic neuron (43,558)", "astrocyte (33,635)", "L5 intratelencephalic projecting glutamatergic neuron (32,230)"], priority: 3 },
+  { organism: "Callithrix jacchus", modality: "10x 3' v3", organ: "dorsolateral prefrontal cortex", datasetSize: 343100, datasets: ["glutamatergic neuron (118,603)", "L2/3 intratelencephalic projecting glutamatergic neuron (50,225)", "GABAergic neuron (40,713)", "oligodendrocyte (32,663)", "astrocyte (30,381)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "10x 3' v2", organ: "cerebral cortex", datasetSize: 303615, datasets: ["radial glial cell (96,233)", "unknown (63,076)", "glutamatergic neuron (60,964)", "neural cell (40,237)", "cerebral cortex pyramidal neuron (20,686)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "10x multiome", organ: "middle temporal gyrus", datasetSize: 302712, datasets: ["L2/3-6 intratelencephalic projecting glutamatergic neuron (167,174)", "oligodendrocyte (23,650)", "VIP GABAergic cortical interneuron (19,372)", "pvalb GABAergic cortical interneuron (17,850)", "astrocyte of the cerebral cortex (15,524)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "10x multiome", organ: "dorsolateral prefrontal cortex", datasetSize: 302488, datasets: ["L2/3-6 intratelencephalic projecting glutamatergic neuron (83,104)", "oligodendrocyte (38,537)", "microglial cell (20,901)", "astrocyte (13,947)", "oligodendrocyte precursor cell (13,366)"], priority: 3 },
+  { organism: "Mus musculus", modality: "10x 3' v2", organ: "kidney", datasetSize: 281765, datasets: ["epithelial cell of proximal tubule (78,196)", "kidney distal convoluted tubule epithelial cell (26,980)", "kidney loop of Henle thick ascending limb epithelial cell (17,204)", "kidney proximal convoluted tubule epithelial cell (13,380)", "epithelial cell of proximal tubule segment 1 (13,024)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "10x 5' v1", organ: "breast", datasetSize: 271562, datasets: ["malignant cell (38,524)", "CD4-positive, alpha-beta T cell (26,578)", "macrophage (19,904)", "mammary gland epithelial cell (17,612)", "CD8-positive, alpha-beta T cell (17,354)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "sci-RNA-seq3", organ: "lung", datasetSize: 271167, datasets: ["epithelial cell of lower respiratory tract (126,058)", "stromal cell (108,390)", "endothelial cell of vascular tree (16,553)", "endothelial cell of lymphatic vessel (6,797)", "ciliated epithelial cell (3,247)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "10x 3' v2", organ: "kidney", datasetSize: 255985, datasets: ["epithelial cell of proximal tubule (32,738)", "epithelial cell of nephron (20,573)", "macrophage (18,950)", "lymphocyte (16,961)", "vascular associated smooth muscle cell (14,569)"], priority: 3 },
+  { organism: "Macaca mulatta", modality: "sci-RNA-seq3", organ: "dorsolateral prefrontal cortex", datasetSize: 252765, datasets: ["glutamatergic neuron (179,491)", "GABAergic neuron (45,314)", "astrocyte (10,994)", "oligodendrocyte (6,493)", "oligodendrocyte precursor cell (3,601)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "10x 5' v1", organ: "liver", datasetSize: 250750, datasets: ["macrophage (54,067)", "erythrocyte (32,388)", "natural killer cell (22,516)", "hepatocyte (16,354)", "dendritic cell (11,376)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "10x 3' v2", organ: "cerebellum", datasetSize: 239327, datasets: ["neuron (56,928)", "neuroblast (sensu Vertebrata) (50,956)", "radial glial cell (37,208)", "Purkinje cell (33,492)", "cerebellar granule cell (14,263)"], priority: 3 },
+  { organism: "Macaca mulatta", modality: "sci-RNA-seq3", organ: "primary motor cortex", datasetSize: 203448, datasets: ["glutamatergic neuron (125,882)", "GABAergic neuron (40,232)", "oligodendrocyte (18,016)", "astrocyte (11,451)", "brain vascular cell (3,029)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "sci-RNA-seq3", organ: "kidney", datasetSize: 193941, datasets: ["unknown (113,315)", "mesangial cell (55,131)", "taste receptor cell (11,520)", "endothelial cell of vascular tree (7,317)", "myeloid cell (4,253)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "10x 5' transcription profiling", organ: "kidney", datasetSize: 192956, datasets: ["CD8-positive, alpha-beta T cell (55,150)", "effector memory CD8-positive, alpha-beta T cell (23,370)", "macrophage (21,684)", "CD4-positive, alpha-beta T cell (16,404)", "natural killer cell (14,226)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "10x 3' v2", organ: "prefrontal cortex", datasetSize: 181098, datasets: ["neuron (73,455)", "glutamatergic neuron (47,318)", "inhibitory interneuron (16,987)", "unknown (14,400)", "cerebral cortex GABAergic interneuron (11,400)"], priority: 3 },
+  { organism: "Pan troglodytes", modality: "10x 3' v3", organ: "dorsolateral prefrontal cortex", datasetSize: 158099, datasets: ["oligodendrocyte (46,061)", "L2/3 intratelencephalic projecting glutamatergic neuron (36,357)", "astrocyte (14,677)", "sst GABAergic cortical interneuron (7,966)", "pvalb GABAergic cortical interneuron (6,715)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "10x 3' v2", organ: "peripheral region of retina", datasetSize: 152526, datasets: ["retinal rod cell (41,159)", "Mueller cell (22,246)", "rod bipolar cell (16,088)", "retinal bipolar neuron (14,349)", "GABAergic amacrine cell (12,716)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "10x 5' v1", organ: "heart left ventricle", datasetSize: 150582, datasets: ["regular ventricular cardiac myocyte (33,611)", "fibroblast (32,201)", "myeloid cell (18,958)", "pericyte (18,731)", "capillary endothelial cell (14,552)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "BD Rhapsody Whole Transcriptome Analysis", organ: "lung", datasetSize: 143689, datasets: ["CD4-positive, alpha-beta T cell (22,193)", "CD8-positive, alpha-beta T cell (22,060)", "neutrophil (19,525)", "alveolar macrophage (16,162)", "natural killer cell (14,399)"], priority: 3 },
+  { organism: "Mus musculus", modality: "10x 3' v2", organ: "lung", datasetSize: 141414, datasets: ["classical monocyte (23,766)", "mesenchymal stem cell (16,928)", "capillary endothelial cell (15,099)", "bronchial smooth muscle cell (7,017)", "endothelial cell of artery (6,538)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "sci-RNA-seq3", organ: "liver", datasetSize: 140953, datasets: ["hepatoblast (72,848)", "erythroblast (51,879)", "endothelial cell of vascular tree (5,708)", "myeloid cell (3,450)", "hepatic stellate cell (2,165)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "10x 3' v2", organ: "primary visual cortex", datasetSize: 135651, datasets: ["glutamatergic neuron (73,119)", "unknown (15,451)", "progenitor cell (10,940)", "forebrain radial glial cell (6,918)", "astrocyte (6,745)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "10x 5' v2", organ: "kidney", datasetSize: 131902, datasets: ["abnormal cell (26,759)", "CD4-positive, alpha-beta T cell (21,294)", "naive thymus-derived CD8-positive, alpha-beta T cell (21,097)", "unknown (9,770)", "myofibroblast cell (9,483)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "10x 3' v3", organ: "thymus", datasetSize: 131316, datasets: ["cortical thymic epithelial cell (20,362)", "CD4-positive, alpha-beta T cell (16,142)", "B cell (11,418)", "double negative thymocyte (9,975)", "thymic fibroblast type 2 (9,764)"], priority: 3 },
+  { organism: "Macaca mulatta", modality: "10x 3' v3", organ: "dorsolateral prefrontal cortex", datasetSize: 131032, datasets: ["L2/3 intratelencephalic projecting glutamatergic neuron (36,340)", "oligodendrocyte (21,491)", "astrocyte (10,933)", "microglial cell (8,058)", "oligodendrocyte precursor cell (6,286)"], priority: 3 },
+  { organism: "Macaca mulatta", modality: "sci-RNA-seq3", organ: "hippocampal formation", datasetSize: 128141, datasets: ["glutamatergic neuron (81,651)", "oligodendrocyte (15,442)", "astrocyte (10,875)", "GABAergic neuron (7,839)", "microglial cell (5,115)"], priority: 3 },
+  { organism: "Callithrix jacchus", modality: "10x 3' v3", organ: "primary motor cortex", datasetSize: 122088, datasets: ["glutamatergic neuron (55,003)", "oligodendrocyte (22,711)", "GABAergic neuron (21,127)", "astrocyte (16,595)", "endothelial cell (3,583)"], priority: 3 },
+  { organism: "Macaca mulatta", modality: "10x 3' v3", organ: "lung", datasetSize: 120042, datasets: ["lung endothelial cell (43,633)", "fibroblast of lung (16,729)", "pulmonary alveolar type 1 cell (12,294)", "pulmonary alveolar type 2 cell (11,469)", "granulocyte (9,039)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "10x multiome", organ: "macula lutea", datasetSize: 119111, datasets: ["retinal progenitor cell (29,092)", "retinal rod cell (14,880)", "retinal ganglion cell (14,181)", "midget ganglion cell of retina (10,167)", "GABAergic amacrine cell (9,338)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "10x 5' v2", organ: "breast", datasetSize: 109300, datasets: ["malignant cell (27,387)", "fibroblast (15,733)", "T cell (10,786)", "macrophage (4,876)", "effector memory CD4-positive, alpha-beta T cell (4,178)"], priority: 3 },
+  { organism: "Mus musculus", modality: "10x 3' v3", organ: "thymus", datasetSize: 101450, datasets: ["double-positive, alpha-beta thymocyte (39,289)", "mature CD4 single-positive thymocyte (15,114)", "CD4-positive, alpha-beta thymocyte (12,078)", "CD8-positive, alpha-beta thymocyte (10,389)", "mature CD8 single-positive thymocyte (7,482)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "10x multiome", organ: "peripheral region of retina", datasetSize: 100532, datasets: ["retinal progenitor cell (40,266)", "retinal rod cell (23,285)", "retinal ganglion cell (8,795)", "GABAergic amacrine cell (4,539)", "retinal cone cell (4,435)"], priority: 3 },
+  { organism: "Homo sapiens", modality: "inDrop", organ: "lung", datasetSize: 97800, datasets: ["neutrophil (14,166)", "B cell (14,060)", "T cell (13,953)", "CD4-positive, alpha-beta T cell (10,422)", "mononuclear phagocyte (7,739)"], priority: 4 },
+  { organism: "Mus musculus", modality: "10x 3' v3", organ: "blood", datasetSize: 90833, datasets: ["granulocyte (27,176)", "T cell (25,077)", "monocyte (16,157)", "B cell (9,948)", "macrophage (9,423)"], priority: 4 },
+  { organism: "Macaca mulatta", modality: "10x 3' v3", organ: "middle temporal gyrus", datasetSize: 89136, datasets: ["L2/3-6 intratelencephalic projecting glutamatergic neuron (41,057)", "oligodendrocyte (9,445)", "sst GABAergic cortical interneuron (8,569)", "VIP GABAergic cortical interneuron (7,515)", "lamp5 GABAergic cortical interneuron (4,793)"], priority: 4 },
+  { organism: "Mus musculus", modality: "10x 3' v2", organ: "cerebellum", datasetSize: 84708, datasets: ["macroglial cell (19,182)", "cerebellar granule cell (15,299)", "Purkinje cell (13,786)", "neuroblast (sensu Vertebrata) (10,281)", "unknown (7,201)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "10x 3' v2", organ: "hippocampal formation", datasetSize: 84265, datasets: ["oligodendrocyte (39,066)", "oligodendrocyte precursor cell (7,758)", "microglial cell (5,772)", "mature microglial cell (5,430)", "astrocyte (4,379)"], priority: 4 },
+  { organism: "Mus musculus", modality: "10x 3' v2", organ: "hippocampal formation", datasetSize: 82535, datasets: ["hippocampal neuron (60,569)", "pyramidal neuron (13,096)", "lamp5 GABAergic cortical interneuron (3,458)", "VIP GABAergic cortical interneuron (1,502)", "sncg GABAergic cortical interneuron (1,462)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "10x 3' v2", organ: "primary motor cortex", datasetSize: 80769, datasets: ["glutamatergic neuron (26,855)", "cerebral cortex GABAergic interneuron (19,735)", "unknown (17,120)", "progenitor cell (7,668)", "forebrain radial glial cell (6,772)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "Drop-seq", organ: "lung", datasetSize: 80689, datasets: ["unknown (18,656)", "pulmonary alveolar type 2 cell (10,790)", "alveolar macrophage (7,682)", "respiratory basal cell (7,436)", "multiciliated columnar cell of tracheobronchial tree (5,087)"], priority: 4 },
+  { organism: "Callithrix jacchus", modality: "10x 3' v3", organ: "middle temporal gyrus", datasetSize: 75861, datasets: ["L2/3-6 intratelencephalic projecting glutamatergic neuron (42,312)", "astrocyte of the cerebral cortex (6,771)", "oligodendrocyte (3,870)", "sst GABAergic cortical interneuron (3,474)", "oligodendrocyte precursor cell (2,868)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "BD Rhapsody Whole Transcriptome Analysis", organ: "liver", datasetSize: 75104, datasets: ["T cell (25,328)", "neutrophil (16,769)", "natural killer cell (12,371)", "mononuclear phagocyte (11,122)", "malignant cell (4,051)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "10x multiome", organ: "cerebellum", datasetSize: 73326, datasets: ["Purkinje cell (27,358)", "glioblast (22,488)", "glutamatergic neuron (6,342)", "radial glial cell (3,080)", "microglial cell (2,824)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "Smart-seq2", organ: "lung", datasetSize: 67475, datasets: ["CD8-positive, alpha-beta T cell (8,915)", "CD4-positive, alpha-beta T cell (8,017)", "pulmonary alveolar type 2 cell (5,631)", "capillary endothelial cell (5,523)", "natural killer cell (4,070)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "10x multiome", organ: "kidney", datasetSize: 62559, datasets: ["T cell (11,052)", "kidney loop of Henle ascending limb epithelial cell (10,023)", "kidney proximal convoluted tubule epithelial cell (6,609)", "B cell (4,425)", "kidney distal convoluted tubule epithelial cell (3,550)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "10x multiome", organ: "telencephalon", datasetSize: 58115, datasets: ["glutamatergic neuron (20,164)", "radial glial cell (16,766)", "interneuron (6,392)", "forebrain radial glial cell (2,403)", "endothelial cell (1,900)"], priority: 4 },
+  { organism: "Callithrix jacchus", modality: "10x 3' v3", organ: "primary visual cortex", datasetSize: 48270, datasets: ["glutamatergic neuron (27,419)", "oligodendrocyte (7,926)", "astrocyte (7,333)", "GABAergic neuron (3,829)", "endothelial cell (1,299)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "microwell-seq", organ: "kidney", datasetSize: 45630, datasets: ["epithelial cell (20,013)", "kidney loop of Henle epithelial cell (8,476)", "endothelial cell (5,094)", "renal intercalated cell (4,451)", "epithelial cell of proximal tubule (1,977)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "inDrop", organ: "breast", datasetSize: 38219, datasets: ["T cell (29,706)", "mononuclear phagocyte (4,038)", "B cell (3,533)", "mast cell (424)", "neutrophil (297)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "Drop-seq", organ: "primary visual cortex", datasetSize: 38024, datasets: ["glutamatergic neuron (25,506)", "GABAergic neuron (5,871)", "neural progenitor cell (5,501)", "glial cell (1,146)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "BD Rhapsody Whole Transcriptome Analysis", organ: "cerebral cortex", datasetSize: 37140, datasets: ["unknown (37,140)"], priority: 4 },
+  { organism: "Callithrix jacchus", modality: "10x 3' v3", organ: "hippocampal formation", datasetSize: 36950, datasets: ["glutamatergic neuron (17,891)", "oligodendrocyte (6,871)", "astrocyte (4,934)", "GABAergic neuron (3,526)", "ependymal cell (1,718)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "10x multiome", organ: "primary motor cortex", datasetSize: 35866, datasets: ["oligodendrocyte (20,795)", "glutamatergic neuron (6,381)", "GABAergic neuron (2,655)", "astrocyte (2,455)", "oligodendrocyte precursor cell (1,760)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "10x multiome", organ: "heart left ventricle", datasetSize: 33805, datasets: ["regular ventricular cardiac myocyte (18,328)", "fibroblast (4,806)", "endothelial cell (3,835)", "mural cell (3,530)", "myeloid cell (2,507)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "microwell-seq", organ: "lung", datasetSize: 33698, datasets: ["pulmonary alveolar type 2 cell (7,402)", "mesenchymal stem cell (6,628)", "endothelial cell (5,982)", "alternatively activated macrophage (5,420)", "macrophage (1,623)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "10x multiome", organ: "prefrontal cortex", datasetSize: 31742, datasets: ["glutamatergic neuron (8,510)", "intratelencephalic-projecting glutamatergic cortical neuron (4,810)", "L6 intratelencephalic projecting glutamatergic neuron (2,261)", "medial ganglionic eminence derived GABAergic cortical interneuron (2,141)", "neural progenitor cell (2,050)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "BD Rhapsody Whole Transcriptome Analysis", organ: "blood", datasetSize: 31000, datasets: ["CD14-positive monocyte (19,504)", "CD14-low, CD16-positive monocyte (3,860)", "CD4-positive, alpha-beta T cell (2,714)", "natural killer cell (1,720)", "cytotoxic T cell (914)"], priority: 4 },
+  { organism: "Mus musculus", modality: "10x 3' v2", organ: "primary visual cortex", datasetSize: 29763, datasets: ["L4/5 intratelencephalic projecting glutamatergic neuron of the primary motor cortex (13,537)", "L2/3-6 intratelencephalic projecting glutamatergic neuron (3,427)", "L6 corticothalamic-projecting glutamatergic cortical neuron (3,033)", "L6 intratelencephalic projecting glutamatergic neuron of the primary motor cortex (2,733)", "VIP GABAergic cortical interneuron (1,682)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "microwell-seq", organ: "liver", datasetSize: 28501, datasets: ["erythroid progenitor cell (9,279)", "erythroid lineage cell (6,756)", "epithelial cell (3,859)", "dendritic cell (2,147)", "macrophage (2,052)"], priority: 4 },
+  { organism: "Mus musculus", modality: "10x 3' v2", organ: "thymus", datasetSize: 27825, datasets: ["professional antigen presenting cell (7,446)", "DN4 thymocyte (6,000)", "thymocyte (5,676)", "immature T cell (5,352)", "double negative thymocyte (2,913)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "10x 5' v2", organ: "chorioretinal region", datasetSize: 27260, datasets: ["fibroblast (18,313)", "retinal pigment epithelial cell (3,974)", "melanocyte (1,807)", "pericyte (735)", "macrophage (664)"], priority: 4 },
+  { organism: "Mus musculus", modality: "10x 3' v3", organ: "kidney", datasetSize: 25656, datasets: ["kidney tubule cell (10,138)", "epithelial cell of proximal tubule (5,410)", "endothelial cell (3,485)", "pericyte (1,621)", "kidney distal convoluted tubule epithelial cell (681)"], priority: 4 },
+  { organism: "Mus musculus", modality: "10x 3' v2", organ: "liver", datasetSize: 21882, datasets: ["hepatocyte (8,787)", "Kupffer cell (7,638)", "endothelial cell of hepatic sinusoid (2,025)", "natural killer cell (1,656)", "myeloid leukocyte (921)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "10x multiome", organ: "hippocampal formation", datasetSize: 20673, datasets: ["oligodendrocyte (7,236)", "astrocyte (5,367)", "oligodendrocyte precursor cell (3,253)", "glutamatergic neuron (1,444)", "microglial cell (998)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "10x 5' v2", organ: "liver", datasetSize: 20249, datasets: ["CD16-positive, CD56-dim natural killer cell, human (4,168)", "gamma-delta T cell (2,440)", "CD16-negative, CD56-bright natural killer cell, human (2,006)", "effector memory CD8-positive, alpha-beta T cell, terminally differentiated (1,953)", "mucosal invariant T cell (1,917)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "10x 3' v1", organ: "lung", datasetSize: 19355, datasets: ["CD8-positive, alpha-beta T cell (3,786)", "CD4-positive, alpha-beta T cell (3,255)", "T cell (1,629)", "unknown (1,364)", "B cell (1,294)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "microwell-seq", organ: "blood", datasetSize: 17331, datasets: ["monocyte (6,429)", "T cell (4,848)", "professional antigen presenting cell (3,635)", "dendritic cell (771)", "B cell (751)"], priority: 4 },
+  { organism: "Mus musculus", modality: "10x 3' v3", organ: "liver", datasetSize: 16201, datasets: ["hepatocyte (11,152)", "endothelial cell (2,435)", "Kupffer cell (853)", "T cell (626)", "hepatic stellate cell (403)"], priority: 4 },
+  { organism: "Mus musculus", modality: "Smart-seq2", organ: "lung", datasetSize: 15654, datasets: ["bronchial smooth muscle cell (6,351)", "fibroblast of lung (1,449)", "myeloid dendritic cell (1,119)", "adventitial cell (867)", "B cell (828)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "10x 3' v2", organ: "embryo", datasetSize: 14244, datasets: ["pluripotent stem cell (14,142)", "cardiac endothelial cell (51)", "progenitor cell (28)", "hematopoietic stem cell (23)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "10x 3' v2", organ: "dorsolateral prefrontal cortex", datasetSize: 14142, datasets: ["microglial cell (14,086)", "T cell (25)", "neural cell (18)", "monocyte (8)", "erythrocyte (5)"], priority: 4 },
+  { organism: "Mus musculus", modality: "Drop-seq", organ: "kidney", datasetSize: 12405, datasets: ["epithelial cell of proximal tubule (9,468)", "kidney distal convoluted tubule epithelial cell (691)", "kidney connecting tubule epithelial cell (450)", "kidney loop of Henle thin ascending limb epithelial cell (418)", "kidney collecting duct principal cell (256)"], priority: 4 },
+  { organism: "Mus musculus", modality: "Smart-seq2", organ: "thymus", datasetSize: 12141, datasets: ["DN4 thymocyte (5,268)", "thymocyte (4,875)", "macrophage (1,119)", "epithelial cell of thymus (495)", "fibroblast (231)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "10x 5' v1", organ: "kidney", datasetSize: 11624, datasets: ["vascular associated smooth muscle cell (2,478)", "macrophage (1,905)", "natural killer cell (1,336)", "epithelial cell of nephron (1,082)", "dendritic cell (1,017)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "sci-RNA-seq3", organ: "thymus", datasetSize: 10961, datasets: ["thymocyte (9,806)", "professional antigen presenting cell (578)", "epithelial cell of thymus (314)", "stromal cell (146)", "endothelial cell of vascular tree (117)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "Smart-seq2", organ: "blood", datasetSize: 10685, datasets: ["monocyte (2,182)", "CD4-positive, alpha-beta T cell (1,791)", "neutrophil (1,283)", "classical monocyte (1,103)", "T cell (740)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "10x 3' transcription profiling", organ: "lung", datasetSize: 10567, datasets: ["epithelial cell (3,171)", "T cell (1,830)", "pulmonary alveolar epithelial cell (1,020)", "endothelial cell (834)", "fibroblast (646)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "10x multiome", organ: "cerebral cortex", datasetSize: 8981, datasets: ["neural cell (7,869)", "astrocyte (814)", "oligodendrocyte precursor cell (172)", "unknown (58)", "microglial cell (51)"], priority: 4 },
+  { organism: "Mus musculus", modality: "Smart-seq2", organ: "liver", datasetSize: 8577, datasets: ["hepatocyte (3,486)", "endothelial cell of hepatic sinusoid (1,851)", "Kupffer cell (786)", "B cell (630)", "myeloid leukocyte (627)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "Drop-seq", organ: "prefrontal cortex", datasetSize: 8201, datasets: ["glutamatergic neuron (5,487)", "GABAergic neuron (2,388)", "glial cell (326)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "10x 3' transcription profiling", organ: "breast", datasetSize: 7709, datasets: ["luminal adaptive secretory precursor cell of mammary gland (4,302)", "luminal hormone-sensing cell of mammary gland (1,616)", "basal-myoepithelial cell of mammary gland (765)", "unknown (255)", "fibroblast of mammary gland (248)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "microwell-seq", organ: "cerebellum", datasetSize: 7324, datasets: ["astrocyte (2,655)", "oligodendrocyte (2,541)", "macrophage (1,528)", "monocyte (145)", "endothelial cell (126)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "Smart-seq2", organ: "liver", datasetSize: 7180, datasets: ["neutrophil (1,562)", "macrophage (1,397)", "CD8-positive, alpha-beta T cell (766)", "classical monocyte (646)", "malignant cell (502)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "10x multiome", organ: "breast", datasetSize: 6270, datasets: ["basal-myoepithelial cell of mammary gland (1,752)", "endothelial cell (1,210)", "fibroblast (963)", "luminal adaptive secretory precursor cell of mammary gland (661)", "adipocyte (475)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "Smart-seq2", organ: "cerebral cortex", datasetSize: 5503, datasets: ["myeloid cell (1,847)", "neoplastic cell (1,091)", "immature astrocyte (794)", "unknown (562)", "cerebral cortex neuron (406)"], priority: 4 },
+  { organism: "Mus musculus", modality: "Smart-seq2", organ: "kidney", datasetSize: 5499, datasets: ["kidney collecting duct epithelial cell (1,335)", "epithelial cell of proximal tubule (1,179)", "fenestrated endothelial cell (804)", "kidney collecting duct principal cell (471)", "macrophage (456)"], priority: 4 },
+  { organism: "Macaca mulatta", modality: "10x 3' v3", organ: "primary motor cortex", datasetSize: 4837, datasets: ["glutamatergic neuron (4,837)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "microwell-seq", organ: "thymus", datasetSize: 4516, datasets: ["T cell (4,287)", "dendritic cell (55)", "erythroid lineage cell (41)", "cord blood hematopoietic stem cell (39)", "neutrophil (34)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "Smart-seq2", organ: "thymus", datasetSize: 4155, datasets: ["vein endothelial cell (882)", "fibroblast (801)", "vascular associated smooth muscle cell (714)", "capillary endothelial cell (516)", "plasma cell (225)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "Drop-seq", organ: "hippocampal formation", datasetSize: 3624, datasets: ["glutamatergic neuron (1,667)", "neural progenitor cell (1,611)", "GABAergic neuron (230)", "glial cell (116)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "10x 3' v1", organ: "blood", datasetSize: 2463, datasets: ["T cell (1,437)", "mononuclear phagocyte (666)", "B cell (345)", "megakaryocyte (12)", "plasmacytoid dendritic cell (3)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "10x 3' v1", organ: "peripheral region of retina", datasetSize: 1057, datasets: ["retinal progenitor cell (426)", "retinal ganglion cell (230)", "amacrine cell (174)", "Mueller cell (86)", "retinal rod cell (55)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "Smart-seq2", organ: "breast", datasetSize: 1010, datasets: ["epithelial cell (428)", "malignant cell (385)", "fibroblast (125)", "B cell (34)", "endothelial cell (17)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "Smart-seq2", organ: "kidney", datasetSize: 600, datasets: ["kidney epithelial cell (327)", "B cell (102)", "CD8-positive, alpha-beta T cell (81)", "CD4-positive, alpha-beta T cell (48)", "natural killer cell (36)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "Smart-seq2", organ: "chorioretinal region", datasetSize: 261, datasets: ["retinal blood vessel endothelial cell (96)", "CD4-positive, alpha-beta T cell (39)", "endothelial cell (24)", "T cell (21)", "conjunctival epithelial cell (15)"], priority: 4 },
+  { organism: "Homo sapiens", modality: "10x 3' v2", organ: "chorioretinal region", datasetSize: 103, datasets: ["microglial cell (55)", "Mueller cell (25)", "retinal pigment epithelial cell (23)"], priority: 4 },
+  { organism: "Mus musculus", modality: "10x 3' transcription profiling", organ: "kidney", datasetSize: 22, datasets: ["epithelial cell of proximal tubule (13)", "kidney distal convoluted tubule epithelial cell (3)", "kidney loop of Henle medullary thick ascending limb epithelial cell (2)", "kidney collecting duct principal cell (1)", "kidney connecting tubule epithelial cell (1)"], priority: 4 },
 ];
 
-/** Aggregated cell: one box in the cube */
+export const TRIMMED_ORGANISMS = ["Callithrix jacchus", "Homo sapiens", "Macaca mulatta", "Mus musculus", "Pan troglodytes"] as const;
+export const TRIMMED_MODALITIES = ["10x 3' v3", "sci-RNA-seq3", "10x 3' v2", "10x 5' v2", "10x 5' v1", "10x multiome", "10x 5' transcription profiling", "Drop-seq", "ScaleBio single cell RNA sequencing", "10x 3' transcription profiling", "microwell-seq", "Smart-seq2", "inDrop", "BD Rhapsody Whole Transcriptome Analysis", "10x 3' v1"] as const;
+export const TRIMMED_ORGANS = ["embryo", "blood", "dorsolateral prefrontal cortex", "lung", "breast", "cerebral cortex", "telencephalon", "middle temporal gyrus", "cerebellum", "peripheral region of retina", "kidney", "liver", "primary motor cortex", "hippocampal formation", "macula lutea", "thymus", "heart left ventricle", "prefrontal cortex", "primary visual cortex", "chorioretinal region"] as const;
+
+
 export interface CubeCell {
   organism: string;
   modality: string;
@@ -168,7 +187,6 @@ export function getOrgans(records: DatasetRecord[]): string[] {
   return [...new Set(records.map((r) => r.organ))];
 }
 
-/** Build the cube cells from records, keyed on (organism, modality, organ) */
 export function buildCubeCells(records: DatasetRecord[]): CubeCell[] {
   const map = new Map<string, CubeCell>();
   for (const r of records) {
@@ -191,113 +209,19 @@ export function buildCubeCells(records: DatasetRecord[]): CubeCell[] {
   return [...map.values()];
 }
 
-// ---------------------------------------------------------------------------
-// Full search space with Human/brain/scRNA at the CENTER.
-// ---------------------------------------------------------------------------
+export const ORIGIN_CELLS: { organism: string; modality: string; organ: string }[] = [];
 
-export const FULL_ORGANISMS = [
-  "C. elegans",
-  "Drosophila",
-  "Zebrafish",
-  "Rat",
-  "Mouse",
-  "Human",       // center
-  "Macaque",
-  "Marmoset",
-  "Dog",
-  "Pig",
-] as const;
-
-export const FULL_MODALITIES = [
-  "Metabolomics",
-  "Hi-C",
-  "CITE-seq",
-  "Methylation",
-  "WES",
-  "WGS",
-  "small RNA-seq", // center band
-  "scRNA-seq",     // center band
-  "Multiome",
-  "bulk RNA-seq",
-  "scRNA (blood)",
-  "ATAC-seq",
-  "Spatial transcr.",
-  "Proteomics",
-] as const;
-
-export const FULL_ORGANS = [
-  "Gut",
-  "Lung",
-  "Heart",
-  "CSF",
-  "Brain",          // center
-  "Blood",
-  "Multi-region",
-  "Kidney",
-  "Liver",
-  "Skin",
-] as const;
-
-// ---------------------------------------------------------------------------
-// Trimmed axes — only categories with data + minimal context.
-// ---------------------------------------------------------------------------
-
-export const TRIMMED_ORGANISMS = [
-  "Rat",
-  "Mouse",
-  "Human",       // center
-  "Macaque",
-  "Marmoset",
-] as const;
-
-export const TRIMMED_MODALITIES = [
-  "WGS",
-  "small RNA-seq",
-  "scRNA-seq",     // center
-  "Multiome",
-  "bulk RNA-seq",
-  "scRNA (blood)",
-  "Proteomics",
-] as const;
-
-export const TRIMMED_ORGANS = [
-  "Heart",
-  "CSF",
-  "Brain",         // center
-  "Blood",
-  "Multi-region",
-  "Kidney",
-] as const;
-
-/** The origin point — Human miRNA/snRNA-seq, brain */
-export const ORIGIN_CELLS: { organism: string; modality: string; organ: string }[] = [
-  { organism: "Human", modality: "small RNA-seq", organ: "Brain" },
-  { organism: "Human", modality: "scRNA-seq", organ: "Brain" },
-];
-
-export function isOriginCell(organism: string, modality: string, organ: string): boolean {
-  return ORIGIN_CELLS.some(
-    (o) => o.organism === organism && o.modality === modality && o.organ === organ
-  );
+export function isOriginCell(_organism: string, _modality: string, _organ: string): boolean {
+  return false;
 }
 
-/** Euclidean distance from the nearest origin cell in 3D grid coordinates */
 export function distanceFromOrigin(
   orgIdx: number,
   modIdx: number,
   organIdx: number,
-  organisms: string[],
-  modalities: string[],
-  organs: string[]
+  _organisms: string[],
+  _modalities: string[],
+  _organs: string[]
 ): number {
-  let minDist = Infinity;
-  for (const o of ORIGIN_CELLS) {
-    const oi = organisms.indexOf(o.organism);
-    const mi = modalities.indexOf(o.modality);
-    const ti = organs.indexOf(o.organ);
-    if (oi === -1 || mi === -1 || ti === -1) continue;
-    const d = Math.sqrt((orgIdx - oi) ** 2 + (modIdx - mi) ** 2 + (organIdx - ti) ** 2);
-    if (d < minDist) minDist = d;
-  }
-  return minDist;
+  return Math.sqrt(orgIdx ** 2 + modIdx ** 2 + organIdx ** 2);
 }

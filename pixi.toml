@@ -11,5 +11,6 @@ build = "npx vite build"
 preview = "npx vite preview"
 
 [dependencies]
-python = ">=3.14.3,<3.15"
+python = ">=3.12,<3.13"
 nodejs = ">=22,<23"
+pip = ">=26.0.1,<27"
