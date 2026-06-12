@@ -1,14 +1,19 @@
 [workspace]
-authors = ["Matthias Flotho <mat.flotho@gmail.com>"]
+authors = ["Matthias Flotho <matthias.flotho@ccb.uni-saarland.de>"]
 channels = ["conda-forge"]
-name = "03-23-26_cube-prototype"
-platforms = ["osx-arm64"]
+name = "metacube"
+platforms = ["osx-arm64", "linux-64"]
 version = "0.1.0"
 
 [tasks]
-dev = "npx vite"
-build = "npx vite build"
-preview = "npx vite preview"
+# Installs the npm dependencies (vite, react, three, …). Cached on package-lock.json,
+# so it is a no-op once node_modules is in place. All vite tasks depend on it.
+install-js = { cmd = "npm ci", inputs = ["package-lock.json"], outputs = ["node_modules/.package-lock.json"] }
+dev = { cmd = "npx vite", depends-on = ["install-js"] }
+build = { cmd = "npx vite build", depends-on = ["install-js"] }
+preview = { cmd = "npx vite preview", depends-on = ["install-js"] }
+export-template = { cmd = "SF_BUILD=1 npx vite build --outDir public && mv public/index.html public/template.html", depends-on = ["install-js"] }
+package-template = { depends-on = ["export-template"], cmd = "cp public/template.html python-pkg/src/metacube/_template.html && cp public/template.html r-pkg/inst/template.html" }
 
 [dependencies]
 python = ">=3.12,<3.13"

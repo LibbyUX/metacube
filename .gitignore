@@ -2,12 +2,27 @@
 .pixi/*
 !.pixi/config.toml
 
+
 # node
 node_modules/
 dist/
+dist*/
 
 # OS
 .DS_Store
 
 # large binary assets (tracked via LFS or downloaded separately)
 *.glb
+
+# IDEs
+.vscode/
+*.code-workspace
+
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+
+# build artifacts
+python-pkg/src/*.egg-info/

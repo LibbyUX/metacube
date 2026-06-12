@@ -1,5 +1,6 @@
 import React from "react";
 import * as THREE from "three";
+import { useTheme } from "../data/themeContext";
 
 interface GridPlanesProps {
   organisms: string[];
@@ -10,6 +11,7 @@ interface GridPlanesProps {
 
 /** Translucent divider planes between organism columns and modality rows */
 export function GridPlanes({ organisms, modalities, cubeSize, gap }: GridPlanesProps) {
+  const { theme } = useTheme();
   const half = cubeSize / 2;
   const orgCount = organisms.length;
   const modCount = modalities.length;
@@ -25,9 +27,9 @@ export function GridPlanes({ organisms, modalities, cubeSize, gap }: GridPlanesP
       <mesh key={`vplane-${i}`} position={[x, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
         <planeGeometry args={[cubeSize, cubeSize]} />
         <meshBasicMaterial
-          color="#d0d5dd"
+          color={theme.grid}
           transparent
-          opacity={0.06}
+          opacity={0.07}
           side={THREE.DoubleSide}
           depthWrite={false}
         />
@@ -42,9 +44,9 @@ export function GridPlanes({ organisms, modalities, cubeSize, gap }: GridPlanesP
       <mesh key={`hplane-${j}`} position={[0, y, 0]} rotation={[0, 0, 0]}>
         <planeGeometry args={[cubeSize, cubeSize]} />
         <meshBasicMaterial
-          color="#d0d5dd"
+          color={theme.grid}
           transparent
-          opacity={0.06}
+          opacity={0.07}
           side={THREE.DoubleSide}
           depthWrite={false}
         />

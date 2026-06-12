@@ -3,11 +3,13 @@
  * Loads data from /census_drilldown.json on demand.
  */
 
-import { useMemo, useRef, useState, useEffect } from "react";
+import { useMemo, useRef, useState, useEffect, useContext } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Text, OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import { scaleSqrt } from "d3-scale";
+import { PAGE_GRADIENT, TEXT_MUTED } from "../data/theme";
+import { useTheme, ThemeContext } from "../data/themeContext";
 
 interface DrilldownEntry {
   d: string; // dataset title
@@ -45,6 +47,7 @@ function DrilldownScene({
   organ: string;
   assay: string;
 }) {
+  const { theme } = useTheme();
   // Aggregate: dataset → cell_type → count
   const matrix = useMemo(() => {
     const map = new Map<string, Map<string, number>>();
@@ -136,7 +139,7 @@ function DrilldownScene({
       <Text
         position={[0, half + 0.4, 0]}
         fontSize={0.14}
-        color="#1a1a2e"
+        color={theme.text}
         anchorX="center"
         anchorY="bottom"
         fontWeight="bold"
@@ -153,7 +156,7 @@ function DrilldownScene({
             key={`xl-${i}`}
             position={[xOf(i), -half - 0.15, half]}
             fontSize={0.06}
-            color="#2a2a3e"
+            color={theme.text}
             anchorX="center"
             anchorY="top"
             maxWidth={bandX * 1.5}
@@ -165,7 +168,7 @@ function DrilldownScene({
       <Text
         position={[0, -half - 0.45, half]}
         fontSize={0.08}
-        color="#5a5a7a"
+        color={theme.text_muted}
         anchorX="center"
         anchorY="top"
         fontWeight="bold"
@@ -179,7 +182,7 @@ function DrilldownScene({
           key={`yl-${j}`}
           position={[-half - 0.08, yOf(j), half]}
           fontSize={0.06}
-          color="#2a2a3e"
+          color={theme.text}
           anchorX="right"
           anchorY="middle"
           maxWidth={1.5}
@@ -190,7 +193,7 @@ function DrilldownScene({
       <Text
         position={[-half - 0.08, 0, half]}
         fontSize={0.08}
-        color="#5a5a7a"
+        color={theme.text_muted}
         anchorX="right"
         anchorY="middle"
         rotation={[0, 0, Math.PI / 2]}
@@ -237,7 +240,7 @@ function DrilldownScene({
         <Text
           position={[0, half + 0.15, 1]}
           fontSize={0.09}
-          color="#333"
+          color={theme.text}
           anchorX="center"
           anchorY="bottom"
         >
@@ -254,6 +257,7 @@ export function DrilldownCube({
   assay,
   onClose,
 }: DrilldownCubeProps) {
+  const themeCtx = useContext(ThemeContext);
   const [entries, setEntries] = useState<DrilldownEntry[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -278,7 +282,7 @@ export function DrilldownCube({
         position: "fixed",
         inset: 0,
         zIndex: 100,
-        background: "rgba(255,255,255,0.97)",
+        background: PAGE_GRADIENT,
         display: "flex",
         flexDirection: "column",
       }}
@@ -313,7 +317,7 @@ export function DrilldownCube({
         <div
           style={{
             padding: 40,
-            color: "#666",
+            color: TEXT_MUTED,
             fontSize: 16,
             fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
           }}
@@ -330,18 +334,20 @@ export function DrilldownCube({
             near: 0.01,
             far: 100,
           }}
-          gl={{ antialias: true, toneMapping: THREE.NoToneMapping }}
-          style={{ flex: 1 }}
+          gl={{ antialias: true, toneMapping: THREE.NoToneMapping, alpha: true }}
+          style={{ flex: 1, background: "transparent" }}
           onCreated={({ scene }) => {
-            scene.background = new THREE.Color("#fafafa");
+            scene.background = null;
           }}
         >
-          <DrilldownScene
-            entries={entries}
-            organism={organism}
-            organ={organ}
-            assay={assay}
-          />
+          <ThemeContext.Provider value={themeCtx}>
+            <DrilldownScene
+              entries={entries}
+              organism={organism}
+              organ={organ}
+              assay={assay}
+            />
+          </ThemeContext.Provider>
         </Canvas>
       )}
     </div>

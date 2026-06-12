@@ -1,0 +1,21 @@
+title: "CellxGene Census (auto axes)"
+
+axes:
+  mode: auto
+  auto:
+    weighting: cube_cells
+
+size_colour: "count"
+count_label: "cells"
+
+drilldown:
+  type: "zoom"
+  treemap:
+    category_column: "dataset_id"
+    category_label_column: "dataset_title"
+    category_noun: "datasets"
+    subcategory_column: "cell_type"
+    count_column: "count"
+
+slice:
+  fixed_axis: "x"

@@ -1,109 +1,126 @@
-# Cube — 3D Dataset Explorer
+# metacube — 3D Data Cube Visualization
 
-Interactive 3D cubic map for exploring datasets across three categorical dimensions. Click any cell to drill down into a nested treemap of studies and cell types.
+Interactive 3D cube visualization for exploring tabular data across three categorical dimensions. Provide a CSV and a YAML config — metacube transforms it into a self-contained HTML file or serves it locally.
 
-**Live demo:** [maflot.github.io/cube](https://maflot.github.io/cube/)
 
-## Examples
 
-| Example | Axes | Size | Sources |
-|---------|------|------|---------|
-| **Cell x Gene Census** | Organism × Assay × Organ | 214M cells, 5 organisms | [CZ CELLxGENE](https://cellxgene.cziscience.com/), [Census API](https://chanzuckerberg.github.io/cellxgene-census/) |
-| **Multi-site Microbiome** | Host × Body Site × Genus | 5,166 genome bins, 12 hosts | [Human study](https://doi.org/10.1038/s41467-024-52598-7), [Zoo study](https://doi.org/10.1038/s41467-024-52669-9) |
+**[Try it in the browser →](https://chair-for-clinical-bioinformatics.github.io/metacube/playground/)**
 
-## Quick Start
+## Packages
+
+| Package | Install | Docs |
+|---------|---------|------|
+| Python | `pip install metacube` | [python-pkg/README.md](python-pkg/README.md) |
+| R | `devtools::install_github("Chair-for-Clinical-Bioinformatics/metacube", subdir = "r-pkg")` | [r-pkg/README.md](r-pkg/README.md) |
+
+No Node.js required by end users — the JS bundle is pre-built and embedded in both packages.
+
+## How it works
+
+You provide two files:
+- **A CSV** with one row per data point and columns for the three axes and a count/size value
+- **A YAML config** that maps CSV columns to axes and enables optional features (drilldown, color gradient, 2D slice)
+
+The transform step aggregates the data into a `CubeData` structure that drives the visualization. The result is a fully self-contained HTML file — open it in any browser, no server needed.
+
+## Repository Layout
+
+```
+metacube/
+├── src/                        # Vite + React + Three.js source (JS visualization)
+├── playground/                 # Browser-based playground page (upload CSV + YAML)
+├── python-pkg/                 # Python package (pip-installable)
+│   └── src/metacube/
+│       ├── _template.html      # Pre-built JS bundle (committed asset)
+│       ├── examples/           # Bundled example CSV + YAML files
+│       ├── transform.py        # CSV + config → CubeData JSON
+│       ├── build.py            # CubeData JSON → standalone HTML
+│       ├── serve.py            # Local HTTP server
+│       └── cli.py              # Click CLI entry point
+├── r-pkg/                      # R package (devtools-installable)
+│   ├── R/
+│   │   ├── transform.R         # data.frame + config → CubeData list
+│   │   ├── build.R             # CubeData → HTML file
+│   │   └── serve.R             # httpuv local server
+│   └── inst/template.html      # Same pre-built JS bundle
+├── public/                     # Static assets served by Vite
+│   ├── examples/               # Bundled example CSV + YAML files
+│   └── template.html           # Pre-built single-file bundle (for playground download)
+└── pixi.toml                   # Dev environment (Node + Python via conda)
+```
+
+## Development Setup
+
+Requires [Pixi](https://pixi.sh):
 
 ```bash
-npm install
-npm run dev
+pixi install                 # Install conda environment (Node, Python)
+pixi run dev                 # Start Vite dev server (hot reload)
+pixi run build               # Production JS build → dist/
+pixi run export-template     # Rebuild template/index.html after JS changes
+pixi run package-template    # Sync template to both packages (run after export-template)
 ```
 
-Open http://localhost:5173/cube/
+The npm dependencies (Vite, React, Three.js, …) are installed automatically by the
+`install-js` task that every `pixi run` step depends on. To install them explicitly,
+run `pixi run install-js` (or `npm ci`).
 
-## Deploy Your Own Data
-
-Fork this repo and add your dataset:
-
-### 1. Prepare your data as two JSON files
-
-**`public/my_data.json`** — cube records:
-```json
-{
-  "records": [
-    {
-      "organism": "Category A value",
-      "modality": "Category B value",
-      "organ": "Category C value",
-      "datasetSize": 1234,
-      "datasets": ["sub-item 1 (500)", "sub-item 2 (734)"],
-      "priority": 1
-    }
-  ],
-  "organisms": ["Cat A val 1", "Cat A val 2"],
-  "modalities": ["Cat B val 1", "Cat B val 2"],
-  "organs": ["Cat C val 1", "Cat C val 2"]
-}
+Type-check:
+```bash
+pixi run -e default npx tsc --noEmit
 ```
 
-**`public/my_drilldown.json`** — drill-down data (optional):
-```json
-{
-  "Cat A val|Cat C val|Cat B val": [
-    { "d": "Study name", "c": "Sub-category", "n": 100 }
-  ]
-}
-```
+## Running the Playground Locally
 
-Note: the drilldown key format is `organism|organ|modality`.
-
-### 2. Register your example
-
-Edit `src/data/examples.ts`:
-```ts
-{
-  id: "my-dataset",
-  title: "My Dataset",
-  description: "Short description",
-  axisLabels: { x: "Category A", y: "Category B", z: "Category C" },
-  drilldownPath: "my_drilldown.json",
-  dataPath: "my_data.json",
-  links: [{ label: "Publication", url: "https://..." }],
-}
-```
-
-### 3. Add the loader
-
-In `src/data/loadExample.ts`, add a case for your `id`:
-```ts
-if (id === "my-dataset") {
-  const resp = await fetch(`${import.meta.env.BASE_URL}my_data.json`);
-  // ... same pattern as microbiome
-}
-```
-
-### 4. Deploy
-
-Push to `main` — GitHub Actions builds and deploys automatically. Or run locally:
+The playground page requires the pre-built template in `public/template.html` before the dev server starts. Example data is already in `public/examples/` and committed to the repo.
 
 ```bash
-npm run build
-npx vite preview
+pixi run export-template   # builds template and copies to public/template.html
+pixi run dev               # → http://localhost:5173/playground/
 ```
 
-### Custom domain / repo name
+## Updating the Pre-built Bundle
 
-Change `base` in `vite.config.ts` to match your repo name:
-```ts
-base: "/your-repo-name/"
+After any JS changes that should be visible to package users, run:
+
+```bash
+pixi run package-template
 ```
+
+This rebuilds the single-file bundle, stages it as `public/template.html`, and copies it to `python-pkg/src/metacube/_template.html` and `r-pkg/inst/template.html`. Both package files must be committed.
+
+## Key Features
+
+| Feature | Config key | Description |
+|---|---|---|
+| Count gradient | `size_colour` | Block colour + size from a numeric column |
+| Uniform colour mode | *(omit `size_colour`)* | All cells flat-coloured; useful when only presence matters |
+| Zoom drilldown | `drilldown.type: zoom` | Click a cell to open a full inner 3D cube on finer axes |
+| Treemap drilldown | `drilldown.type: treemap` | Click opens a hierarchical treemap of dataset/category breakdown |
+| Ghost datasets | `ghost_datasets` | Matching cells render as transparent wireframe (e.g. planned data) |
+| Accent datasets | `accent_datasets` / `accent_color` | Matching cells render in a fixed colour instead of the gradient |
+| Multi-column axis | `columns: [col1, col2]` | Combine multiple CSV columns into one axis value with a separator |
+| Per-column remapping | `column_value_labels` | Remap or drop individual components before combining |
+| Explicit label order | `value_order` | Control axis label order regardless of frequency or sort_by |
+| Metadata join | `metadata_csv` | Left-join a secondary CSV (title/doi/year) by key — keeps main CSV lean |
+| Tooltip breakdown | `tooltip_breakdown` | Show per-cell breakdown of a column (e.g. cell types) on hover |
+| Inner zoom colours | `drilldown.axis_colors` | Override axis label colours for the inner zoom cube |
+| Dataset highlighting | *(click dataset card)* | In zoom mode, clicking a dataset card highlights all its inner cells |
+| Filter summary | *(automatic)* | Live "selected: X entries" panel when axis labels are clicked |
+| 2D slice | `slice` | Toggle a heatmap of the two free axes at the selected cell's fixed value |
+| Per-cell charts | `charts_json` | Per-cell sparkline, line, or bar chart in the details panel |
+
+## Documentation
+
+- **[Config file reference →](docs/config.md)** — all YAML options, visualization modes, worked examples
 
 ## Tech Stack
 
-- React 19 + TypeScript + Three.js (react-three-fiber)
-- d3-scale + d3-hierarchy for data mapping and treemaps
-- Vite 8 for build
-- GitHub Actions for deployment
+- **Visualization:** React 19 + TypeScript + Three.js (react-three-fiber) + d3-hierarchy
+- **Build:** Vite 8
+- **Python package:** Click CLI, pandas, pyyaml
+- **R package:** jsonlite, yaml, httpuv
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE).

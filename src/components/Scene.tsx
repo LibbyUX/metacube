@@ -1,32 +1,47 @@
-import { useRef, useImperativeHandle, forwardRef } from "react";
+import { useRef, useImperativeHandle, forwardRef, useContext } from "react";
 import { Canvas, useThree, useFrame } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import { CubeMap } from "./CubeMap";
-import { DatasetRecord, CubeCell } from "../data/datasets";
-import { ScaleMode, SortMode, ColorBy } from "../hooks/useStore";
+import type { CubeRecord, CubeCell } from "../data/dataModel";
+import type { ScaleMode, SortMode } from "../hooks/useStore";
+import type { CubeConfig, AxisGroup } from "../data/config";
+import { PAGE_GRADIENT } from "../data/theme";
+import { ThemeContext } from "../data/themeContext";
 
 interface SceneProps {
-  records: DatasetRecord[];
+  records: CubeRecord[];
   scaleMode: ScaleMode;
   sortMode: SortMode;
-  colorBy: ColorBy;
-  cubeOpacity: number;
+  config: CubeConfig;
   cellOpacity: number;
-  organismFilter: Set<string>;
-  modalityFilter: Set<string>;
-  organFilter: Set<string>;
+  xFilter: Set<string>;
+  yFilter: Set<string>;
+  zFilter: Set<string>;
   hoveredCell: CubeCell | null;
   selectedCell: CubeCell | null;
+  selectedCells?: Set<string>;
   onHover: (c: CubeCell | null) => void;
   onSelect: (c: CubeCell) => void;
   onZoomComplete?: () => void;
   zoomTarget?: [number, number, number] | null;
   zoomingBack?: boolean;
   onZoomBackDone?: () => void;
-  axisOrganisms?: string[];
-  axisModalities?: string[];
-  axisOrgans?: string[];
+  axisXs?: string[];
+  axisYs?: string[];
+  axisZs?: string[];
+  fontScale?: number;
+  hideAxisTitles?: boolean;
+  cameraPosition?: [number, number, number];
+  cameraFov?: number;
+  xGroups?: AxisGroup[];
+  yGroups?: AxisGroup[];
+  zGroups?: AxisGroup[];
+  onToggleX?: (v: string) => void;
+  onToggleY?: (v: string) => void;
+  onToggleZ?: (v: string) => void;
+  uniformCellColor?: string;
+  background?: string;
 }
 
 export interface SceneHandle {
@@ -34,16 +49,11 @@ export interface SceneHandle {
   resetView: () => void;
 }
 
-const DEFAULT_CAM = new THREE.Vector3(4.5, 3.5, 4.5);
+const DEFAULT_CAM = new THREE.Vector3(6.0, 4.5, 6.0);
 const ZOOM_OFFSET = 0.6;
 
 function CameraController(
-  {
-    zoomTarget,
-    onZoomComplete,
-    zoomingBack,
-    onZoomBackDone,
-  }: {
+  { zoomTarget, onZoomComplete, zoomingBack, onZoomBackDone }: {
     zoomTarget?: [number, number, number] | null;
     onZoomComplete?: () => void;
     zoomingBack?: boolean;
@@ -63,7 +73,6 @@ function CameraController(
       camera.lookAt(0, 0, 0);
     },
     resetView() {
-      // Hard reset — used by preset buttons
       camera.position.copy(DEFAULT_CAM);
       camera.lookAt(0, 0, 0);
       isZooming.current = false;
@@ -72,57 +81,33 @@ function CameraController(
   }));
 
   useFrame(() => {
-    // Zoom INTO a cell
     if (zoomTarget && !zoomingBack) {
       if (!isZooming.current) {
         isZooming.current = true;
         hasNotified.current = false;
         const cellPos = new THREE.Vector3(...zoomTarget);
-        const camDir = new THREE.Vector3()
-          .subVectors(camera.position, cellPos)
-          .normalize();
+        const camDir = new THREE.Vector3().subVectors(camera.position, cellPos).normalize();
         targetPos.current.copy(cellPos).addScaledVector(camDir, ZOOM_OFFSET);
         targetLookAt.current.copy(cellPos);
       }
-
       camera.position.lerp(targetPos.current, 0.07);
       const lookTarget = new THREE.Vector3();
       camera.getWorldDirection(lookTarget);
-      const desiredDir = new THREE.Vector3()
-        .subVectors(targetLookAt.current, camera.position)
-        .normalize();
+      const desiredDir = new THREE.Vector3().subVectors(targetLookAt.current, camera.position).normalize();
       lookTarget.lerp(desiredDir, 0.1);
-      camera.lookAt(
-        camera.position.x + lookTarget.x,
-        camera.position.y + lookTarget.y,
-        camera.position.z + lookTarget.z
-      );
-
-      const dist = camera.position.distanceTo(targetPos.current);
-      if (dist < 0.03 && !hasNotified.current) {
+      camera.lookAt(camera.position.x + lookTarget.x, camera.position.y + lookTarget.y, camera.position.z + lookTarget.z);
+      if (camera.position.distanceTo(targetPos.current) < 0.03 && !hasNotified.current) {
         hasNotified.current = true;
         onZoomComplete?.();
       }
-    }
-    // Zoom BACK to default
-    else if (zoomingBack) {
+    } else if (zoomingBack) {
       camera.position.lerp(DEFAULT_CAM, 0.05);
-
-      // Smoothly look back at origin
       const lookTarget = new THREE.Vector3();
       camera.getWorldDirection(lookTarget);
-      const toOrigin = new THREE.Vector3()
-        .subVectors(new THREE.Vector3(0, 0, 0), camera.position)
-        .normalize();
+      const toOrigin = new THREE.Vector3().subVectors(new THREE.Vector3(0, 0, 0), camera.position).normalize();
       lookTarget.lerp(toOrigin, 0.08);
-      camera.lookAt(
-        camera.position.x + lookTarget.x,
-        camera.position.y + lookTarget.y,
-        camera.position.z + lookTarget.z
-      );
-
-      const dist = camera.position.distanceTo(DEFAULT_CAM);
-      if (dist < 0.08) {
+      camera.lookAt(camera.position.x + lookTarget.x, camera.position.y + lookTarget.y, camera.position.z + lookTarget.z);
+      if (camera.position.distanceTo(DEFAULT_CAM) < 0.08) {
         camera.position.copy(DEFAULT_CAM);
         camera.lookAt(0, 0, 0);
         isZooming.current = false;
@@ -142,25 +127,30 @@ const CameraControllerForwarded = forwardRef(CameraController);
 
 export const Scene = forwardRef<SceneHandle, SceneProps>(function Scene(props, ref) {
   const camRef = useRef<SceneHandle>(null);
+  // R3F's <Canvas> renders in a separate reconciler; React context does not cross
+  // it automatically, so capture the theme here and re-provide it inside.
+  const themeCtx = useContext(ThemeContext);
 
   useImperativeHandle(ref, () => ({
-    setCamera(pos) {
-      camRef.current?.setCamera(pos);
-    },
-    resetView() {
-      camRef.current?.resetView();
-    },
+    setCamera(pos) { camRef.current?.setCamera(pos); },
+    resetView() { camRef.current?.resetView(); },
   }));
 
   const isAnimating = !!(props.zoomTarget || props.zoomingBack);
 
   return (
     <Canvas
-      camera={{ position: [DEFAULT_CAM.x, DEFAULT_CAM.y, DEFAULT_CAM.z], fov: 45, near: 0.1, far: 100 }}
+      camera={{
+        position: props.cameraPosition ?? [DEFAULT_CAM.x, DEFAULT_CAM.y, DEFAULT_CAM.z],
+        fov: props.cameraFov ?? 45,
+        near: 0.1,
+        far: 100,
+      }}
       gl={{ antialias: true, alpha: true, toneMapping: THREE.NoToneMapping }}
-      style={{ width: "100%", height: "100%", background: "#ffffff" }}
+      style={{ width: "100%", height: "100%", background: props.background ?? PAGE_GRADIENT }}
       onPointerMissed={() => { if (!isAnimating) props.onSelect(null!); }}
     >
+      <ThemeContext.Provider value={themeCtx}>
       <CameraControllerForwarded
         ref={camRef}
         zoomTarget={props.zoomTarget}
@@ -168,34 +158,38 @@ export const Scene = forwardRef<SceneHandle, SceneProps>(function Scene(props, r
         zoomingBack={props.zoomingBack}
         onZoomBackDone={props.onZoomBackDone}
       />
-      <ambientLight intensity={0.8} />
-      <directionalLight position={[5, 8, 5]} intensity={0.6} />
-      <directionalLight position={[-3, 3, -2]} intensity={0.25} />
-      <OrbitControls
-        enableDamping
-        dampingFactor={0.08}
-        minDistance={0.3}
-        maxDistance={15}
-        enabled={!isAnimating}
-      />
+      <ambientLight intensity={0.95} />
+      <directionalLight position={[5, 8, 5]} intensity={0.7} />
+      <directionalLight position={[-3, 3, -2]} intensity={0.3} />
+      <OrbitControls enableDamping dampingFactor={0.08} minDistance={0.3} maxDistance={15} enabled={!isAnimating} />
       <CubeMap
         records={props.records}
         scaleMode={props.scaleMode}
         sortMode={props.sortMode}
-        colorBy={props.colorBy}
-        cubeOpacity={props.cubeOpacity}
+        config={props.config}
         cellOpacity={props.cellOpacity}
-        organismFilter={props.organismFilter}
-        modalityFilter={props.modalityFilter}
-        organFilter={props.organFilter}
+        xFilter={props.xFilter}
+        yFilter={props.yFilter}
+        zFilter={props.zFilter}
         hoveredCell={props.hoveredCell}
         selectedCell={props.selectedCell}
+        selectedCells={props.selectedCells}
         onHover={props.onHover}
         onSelect={props.onSelect}
-        axisOrganisms={props.axisOrganisms}
-        axisModalities={props.axisModalities}
-        axisOrgans={props.axisOrgans}
+        axisXs={props.axisXs}
+        axisYs={props.axisYs}
+        axisZs={props.axisZs}
+        xGroups={props.xGroups}
+        yGroups={props.yGroups}
+        zGroups={props.zGroups}
+        fontScale={props.fontScale}
+        hideAxisTitles={props.hideAxisTitles}
+        onToggleX={props.onToggleX}
+        onToggleY={props.onToggleY}
+        onToggleZ={props.onToggleZ}
+        uniformCellColor={props.uniformCellColor}
       />
+      </ThemeContext.Provider>
     </Canvas>
   );
 });

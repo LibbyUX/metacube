@@ -1,0 +1,16 @@
+title: "ENCODE — automatic axis assignment"
+
+axes:
+  mode: auto
+  max_labels: 30
+
+size_colour: "count"
+count_label: "experiments" 
+axis_order: "cluster"
+
+drilldown:
+  type: "zoom"
+  treemap:
+    category_column: lab
+    category_noun: "labs"
+    count_column: "count"     

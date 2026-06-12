@@ -1,9 +1,9 @@
 import { useState, useCallback } from "react";
-import { CubeCell } from "../data/datasets";
+import type { CubeCell } from "../data/dataModel";
 
 export type ScaleMode = "linear" | "sqrt" | "log";
 export type SortMode = "size" | "alpha";
-export type ColorBy = "size" | "organism" | "modality" | "organ";
+export type ColorBy = "size" | "x" | "y" | "z";
 
 export interface StoreState {
   scaleMode: ScaleMode;
@@ -16,87 +16,51 @@ export interface StoreState {
   setHoveredCell: (c: CubeCell | null) => void;
   selectedCell: CubeCell | null;
   setSelectedCell: (c: CubeCell | null) => void;
-  organismFilter: Set<string>;
-  toggleOrganism: (o: string) => void;
-  modalityFilter: Set<string>;
-  toggleModality: (m: string) => void;
-  organFilter: Set<string>;
-  toggleOrgan: (o: string) => void;
-  cubeOpacity: number;
-  setCubeOpacity: (v: number) => void;
+  xFilter: Set<string>;
+  toggleX: (v: string) => void;
+  setXFilter: (f: Set<string>) => void;
+  yFilter: Set<string>;
+  toggleY: (v: string) => void;
+  setYFilter: (f: Set<string>) => void;
+  zFilter: Set<string>;
+  toggleZ: (v: string) => void;
+  setZFilter: (f: Set<string>) => void;
   cellOpacity: number;
   setCellOpacity: (v: number) => void;
 }
 
-export function useStore(
-  allOrganisms: string[],
-  allModalities: string[],
-  allOrgans: string[]
-): StoreState {
+export function useStore(): StoreState {
   const [scaleMode, setScaleMode] = useState<ScaleMode>("sqrt");
   const [sortMode, setSortMode] = useState<SortMode>("size");
   const [colorBy, setColorBy] = useState<ColorBy>("size");
   const [hoveredCell, setHoveredCell] = useState<CubeCell | null>(null);
   const [selectedCell, setSelectedCell] = useState<CubeCell | null>(null);
-  const [organismFilter, setOrganismFilter] = useState<Set<string>>(
-    () => new Set(allOrganisms)
-  );
-  const [modalityFilter, setModalityFilter] = useState<Set<string>>(
-    () => new Set(allModalities)
-  );
-  const [organFilter, setOrganFilter] = useState<Set<string>>(
-    () => new Set(allOrgans)
-  );
-  const [cubeOpacity, setCubeOpacity] = useState(0.0);
+  const [xFilter, setXFilter] = useState<Set<string>>(() => new Set());
+  const [yFilter, setYFilter] = useState<Set<string>>(() => new Set());
+  const [zFilter, setZFilter] = useState<Set<string>>(() => new Set());
   const [cellOpacity, setCellOpacity] = useState(0.88);
 
-  const toggleOrganism = useCallback((o: string) => {
-    setOrganismFilter((prev) => {
-      const next = new Set(prev);
-      if (next.has(o)) next.delete(o);
-      else next.add(o);
-      return next;
-    });
+  const toggleX = useCallback((v: string) => {
+    setXFilter((prev) => { const next = new Set(prev); next.has(v) ? next.delete(v) : next.add(v); return next; });
   }, []);
 
-  const toggleModality = useCallback((m: string) => {
-    setModalityFilter((prev) => {
-      const next = new Set(prev);
-      if (next.has(m)) next.delete(m);
-      else next.add(m);
-      return next;
-    });
+  const toggleY = useCallback((v: string) => {
+    setYFilter((prev) => { const next = new Set(prev); next.has(v) ? next.delete(v) : next.add(v); return next; });
   }, []);
 
-  const toggleOrgan = useCallback((o: string) => {
-    setOrganFilter((prev) => {
-      const next = new Set(prev);
-      if (next.has(o)) next.delete(o);
-      else next.add(o);
-      return next;
-    });
+  const toggleZ = useCallback((v: string) => {
+    setZFilter((prev) => { const next = new Set(prev); next.has(v) ? next.delete(v) : next.add(v); return next; });
   }, []);
 
   return {
-    scaleMode,
-    setScaleMode,
-    sortMode,
-    setSortMode,
-    colorBy,
-    setColorBy,
-    hoveredCell,
-    setHoveredCell,
-    selectedCell,
-    setSelectedCell,
-    organismFilter,
-    toggleOrganism,
-    modalityFilter,
-    toggleModality,
-    organFilter,
-    toggleOrgan,
-    cubeOpacity,
-    setCubeOpacity,
-    cellOpacity,
-    setCellOpacity,
+    scaleMode, setScaleMode,
+    sortMode, setSortMode,
+    colorBy, setColorBy,
+    hoveredCell, setHoveredCell,
+    selectedCell, setSelectedCell,
+    xFilter, toggleX, setXFilter,
+    yFilter, toggleY, setYFilter,
+    zFilter, toggleZ, setZFilter,
+    cellOpacity, setCellOpacity,
   };
 }

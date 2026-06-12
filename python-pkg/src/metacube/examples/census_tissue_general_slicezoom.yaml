@@ -1,0 +1,32 @@
+title: "CellxGene Census — Slice Zoom"
+
+axes:
+  x:
+    label: "Organism"
+    column: "organism"
+  y:
+    label: "Assay"
+    column: "assay"
+    max_labels: 20
+  z:
+    label: "Tissue (general)"
+    column: "tissue_general"
+    max_labels: 30
+size_colour: "count"
+count_label: "cells"
+drilldown:
+  type: "zoom"
+  axes:
+    z:
+      label: "Tissue"
+      column: "tissue"
+      max_labels: 30
+  treemap:
+    category_column: "dataset_id"
+    category_label_column: "dataset_title"
+    category_noun: "datasets"
+    subcategory_column: "cell_type"
+    count_column: "count"
+slice:
+  fixed_axis: "x"
+  count_column: "count"

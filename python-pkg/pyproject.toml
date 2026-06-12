@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "metacube"
+version = "0.1.0"
+description = "Interactive 3D cube visualization for multi-dimensional datasets"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.9"
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+]
+dependencies = [
+    "click>=8.0",
+    "numpy>=1.21",
+    "pandas>=2.0",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+cluster = ["scipy>=1.7"]
+
+[project.urls]
+Homepage = "https://github.com/Chair-for-Clinical-Bioinformatics/metacube"
+Repository = "https://github.com/Chair-for-Clinical-Bioinformatics/metacube"
+
+[project.scripts]
+metacube = "metacube.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+metacube = ["_template.html", "examples/*.csv", "examples/*.yaml"]

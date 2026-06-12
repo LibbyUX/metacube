@@ -1,0 +1,109 @@
+# ── Default colour scheme ─────────────────────────────────────────────────────
+# The "normal" cube look (not ASAP brand). Selected by a dataset config with
+#   colour_scheme: default        (this is also the fallback when none is set)
+#
+# Two modes — `light` is the classic package look (white background, amber accent,
+# blue cube cells, blue/green/amber axes); `dark` is a neutral slate counterpart.
+# The runtime toggle switches between them; the dataset never picks the mode.
+#
+# Edit values here, then `pixi run dev` / `pixi run export-template` recompile the
+# bundle (this file is inlined at build time). Every key below is required in both
+# modes. matplotlib/d3 palette NAMES (viridis, RdYlGn, …) are mode-independent and
+# handled in code; only the fallbacks and brand colours live here.
+
+light:
+  background:          "#ffffff"
+  panel_bg:            "rgba(255, 255, 255, 0.92)"
+  panel_bg_solid:      "rgba(255, 255, 255, 0.98)"
+  panel_border:        "#d1d5db"
+  card_bg:             "#f3f4f6"
+  card_bg_active:      "rgba(59, 130, 246, 0.18)"
+  backdrop:            "rgba(0, 0, 0, 0.35)"
+
+  text:                "#111827"
+  text_body:           "#374151"
+  text_muted:          "#6b7280"
+  text_dim:            "#9ca3af"
+
+  accent:              "#f59e0b"
+  accent_strong:       "#d97706"
+  accent_fill:         "#f59e0b"
+  accent_soft_bg:      "rgba(245, 158, 11, 0.15)"
+  accent_soft_border:  "rgba(245, 158, 11, 0.50)"
+
+  cell_default:        "#60a5fa"
+  cell_accent:         "#f59e0b"
+  edge:                "#d1d5db"
+  edge_hover:          "#374151"
+  edge_selected:       "#f59e0b"
+  wire:                "#9ca3af"
+  grid:                "#e5e7eb"
+
+  axis:                { x: "#3b82f6", y: "#10b981", z: "#f59e0b" }
+  axis_title:          "#374151"
+  axis_outline:        "#ffffff"
+
+  categorical:
+    - "#3b82f6"
+    - "#10b981"
+    - "#f59e0b"
+    - "#ef4444"
+    - "#8b5cf6"
+    - "#06b6d4"
+    - "#ec4899"
+    - "#84cc16"
+    - "#f97316"
+    - "#6366f1"
+    - "#14b8a6"
+    - "#eab308"
+
+  size_scale:          { low: "#1a237e", mid: "#e65100", high: "#ffee58" }
+
+dark:
+  background:          "#0d1117"
+  panel_bg:            "rgba(22, 27, 34, 0.88)"
+  panel_bg_solid:      "rgba(22, 27, 34, 0.97)"
+  panel_border:        "rgba(255, 255, 255, 0.14)"
+  card_bg:             "rgba(255, 255, 255, 0.06)"
+  card_bg_active:      "rgba(96, 165, 250, 0.28)"
+  backdrop:            "rgba(0, 0, 0, 0.62)"
+
+  text:                "#f0f3f6"
+  text_body:           "#d8dee4"
+  text_muted:          "#9aa4b2"
+  text_dim:            "#6b7280"
+
+  accent:              "#fbbf24"
+  accent_strong:       "#fcd34d"
+  accent_fill:         "#f59e0b"
+  accent_soft_bg:      "rgba(251, 191, 36, 0.18)"
+  accent_soft_border:  "rgba(251, 191, 36, 0.50)"
+
+  cell_default:        "#60a5fa"
+  cell_accent:         "#fbbf24"
+  edge:                "#cbd5e1"
+  edge_hover:          "#ffffff"
+  edge_selected:       "#fbbf24"
+  wire:                "#64748b"
+  grid:                "#475569"
+
+  # Muted blue / green / amber — distinct from the cube's blue cell fill.
+  axis:                { x: "#305CA4", y: "#086043", z: "#B68532" }
+  axis_title:          "#cbd5e1"
+  axis_outline:        "#0d1117"
+
+  categorical:
+    - "#60a5fa"
+    - "#34d399"
+    - "#fbbf24"
+    - "#f87171"
+    - "#a78bfa"
+    - "#22d3ee"
+    - "#f472b6"
+    - "#a3e635"
+    - "#fb923c"
+    - "#818cf8"
+    - "#2dd4bf"
+    - "#facc15"
+
+  size_scale:          { low: "#1e3a8a", mid: "#f59e0b", high: "#fde68a" }
