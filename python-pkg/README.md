@@ -250,7 +250,6 @@ axis_order: "frequency"  # "frequency" (default) or "cluster"
                          #            by average-linkage cosine clustering on their
                          #            co-occurrence profiles across the other two axes.
                          #            Groups categories with similar occupancy patterns.
-                         #            Requires: pip install 'metacube[cluster]'
 ```
 
 ### Config options summary
@@ -273,7 +272,7 @@ axis_order: "frequency"  # "frequency" (default) or "cluster"
 
 **`axis_order: "frequency"` (default):** labels are presented in descending order of total count, matching the `max_labels` selection rank.
 
-**`axis_order: "cluster"`:** after `max_labels` selection, each axis is reordered by average-linkage hierarchical clustering on co-occurrence profiles. Each label becomes a row vector of its counts across all combinations of the other two axes (mode-*k* tensor unfolding); rows are L2-normalised and pairwise cosine distances feed `scipy.cluster.hierarchy.linkage(method="average")`. This groups categories with similar occupancy patterns together, making large-scale structure easier to read. Requires scipy: `pip install 'metacube[cluster]'`. The R package uses `stats::hclust` and needs no additional dependencies.
+**`axis_order: "cluster"`:** after `max_labels` selection, each axis is reordered by average-linkage hierarchical clustering on co-occurrence profiles. Each label becomes a row vector of its counts across all combinations of the other two axes (mode-*k* tensor unfolding); rows are L2-normalised and pairwise cosine distances feed `scipy.cluster.hierarchy.linkage(method="average")`. This groups categories with similar occupancy patterns together, making large-scale structure easier to read. This uses scipy, which is installed as a dependency of metacube. The R package uses `stats::hclust` and needs no additional dependencies.
 
 ---
 

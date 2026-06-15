@@ -760,7 +760,7 @@ displayed axis order. This groups categories with similar occupancy patterns tog
 making spatial structure easier to read in large views. Axes with ≤ 2 labels are left
 unchanged.
 
-> **Python:** requires scipy — install with `pip install 'metacube[cluster]'`
+> **Python:** uses scipy, which is installed automatically as a dependency of metacube.
 >
 > **R:** uses `stats::hclust` from base R — no extra package needed.
 

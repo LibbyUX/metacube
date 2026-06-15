@@ -1,6 +1,6 @@
 """Bundled example datasets for metacube.
 
-Use ``metacube.examples.path("census_tissue_general.yaml")`` to get a Path
+Use ``metacube.examples.path("census_tissue_general_treemap.yaml")`` to get a Path
 to any bundled file, or ``metacube examples`` on the command line to copy
 them into the current directory.
 """

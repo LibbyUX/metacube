@@ -197,6 +197,7 @@ cube_transform <- function(df, config) {
     cat_col <- drill_cfg$category_column
     sub_col <- drill_cfg$subcategory_column
     label_col <- drill_cfg$category_label_column
+    count_col <- drill_cfg$count_column
     if (is.null(cat_col)) return(result)
     groups <- split(df, list(df[[x_col]], df[[y_col]], df[[z_col]]), drop = TRUE)
     for (key_parts in names(groups)) {
@@ -204,21 +205,26 @@ cube_transform <- function(df, config) {
       xv <- as.character(g[[x_col]][1]); yv <- as.character(g[[y_col]][1]); zv <- as.character(g[[z_col]][1])
       key <- paste(xv, yv, zv, sep = "|")
       has_label <- !is.null(label_col) && label_col %in% names(g)
+      has_count <- !is.null(count_col) && count_col %in% names(g)
+      # Tile size = summed count_column (real counts), falling back to row count when
+      # no count_column is configured. Mirrors .build_treemap / Python _build_drilldown.
+      .n <- function(p) if (has_count) as.integer(sum(p[[count_col]], na.rm = TRUE)) else nrow(p)
       if (!is.null(sub_col) && sub_col %in% names(g)) {
-        entries <- lapply(seq_len(nrow(g)), function(i) {
-          e <- list(d = as.character(g[[cat_col]][i]), c = as.character(g[[sub_col]][i]), n = 1L)
-          if (has_label) e$label <- as.character(g[[label_col]][i])
+        parts <- split(g, list(as.character(g[[cat_col]]), as.character(g[[sub_col]])), drop = TRUE)
+        entries <- lapply(parts, function(p) {
+          e <- list(d = as.character(p[[cat_col]][1]), c = as.character(p[[sub_col]][1]), n = .n(p))
+          if (has_label) e$label <- as.character(p[[label_col]][1])
           e
         })
       } else {
-        tab <- table(as.character(g[[cat_col]]))
-        labmap <- if (has_label) tapply(as.character(g[[label_col]]), as.character(g[[cat_col]]), function(v) v[1]) else NULL
-        entries <- lapply(names(tab), function(d) {
-          e <- list(d = d, c = d, n = as.integer(tab[[d]]))
-          if (!is.null(labmap)) e$label <- unname(labmap[[d]])
+        parts <- split(g, as.character(g[[cat_col]]), drop = TRUE)
+        entries <- lapply(parts, function(p) {
+          e <- list(d = as.character(p[[cat_col]][1]), c = as.character(p[[cat_col]][1]), n = .n(p))
+          if (has_label) e$label <- as.character(p[[label_col]][1])
           e
         })
       }
+      names(entries) <- NULL
       result[[key]] <- entries
     }
     return(result)

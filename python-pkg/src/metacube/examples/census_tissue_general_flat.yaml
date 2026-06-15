@@ -1,0 +1,17 @@
+title: "CellxGene Census — Flat"
+
+axes:
+  mode: auto
+  max_labels: 20
+
+size_colour: "count"
+count_label: "cells"
+
+info:
+  columns:
+    dataset: "dataset_title"
+    doi:     "collection_doi"
+
+slice:
+  fixed_axis: "x"
+  count_column: "count"

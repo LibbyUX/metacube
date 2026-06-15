@@ -17,10 +17,8 @@ dependencies = [
     "numpy>=1.21",
     "pandas>=2.0",
     "pyyaml>=6.0",
+    "scipy>=1.7",
 ]
-
-[project.optional-dependencies]
-cluster = ["scipy>=1.7"]
 
 [project.urls]
 Homepage = "https://github.com/Chair-for-Clinical-Bioinformatics/metacube"

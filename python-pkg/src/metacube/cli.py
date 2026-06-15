@@ -148,6 +148,6 @@ def examples_cmd(dest: Path, list_only: bool) -> None:
     click.echo(f"\nCopied {len(files)} files to {dest.resolve()}")
     click.echo("\nTry it out:")
     click.echo(f"  metacube transform {dest}/census_tissue_general_counts.csv \\")
-    click.echo(f"    --config {dest}/census_tissue_general.yaml \\")
+    click.echo(f"    --config {dest}/census_tissue_general_treemap.yaml \\")
     click.echo(f"    --output data.json")
     click.echo(f"  metacube serve data.json")

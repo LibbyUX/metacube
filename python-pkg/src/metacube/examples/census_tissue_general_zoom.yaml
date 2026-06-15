@@ -1,4 +1,4 @@
-title: "CellxGene Census — Slice Zoom"
+title: "CellxGene Census — Zoom"
 
 axes:
   x:
@@ -9,11 +9,19 @@ axes:
     column: "assay"
     max_labels: 20
   z:
-    label: "Tissue (general)"
+    label: "Tissue General"
     column: "tissue_general"
     max_labels: 30
+
 size_colour: "count"
 count_label: "cells"
+axis_order: "cluster"
+
+info_box:
+  columns:
+    dataset: "dataset_title"
+    doi:     "collection_doi"
+
 drilldown:
   type: "zoom"
   axes:
@@ -22,9 +30,9 @@ drilldown:
       column: "tissue"
       max_labels: 30
   treemap:
+    # Concentration unit = dataset (one H5AD = dataset_id), labelled by title.
     category_column: "dataset_id"
     category_label_column: "dataset_title"
-    category_noun: "datasets"
     subcategory_column: "cell_type"
     count_column: "count"
 slice:

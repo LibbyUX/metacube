@@ -246,7 +246,7 @@ def _cluster_axis_order(
     except ImportError:
         warnings.warn(
             "scipy is required for axis_order='cluster'. "
-            "Install it with: pip install 'metacube[cluster]'. "
+            "Install it with: pip install scipy. "
             "Falling back to frequency order.",
             stacklevel=4,
         )
@@ -435,6 +435,7 @@ def _build_drilldown(
         cat_col = drilldown_cfg.get("category_column")
         sub_col = drilldown_cfg.get("subcategory_column")
         label_col = drilldown_cfg.get("category_label_column")
+        count_col = drilldown_cfg.get("count_column")
         if not cat_col:
             return result
 
@@ -442,15 +443,18 @@ def _build_drilldown(
             return ({"label": str(sub[label_col].iloc[0])}
                     if label_col and label_col in sub.columns and len(sub) else {})
 
+        def _n(sub):
+            return int(sub[count_col].sum()) if count_col and count_col in sub.columns else int(sub.shape[0])
+
         for (xv, yv, zv), group in df.groupby([x_col, y_col, z_col]):
             key = f"{xv}|{yv}|{zv}"
             entries = []
             if sub_col and sub_col in df.columns:
                 for (d, c), sub in group.groupby([cat_col, sub_col]):
-                    entries.append({"d": str(d), "c": str(c), "n": int(sub.shape[0]), **_lbl(sub)})
+                    entries.append({"d": str(d), "c": str(c), "n": _n(sub), **_lbl(sub)})
             else:
                 for d, sub in group.groupby(cat_col):
-                    entries.append({"d": str(d), "c": str(d), "n": int(sub.shape[0]), **_lbl(sub)})
+                    entries.append({"d": str(d), "c": str(d), "n": _n(sub), **_lbl(sub)})
             result[key] = entries
 
     elif drill_type == "zoom":

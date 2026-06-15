@@ -79,6 +79,10 @@ interface RawDrilldownCfg {
 interface RawConfig {
   title?: string;
   axes: { x: RawAxisCfg; y: RawAxisCfg; z: RawAxisCfg };
+  /** Outer-axis ordering: "frequency" (insertion order, default) or "cluster"
+   *  (average-linkage cosine clustering on co-occurrence profiles). Mirrors the
+   *  Python package's axis_order; see clusterAxisOrder(). */
+  axis_order?: "frequency" | "cluster";
   size_colour?: string;
   /** Sets only the color field; size becomes count (1 per row). Use with color_aggregation: mean. */
   colour?: string;
@@ -166,6 +170,7 @@ export async function transformCsvYaml(
   if (cfg.axes.x.value_order) xs = applyValueOrder(xs, cfg.axes.x.value_order);
   if (cfg.axes.y.value_order) ys = applyValueOrder(ys, cfg.axes.y.value_order);
   if (cfg.axes.z.value_order) zs = applyValueOrder(zs, cfg.axes.z.value_order);
+  if (cfg.axis_order === "cluster") [xs, ys, zs] = clusterAxisOrder(filtered, cfg, xs, ys, zs);
 
   const result: CubeData = { config: buildConfig(cfg), records, xs, ys, zs };
 
@@ -397,6 +402,110 @@ function applyValueOrder(labels: string[], order: string[]): string[] {
     if (ra !== rb) return ra - rb;
     return a.localeCompare(b); // alphabetical tiebreak for unlisted values
   });
+}
+
+// ── Average-linkage cosine clustering of axis labels ──────────────────────────
+// Faithful port of the Python package's transform.py::_cluster_axis_order so the
+// playground reproduces `axis_order: "cluster"` layouts. For each outer axis, every
+// label becomes a vector of its (count-weighted) co-occurrences across all combinations
+// of the other two axes (mode-k unfolding of the count tensor). Rows are L2-normalised,
+// pairwise cosine distances feed average-linkage (UPGMA) clustering, and the dendrogram
+// leaf order becomes the new axis order. Axes with <=2 labels are left unchanged.
+//
+// The leaf order matches scipy's leaves_list convention: average linkage is monotonic
+// (no inversions), so greedily merging the closest pair yields merges already in
+// distance order; each merge stores its two child cluster ids smaller-first, and a
+// pre-order traversal (child[0] before child[1]) emits the leaves. Exact ties (rare with
+// real counts) may break differently from scipy, so layouts can differ marginally.
+function clusterAxisOrder(
+  rows: Row[],
+  cfg: RawConfig,
+  xs: string[], ys: string[], zs: string[],
+): [string[], string[], string[]] {
+  const { x, y, z } = cfg.axes;
+  const rankCol = cfg.size_colour ?? cfg.colour;
+  const xi = new Map(xs.map((v, i) => [v, i]));
+  const yi = new Map(ys.map((v, i) => [v, i]));
+  const zi = new Map(zs.map((v, i) => [v, i]));
+
+  // tensor[ix][iy][iz] = summed weight (count column, or 1 per row if none)
+  const tensor = xs.map(() => ys.map(() => new Array<number>(zs.length).fill(0)));
+  for (const r of rows) {
+    const ix = xi.get(applyValueLabel(r[x.column], x));
+    const iy = yi.get(applyValueLabel(r[y.column], y));
+    const iz = zi.get(applyValueLabel(r[z.column], z));
+    if (ix === undefined || iy === undefined || iz === undefined) continue;
+    const w = rankCol ? (parseFloat(r[rankCol]) || 0) : 1;
+    tensor[ix][iy][iz] += w;
+  }
+
+  // Mode-k unfoldings: one flattened co-occurrence row per label. Column order is
+  // arbitrary as long as it is consistent across rows (cosine is permutation-invariant).
+  const xMat = xs.map((_, ix) => tensor[ix].flat());
+  const yMat = ys.map((_, iy) => xs.flatMap((_, ix) => tensor[ix][iy]));
+  const zMat = zs.map((_, iz) => xs.flatMap((_, ix) => ys.map((_, iy) => tensor[ix][iy][iz])));
+
+  return [reorderByCluster(xs, xMat), reorderByCluster(ys, yMat), reorderByCluster(zs, zMat)];
+}
+
+function reorderByCluster(labels: string[], mat: number[][]): string[] {
+  const n = labels.length;
+  if (n <= 2) return labels;
+
+  // L2-normalise rows (zero rows stay zero → cosine distance 1 to everything).
+  const norm = mat.map(row => {
+    const len = Math.sqrt(row.reduce((s, v) => s + v * v, 0)) || 1;
+    return row.map(v => v / len);
+  });
+  const cosDist = (a: number[], b: number[]): number => {
+    let dot = 0;
+    for (let k = 0; k < a.length; k++) dot += a[k] * b[k];
+    return 1 - dot;
+  };
+
+  // Active clusters keyed by id (leaf id < n, merged id = n + step). Greedy UPGMA:
+  // repeatedly merge the globally-closest pair, updating distances via the
+  // Lance-Williams average rule. Children are recorded smaller-id-first.
+  const active: { id: number; size: number }[] = labels.map((_, i) => ({ id: i, size: 1 }));
+  const dist = new Map<number, Map<number, number>>();
+  const setDist = (a: number, b: number, v: number) => {
+    (dist.get(a) ?? dist.set(a, new Map()).get(a)!).set(b, v);
+    (dist.get(b) ?? dist.set(b, new Map()).get(b)!).set(a, v);
+  };
+  const getDist = (a: number, b: number) => dist.get(a)!.get(b)!;
+  for (let i = 0; i < n; i++)
+    for (let j = i + 1; j < n; j++) setDist(i, j, cosDist(norm[i], norm[j]));
+
+  const children = new Map<number, [number, number]>();
+  let nextId = n;
+  while (active.length > 1) {
+    let bi = 0, bj = 1, best = Infinity;
+    for (let a = 0; a < active.length; a++)
+      for (let b = a + 1; b < active.length; b++) {
+        const d = getDist(active[a].id, active[b].id);
+        if (d < best) { best = d; bi = a; bj = b; }
+      }
+    const ca = active[bi], cb = active[bj];
+    const newId = nextId++;
+    const newSize = ca.size + cb.size;
+    children.set(newId, [Math.min(ca.id, cb.id), Math.max(ca.id, cb.id)]);
+    for (const c of active) {
+      if (c === ca || c === cb) continue;
+      setDist(newId, c.id, (ca.size * getDist(ca.id, c.id) + cb.size * getDist(cb.id, c.id)) / newSize);
+    }
+    active.splice(bj, 1); active.splice(bi, 1);
+    active.push({ id: newId, size: newSize });
+  }
+
+  // leaves_list: pre-order traversal from the root, smaller child first.
+  const order: string[] = [];
+  const visit = (id: number) => {
+    if (id < n) { order.push(labels[id]); return; }
+    const [a, b] = children.get(id)!;
+    visit(a); visit(b);
+  };
+  visit(nextId - 1);
+  return order;
 }
 
 function buildRecords(rows: Row[], cfg: RawConfig): CubeRecord[] {

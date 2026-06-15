@@ -1,0 +1,36 @@
+title: "CellxGene Census - Treemap"
+
+axes:
+  x:
+    label: "Organism"
+    column: "organism"
+  y:
+    label: "Assay"
+    column: "assay"
+    max_labels: 20
+  z:
+    label: "Tissue General"
+    column: "tissue_general"
+    max_labels: 30
+size_colour: "count"
+count_label: "cells"
+axis_order: "cluster"
+
+info_box:
+  columns:
+    dataset: "dataset_title"
+    doi:     "collection_doi"
+
+drilldown:
+  type: "treemap"
+  # Concentration (N_eff / D) is computed over category_column. We use the
+  # dataset (one ingested H5AD = dataset_id), the atomic provenance unit: D=1
+  # then certainly means a single source. dataset_id is an opaque UUID, so we
+  # label tiles by dataset_title via category_label_column.
+  category_column: "dataset_id"
+  category_label_column: "dataset_title"
+  subcategory_column: "cell_type"
+  count_column: "count"
+slice:
+  fixed_axis: "x"
+

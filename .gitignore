@@ -26,3 +26,8 @@ __pycache__/
 
 # build artifacts
 python-pkg/src/*.egg-info/
+build/
+*.Rcheck/
+metacube_*.tar.gz
+tests/parity/fixture.csv
+tests/
