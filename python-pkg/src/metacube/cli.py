@@ -113,7 +113,7 @@ def build(data_file: Path, output: Path | None) -> None:
 
 # ── serve: JSON → browser ─────────────────────────────────────────────────────
 
-@main.command()
+@main.command("serve")
 @click.argument("data_file", type=click.Path(exists=True, path_type=Path))
 @click.option("--port", "-p", default=8000, show_default=True, help="Port to serve on")
 @click.option("--no-browser", is_flag=True, default=False, help="Do not open browser automatically")
@@ -122,9 +122,6 @@ def serve_cmd(data_file: Path, port: int, no_browser: bool) -> None:
     with open(data_file) as f:
         data = json.load(f)
     serve(data, port=port, open_browser=not no_browser)
-
-
-main.add_command(serve_cmd, name="serve")
 
 
 @main.command("examples")

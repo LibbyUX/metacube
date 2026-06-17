@@ -31,3 +31,4 @@ build/
 metacube_*.tar.gz
 tests/parity/fixture.csv
 tests/
+scripts/
