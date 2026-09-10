@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <title>CIFAR Metacube preview</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="preview-header">
+      <div>
+        <p class="preview-eyebrow">Component preview</p>
+        <h1>CIFAR Metacube</h1>
+        <p class="preview-intro">Organ imaging datasets presented as direct links to their metadata.</p>
+      </div>
+      <button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false">
+        Use dark theme
+      </button>
+    </header>
+
+    <main>
+      <cifar-metacube label="Organ imaging datasets"></cifar-metacube>
+
+      <section class="metadata-preview" aria-labelledby="metadata-heading">
+        <h2 id="metadata-heading">Preview metadata destinations</h2>
+        <p>These anchors stand in for the separate metadata pages in the host application.</p>
+        <div id="metadata-destinations" class="metadata-preview__grid"></div>
+      </section>
+    </main>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>
+
