@@ -16,7 +16,7 @@ interface InfoPanelProps {
   onStudyHover?: (study: string | null) => void;
 }
 
-const FONT = "'Helvetica Neue', Helvetica, Arial, sans-serif";
+const FONT = "Roboto, sans-serif";
 
 export function InfoPanel({ cell, entries, config, onClose, hoveredStudy, onStudyHover }: InfoPanelProps) {
   const zDisplay = cell.z.includes(" - ") ? cell.z.split(" - ").slice(1).join(" - ") : cell.z;

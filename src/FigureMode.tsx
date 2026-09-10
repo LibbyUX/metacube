@@ -17,7 +17,7 @@ import { Scene } from "./components/Scene";
 import { TreemapOverlay } from "./components/TreemapOverlay";
 import { InnerCubeZoom } from "./components/InnerCubeZoom";
 
-const FONT = "'Helvetica Neue', Helvetica, Arial, sans-serif";
+const FONT = "Roboto, sans-serif";
 const EMPTY_SET = new Set<string>();
 
 function OMetricOverlay({ cObs, cTotal, title, axisLabels, zIndex = 50 }: {

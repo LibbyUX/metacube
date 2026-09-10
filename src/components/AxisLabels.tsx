@@ -4,6 +4,8 @@ import type { AxisGroup } from "../data/config";
 import { getAxisColor, getAxisColorDim, AXIS_COLORS } from "../data/colors";
 import type { CubeConfig } from "../data/config";
 import { useTheme } from "../data/themeContext";
+import { TOOLTIP_BG, TOOLTIP_TEXT } from "../data/theme";
+import { ROBOTO_BOLD_3D_URL, ROBOTO_REGULAR_3D_URL } from "../data/typography";
 
 interface AxisLabelsProps {
   xs: string[];
@@ -62,6 +64,7 @@ function BillboardLabel({
   return (
     <Billboard position={position} follow lockX={false} lockY={false} lockZ={false}>
       <Text
+        font={fontWeight === "bold" ? ROBOTO_BOLD_3D_URL : ROBOTO_REGULAR_3D_URL}
         fontSize={fontSize}
         color={color}
         anchorX={anchorX ?? "center"}
@@ -455,11 +458,11 @@ export function AxisLabels({
           <Html position={t.pos} center zIndexRange={[400, 0]} style={{ pointerEvents: "none" }}>
             <div style={{
               transform: "translateY(calc(-100% - 10px))",
-              background: "#1f2937", color: "#f9fafb",
+              background: TOOLTIP_BG, color: TOOLTIP_TEXT,
               padding: "10px 14px", borderRadius: 8,
               fontSize: 12, minWidth: 180, maxWidth: 320, whiteSpace: "pre-line",
               pointerEvents: "none",
-              fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+              fontFamily: "Roboto, sans-serif",
               boxShadow: "0 6px 20px rgba(0,0,0,0.4)",
               lineHeight: 1.65, textAlign: "left",
               outline: pinnedTooltip ? `2px solid ${theme.accent}` : "none",

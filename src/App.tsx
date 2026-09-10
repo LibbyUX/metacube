@@ -286,7 +286,7 @@ export default function App({ data }: { data: CubeData }) {
         zIndex: 50, display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
         background: theme.panel_bg, border: `1px solid ${theme.panel_border}`, borderRadius: 8, padding: "6px 14px",
         boxShadow: "0 4px 18px rgba(0,0,0,0.35)", backdropFilter: "blur(10px)",
-        fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+        fontFamily: "Roboto, sans-serif",
       }}>
         <div style={{ fontWeight: 700, fontSize: 13, color: theme.text }}>{config.title}</div>
         <div style={{ fontSize: 10, color: theme.text_muted }}>

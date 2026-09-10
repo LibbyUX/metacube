@@ -1,0 +1,105 @@
+# CIFAR Angular Material theme. Values map only to the stable `Schemes` groups
+# in src/CIFAR Light.tokens.json and src/CIFAR Dark.tokens.json. Alpha is added
+# only where metacube overlays need to reveal the 3D scene beneath them.
+
+light:
+  background:          "#FCFCFC" # Background
+  panel_bg:            "rgba(255, 255, 255, 0.92)" # Surface Container Lowest
+  panel_bg_solid:      "#FFFFFF" # Surface Container Lowest
+  panel_border:        "#C0CBD1" # Outline Variant
+  card_bg:             "#F4F4F4" # Surface Container Low
+  card_bg_active:      "#FFDAD5" # Primary Container
+  backdrop:            "rgba(0, 0, 0, 0.35)" # Scrim
+  tooltip_bg:          "#2D373F" # Inverse Surface
+  tooltip_text:        "#F0F2F3" # Inverse On Surface
+
+  text:                "#1D2429" # On Surface
+  text_body:           "#354B57" # On Surface Variant
+  text_muted:          "#354B57" # On Surface Variant
+  text_dim:            "#354B57" # On Surface Variant
+
+  accent:              "#8B1510" # Primary
+  accent_text:         "#FFFFFF" # On Primary
+  accent_strong:       "#6B0F0A" # On Primary Container
+  accent_fill:         "#8B1510" # Primary
+  accent_soft_bg:      "#FFDAD5" # Primary Container
+  accent_soft_border:  "rgba(139, 21, 16, 0.50)" # Primary
+
+  cell_default:        "#8B1510" # Primary
+  cell_accent:         "#70403C" # Tertiary
+  edge:                "#C0CBD1" # Outline Variant
+  edge_hover:          "#1D2429" # On Surface
+  edge_selected:       "#8B1510" # Primary
+  wire:                "#6C7F8A" # Outline
+  grid:                "#C0CBD1" # Outline Variant
+
+  axis:                { x: "#8B1510", y: "#333F48", z: "#70403C" }
+  axis_title:          "#1D2429" # On Surface
+  axis_outline:        "#FCFCFC" # Surface
+
+  categorical:
+    - "#8B1510" # Primary
+    - "#333F48" # Secondary
+    - "#70403C" # Tertiary
+    - "#921A3C" # Error
+    - "#6B0F0A" # On Primary Container
+    - "#2A353D" # On Secondary Container
+    - "#482624" # On Tertiary Container
+    - "#761331" # On Error Container
+    - "#6C7F8A" # Outline
+    - "#354B57" # On Surface Variant
+    - "#2D373F" # Inverse Surface
+    - "#FFB4A9" # Inverse Primary
+
+  size_scale:          { low: "#FFDAD5", mid: "#8B1510", high: "#6B0F0A" }
+
+dark:
+  background:          "#151A1E" # Background
+  panel_bg:            "rgba(34, 42, 48, 0.92)" # Surface Container
+  panel_bg_solid:      "#29333A" # Surface Container High
+  panel_border:        "#354B57" # Outline Variant
+  card_bg:             "#222A30" # Surface Container
+  card_bg_active:      "#6B0F0A" # Primary Container
+  backdrop:            "rgba(0, 0, 0, 0.62)" # Scrim
+  tooltip_bg:          "#E0E3E5" # Inverse Surface
+  tooltip_text:        "#2D373F" # Inverse On Surface
+
+  text:                "#E0E3E5" # On Surface
+  text_body:           "#E1E8EC" # On Surface Variant
+  text_muted:          "#E1E8EC" # On Surface Variant
+  text_dim:            "#E1E8EC" # On Surface Variant
+
+  accent:              "#FFB4A9" # Primary
+  accent_text:         "#530A06" # On Primary
+  accent_strong:       "#FFDAD5" # On Primary Container
+  accent_fill:         "#FFB4A9" # Primary
+  accent_soft_bg:      "#6B0F0A" # Primary Container
+  accent_soft_border:  "rgba(255, 180, 169, 0.50)" # Primary
+
+  cell_default:        "#FFB4A9" # Primary
+  cell_accent:         "#D9B6B2" # Tertiary
+  edge:                "#354B57" # Outline Variant
+  edge_hover:          "#E0E3E5" # On Surface
+  edge_selected:       "#FFB4A9" # Primary
+  wire:                "#8799A4" # Outline
+  grid:                "#354B57" # Outline Variant
+
+  axis:                { x: "#FFB4A9", y: "#BCCBD4", z: "#D9B6B2" }
+  axis_title:          "#E0E3E5" # On Surface
+  axis_outline:        "#151A1E" # Surface
+
+  categorical:
+    - "#FFB4A9" # Primary
+    - "#BCCBD4" # Secondary
+    - "#D9B6B2" # Tertiary
+    - "#F8B6C8" # Error
+    - "#FFDAD5" # On Primary Container
+    - "#DDE6EB" # On Secondary Container
+    - "#F1DAD7" # On Tertiary Container
+    - "#FFD9E4" # On Error Container
+    - "#8799A4" # Outline
+    - "#E1E8EC" # On Surface Variant
+    - "#E0E3E5" # On Surface
+    - "#2D373F" # Inverse On Surface
+
+  size_scale:          { low: "#6B0F0A", mid: "#FFB4A9", high: "#FFDAD5" }

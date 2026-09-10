@@ -18,6 +18,8 @@ light:
   card_bg:             "#f4f1f7"
   card_bg_active:      "rgba(140, 78, 159, 0.18)"
   backdrop:            "rgba(40, 20, 50, 0.35)"
+  tooltip_bg:          "#1f2937"
+  tooltip_text:        "#f9fafb"
 
   text:                "#2a1a32"
   text_body:           "#4b3a55"
@@ -27,6 +29,7 @@ light:
   text_dim:            "#b3aabe"
 
   accent:              "#8c4e9f"
+  accent_text:         "#ffffff"
   accent_strong:       "#6f3d80"
   accent_fill:         "#8c4e9f"
   accent_soft_bg:      "rgba(140, 78, 159, 0.15)"
@@ -68,6 +71,8 @@ dark:
   card_bg:             "rgba(255, 255, 255, 0.08)"
   card_bg_active:      "rgba(150, 92, 170, 0.34)"
   backdrop:            "rgba(4, 12, 16, 0.62)"
+  tooltip_bg:          "#1f2937"
+  tooltip_text:        "#f9fafb"
 
   # Wider spread so dimmed/resting labels (text_muted/text_dim) read clearly below
   # the bright primary text on the dark stage — keeps selection highlight visible.
@@ -77,6 +82,7 @@ dark:
   text_dim:            "#5f7a72"
 
   accent:              "#b07cc0"
+  accent_text:         "#2a1a32"
   accent_strong:       "#c79bd6"
   accent_fill:         "#8c4e9f"
   accent_soft_bg:      "rgba(140, 78, 159, 0.22)"

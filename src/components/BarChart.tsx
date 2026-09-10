@@ -9,7 +9,7 @@ interface BarChartProps {
   height?: number;
 }
 
-const FONT = "'Helvetica Neue', Helvetica, Arial, sans-serif";
+const FONT = "Roboto, sans-serif";
 
 const fmt = (v: number) =>
   Math.abs(v) >= 1000 ? v.toLocaleString(undefined, { maximumFractionDigits: 0 }) : String(v);

@@ -7,7 +7,6 @@ import { transformCsvYaml } from "./transform";
 import { downloadStandaloneHtml } from "./download";
 import type { CubeData, ChartSpec } from "../src/data/dataModel";
 import {
-  ASAP,
   PAGE_GRADIENT,
   PANEL_BG,
   PANEL_BORDER,
@@ -16,6 +15,8 @@ import {
   TEXT_BODY,
   TEXT_MUTED,
   TEXT_DIM,
+  ACCENT,
+  ACCENT_TEXT,
 } from "../src/data/theme";
 
 const BASE = import.meta.env.BASE_URL;
@@ -58,7 +59,7 @@ const _urlParams = new URLSearchParams(window.location.search);
 const DATASET_PARAM = _urlParams.get("dataset");
 const FIGURE_PARAM = _urlParams.get("figure");
 
-const FONT = "'Helvetica Neue', Helvetica, Arial, sans-serif";
+const FONT = "Roboto, sans-serif";
 
 // ── State machine ─────────────────────────────────────────────────────────────
 
@@ -412,8 +413,8 @@ function primaryButtonStyle(disabled: boolean): React.CSSProperties {
     padding: "9px 18px",
     borderRadius: 6,
     border: "none",
-    background: disabled ? CARD_BG : ASAP.green,
-    color: disabled ? TEXT_DIM : "white",
+    background: disabled ? CARD_BG : ACCENT,
+    color: disabled ? TEXT_DIM : ACCENT_TEXT,
     fontFamily: FONT,
     fontSize: 13,
     fontWeight: 500,

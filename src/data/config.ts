@@ -71,8 +71,8 @@ export interface CubeConfig {
   background?: string;
   /** When true, grouped-axis headers are rotated to run parallel to their axis (e.g. vertical Y group headers). Default: false (headers stay horizontal). */
   tiltGroupLabels?: boolean;
-  /** Named colour scheme to theme the app with: "default" (classic look) or "asap" (ASAP/CRN brand). Light/dark mode is chosen at runtime by the toggle. Defaults to "default". */
-  colour_scheme?: "default" | "asap";
+  /** Named colour scheme to theme the app with: "cifar", "default" (classic), or "asap" (ASAP/CRN brand). Light/dark mode is chosen at runtime by the toggle. Defaults to "cifar". */
+  colour_scheme?: "cifar" | "default" | "asap";
   /** Thresholds on the effective number of sources (inverse Simpson) for the concentration label/colour: [skewedBelow, diverseAtOrAbove]. Default [2, 5]. */
   concentrationThresholds?: [number, number];
 }

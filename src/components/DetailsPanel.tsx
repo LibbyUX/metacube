@@ -11,7 +11,7 @@ import {
 import { useTheme } from "../data/themeContext";
 import { CellChart } from "./CellChart";
 
-const FONT = "'Helvetica Neue', Helvetica, Arial, sans-serif";
+const FONT = "Roboto, sans-serif";
 const PANEL_W = 300;
 // Max dataset cards in a figure-capture info box (keeps the element under
 // Playwright's 32767px screenshot limit and readable as a panel).

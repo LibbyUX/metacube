@@ -4,7 +4,7 @@ import type { CubeConfig } from "../data/config";
 import { AXIS_COLORS } from "../data/colors";
 import { PANEL_BG_SOLID, PANEL_BORDER, CARD_BG, BACKDROP, TEXT_BODY, TEXT_MUTED, TEXT_DIM, ACCENT } from "../data/theme";
 
-const FONT = "'Helvetica Neue', Helvetica, Arial, sans-serif";
+const FONT = "Roboto, sans-serif";
 
 function fmt(n: number): string {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + "M";

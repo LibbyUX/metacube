@@ -1,6 +1,7 @@
 // ── Colour schemes ────────────────────────────────────────────────────────────
-// Two named schemes — `default` (the classic cube look) and `asap` (ASAP/CRN
-// brand) — each with a `light` and `dark` palette. The palettes are authored in
+// Three named schemes — `cifar` (the default Angular Material look), `default`
+// (the classic cube look), and `asap` (ASAP/CRN brand) — each with a `light` and
+// `dark` palette. The palettes are authored in
 // editable YAML (src/data/colour_schemes/*.yaml) and inlined at build time via
 // Vite `?raw`, so `pixi run dev` / `pixi run export-template` recompile from them.
 //
@@ -9,6 +10,7 @@
 // Components read the active palette through useTheme() — see data/themeContext.
 
 import { load } from "js-yaml";
+import cifarRaw from "./colour_schemes/cifar_colours.yaml?raw";
 import defaultRaw from "./colour_schemes/colours.yaml?raw";
 import asapRaw from "./colour_schemes/asap_colours.yaml?raw";
 
@@ -31,7 +33,7 @@ export const ASAP = {
 } as const;
 
 export type ThemeMode = "light" | "dark";
-export type ColourScheme = "default" | "asap";
+export type ColourScheme = "cifar" | "default" | "asap";
 
 /** Resolved palette for one scheme + mode. Mirrors the YAML preset keys. */
 export interface Theme {
@@ -42,6 +44,8 @@ export interface Theme {
   card_bg: string;
   card_bg_active: string;
   backdrop: string;
+  tooltip_bg: string;
+  tooltip_text: string;
 
   text: string;
   text_body: string;
@@ -49,6 +53,7 @@ export interface Theme {
   text_dim: string;
 
   accent: string;
+  accent_text: string;
   accent_strong: string;
   accent_fill: string;
   accent_soft_bg: string;
@@ -72,19 +77,21 @@ export interface Theme {
 
 type SchemePair = { light: Theme; dark: Theme };
 
+const cifarScheme = load(cifarRaw) as SchemePair;
 const defaultScheme = load(defaultRaw) as SchemePair;
 const asapScheme = load(asapRaw) as SchemePair;
 
 export const SCHEMES: Record<ColourScheme, SchemePair> = {
+  cifar: cifarScheme,
   default: defaultScheme,
   asap: asapScheme,
 };
 
 /** Scheme used when a config doesn't specify `colour_scheme`. */
-export const DEFAULT_SCHEME: ColourScheme = "default";
+export const DEFAULT_SCHEME: ColourScheme = "cifar";
 
 export function isColourScheme(v: unknown): v is ColourScheme {
-  return v === "default" || v === "asap";
+  return v === "cifar" || v === "default" || v === "asap";
 }
 
 /** Resolve the active palette, falling back to the default scheme for unknown names. */
@@ -106,11 +113,14 @@ export function themeToCssVars(t: Theme): Record<string, string> {
     "--ct-card-bg":           t.card_bg,
     "--ct-card-bg-active":    t.card_bg_active,
     "--ct-backdrop":          t.backdrop,
+    "--ct-tooltip-bg":        t.tooltip_bg,
+    "--ct-tooltip-text":      t.tooltip_text,
     "--ct-text":              t.text,
     "--ct-text-body":         t.text_body,
     "--ct-text-muted":        t.text_muted,
     "--ct-text-dim":          t.text_dim,
     "--ct-accent":            t.accent,
+    "--ct-accent-text":       t.accent_text,
     "--ct-accent-strong":     t.accent_strong,
     "--ct-accent-fill":       t.accent_fill,
     "--ct-accent-soft-bg":    t.accent_soft_bg,
@@ -127,11 +137,14 @@ export const PANEL_BORDER       = "var(--ct-panel-border)";
 export const CARD_BG            = "var(--ct-card-bg)";
 export const CARD_BG_ACTIVE     = "var(--ct-card-bg-active)";
 export const BACKDROP           = "var(--ct-backdrop)";
+export const TOOLTIP_BG         = "var(--ct-tooltip-bg)";
+export const TOOLTIP_TEXT       = "var(--ct-tooltip-text)";
 export const TEXT               = "var(--ct-text)";
 export const TEXT_BODY          = "var(--ct-text-body)";
 export const TEXT_MUTED         = "var(--ct-text-muted)";
 export const TEXT_DIM           = "var(--ct-text-dim)";
 export const ACCENT             = "var(--ct-accent)";
+export const ACCENT_TEXT        = "var(--ct-accent-text)";
 export const ACCENT_STRONG      = "var(--ct-accent-strong)";
 export const ACCENT_FILL        = "var(--ct-accent-fill)";
 export const ACCENT_SOFT_BG     = "var(--ct-accent-soft-bg)";

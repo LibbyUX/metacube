@@ -1,6 +1,6 @@
 # ── Default colour scheme ─────────────────────────────────────────────────────
 # The "normal" cube look (not ASAP brand). Selected by a dataset config with
-#   colour_scheme: default        (this is also the fallback when none is set)
+#   colour_scheme: default
 #
 # Two modes — `light` is the classic package look (white background, amber accent,
 # blue cube cells, blue/green/amber axes); `dark` is a neutral slate counterpart.
@@ -19,6 +19,8 @@ light:
   card_bg:             "#f3f4f6"
   card_bg_active:      "rgba(59, 130, 246, 0.18)"
   backdrop:            "rgba(0, 0, 0, 0.35)"
+  tooltip_bg:          "#1f2937"
+  tooltip_text:        "#f9fafb"
 
   text:                "#111827"
   text_body:           "#374151"
@@ -26,12 +28,13 @@ light:
   text_dim:            "#9ca3af"
 
   accent:              "#f59e0b"
+  accent_text:         "#111827"
   accent_strong:       "#d97706"
   accent_fill:         "#f59e0b"
   accent_soft_bg:      "rgba(245, 158, 11, 0.15)"
   accent_soft_border:  "rgba(245, 158, 11, 0.50)"
 
-  cell_default:        "#60a5fa"
+  cell_default:        "#C84A40"
   cell_accent:         "#f59e0b"
   edge:                "#d1d5db"
   edge_hover:          "#374151"
@@ -67,6 +70,8 @@ dark:
   card_bg:             "rgba(255, 255, 255, 0.06)"
   card_bg_active:      "rgba(96, 165, 250, 0.28)"
   backdrop:            "rgba(0, 0, 0, 0.62)"
+  tooltip_bg:          "#1f2937"
+  tooltip_text:        "#f9fafb"
 
   text:                "#f0f3f6"
   text_body:           "#d8dee4"
@@ -74,12 +79,13 @@ dark:
   text_dim:            "#6b7280"
 
   accent:              "#fbbf24"
+  accent_text:         "#111827"
   accent_strong:       "#fcd34d"
   accent_fill:         "#f59e0b"
   accent_soft_bg:      "rgba(251, 191, 36, 0.18)"
   accent_soft_border:  "rgba(251, 191, 36, 0.50)"
 
-  cell_default:        "#60a5fa"
+  cell_default:        "#C84A40"
   cell_accent:         "#fbbf24"
   edge:                "#cbd5e1"
   edge_hover:          "#ffffff"
