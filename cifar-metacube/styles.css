@@ -123,8 +123,7 @@ h1 {
 }
 
 cifar-metacube {
-  border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: 1.5rem;
+  display: block;
 }
 
 .metadata-preview {
@@ -168,4 +167,3 @@ cifar-metacube {
     scroll-behavior: auto;
   }
 }
-

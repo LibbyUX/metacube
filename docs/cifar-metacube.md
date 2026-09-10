@@ -5,7 +5,8 @@
 ## User experience
 
 - Selecting a cube navigates immediately to its `href`.
-- The dataset name and metadata remain visible without hover.
+- On wide screens, the dataset name and metadata appear on pointer hover or keyboard focus.
+- Axis titles and values are selectable HTML text, with a concise equivalent summary for screen readers.
 - Keyboard users follow the same link order as the document and receive a high-contrast focus indicator.
 - Wide screens use a flat isometric arrangement. Below 768 px, the links reflow into a card grid instead of shrinking the interaction targets.
 - `current` items remain links and expose `aria-current="page"`. `unavailable` items are displayed without a link.
@@ -31,25 +32,32 @@ import { CUSTOM_ELEMENTS_SCHEMA, Component } from "@angular/core";
   template: `
     <cifar-metacube
       label="Organ imaging datasets"
+      [axes]="axes"
       [items]="datasets"
     ></cifar-metacube>
   `,
 })
 export class OrganDatasetsComponent {
+  axes = {
+    x: { label: "Scale", values: ["100-microns", "10-centimeters"] },
+    y: { label: "Age (years)", values: ["45", "63", "85", "~40–70", "4–5 months", "7–47"] },
+    z: { label: "Organ", values: ["Thymus", "Heart", "Kidney", "Liver"] },
+  };
+
   datasets = [
     {
       id: "bader-liver-sem-sbf",
       label: "Bader liver SEM/SBF",
       href: "/metadata/bader-liver-sem-sbf",
       metadata: { Organ: "Liver", Scale: "100-microns", Age: "45" },
-      position: { x: 0, y: 2, z: 1 },
+      position: { x: 0, y: 0, z: 3 },
     },
     {
       id: "lee-heart-hipct",
       label: "Lee heart HiP-CT",
       href: "/metadata/lee-heart-hipct",
       metadata: { Organ: "Heart", Scale: "10-centimeters", Age: "63" },
-      position: { x: 2, y: 1, z: 0 },
+      position: { x: 1, y: 1, z: 1 },
     },
   ];
 }
@@ -96,9 +104,9 @@ interface CifarMetacubeItem {
   label: string;
   href: string;
   metadata?: Record<string, string | number | null | undefined>;
-  position?: { x: number; y: number; z?: number };
+  position?: { x: number; y: number; z: number };
   status?: "available" | "current" | "unavailable";
 }
 ```
 
-`position` affects only the wide-screen isometric arrangement. Array order determines keyboard, screen-reader, and mobile grid order, so provide items in a meaningful sequence.
+`position` contains zero-based categorical indexes: x is Scale, y is Age, and z is Organ. Categories are projected from the center of their cells rather than the frame vertices, keeping every interactive cube inside the canvas. Array order determines keyboard, screen-reader, and mobile grid order, so provide items in a meaningful sequence.
