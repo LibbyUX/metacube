@@ -5,7 +5,7 @@ import { useTheme } from "../data/themeContext";
 import type { ThemeMode } from "../data/theme";
 import {
   PANEL_BG, PANEL_BORDER, CARD_BG, TEXT, TEXT_BODY, TEXT_MUTED, TEXT_DIM,
-  ACCENT, ACCENT_SOFT_BG, ACCENT_SOFT_BORDER,
+  ACCENT, ACCENT_SOFT_BG, ACCENT_SOFT_BORDER, TOOLTIP_BG, TOOLTIP_TEXT,
 } from "../data/theme";
 
 const DIVERGING_NAMES = new Set([
@@ -50,7 +50,7 @@ interface ControlPanelProps {
   onClearSelection: () => void;
 }
 
-const FONT = "'Helvetica Neue', Helvetica, Arial, sans-serif";
+const FONT = "Roboto, sans-serif";
 
 function DescTooltip({ text, anchor = "bottom" }: { text: string; anchor?: "bottom" | "top" }) {
   return (
@@ -59,7 +59,7 @@ function DescTooltip({ text, anchor = "bottom" }: { text: string; anchor?: "bott
       ...(anchor === "bottom"
         ? { bottom: "calc(100% + 5px)", left: 0 }
         : { top: "calc(100% + 5px)", left: 0 }),
-      background: "#1f2937", color: "#f9fafb",
+      background: TOOLTIP_BG, color: TOOLTIP_TEXT,
       padding: "9px 12px", borderRadius: 7,
       fontSize: 11, whiteSpace: "pre-line", minWidth: 160, maxWidth: 260,
       pointerEvents: "none", zIndex: 600,

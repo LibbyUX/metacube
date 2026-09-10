@@ -6,7 +6,7 @@ interface PriceSparklineProps {
   height?: number;
 }
 
-const FONT = "'Helvetica Neue', Helvetica, Arial, sans-serif";
+const FONT = "Roboto, sans-serif";
 
 export function PriceSparkline({ ticker, data, height = 100 }: PriceSparklineProps) {
   const prices = data.price;

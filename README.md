@@ -23,6 +23,51 @@ You provide two files:
 
 The transform step aggregates the data into a `CubeData` structure that drives the visualization. The result is a fully self-contained HTML file — open it in any browser, no server needed.
 
+## Branding and theming
+
+Metacube uses the CIFAR Angular Material theme by default. The original `default`
+theme and the ASAP/CRN `asap` theme remain available for existing visualizations:
+
+```yaml
+colour_scheme: cifar   # default when omitted
+# colour_scheme: default
+# colour_scheme: asap
+```
+
+The CIFAR theme is defined in
+[`src/data/colour_schemes/cifar_colours.yaml`](src/data/colour_schemes/cifar_colours.yaml).
+Its light and dark modes are mapped from only the stable `Schemes` groups in the
+Figma token exports:
+
+- [`src/CIFAR Light.tokens.json`](src/CIFAR%20Light.tokens.json)
+- [`src/CIFAR Dark.tokens.json`](src/CIFAR%20Dark.tokens.json)
+
+The unstable `Cosmetic`, `State layers`, and `Palettes` export groups are not used.
+Metacube-specific transparency is added only where an overlay must reveal the 3D
+scene beneath it.
+
+Semantic color usage follows the Angular Material roles:
+
+- Page and panel copy uses On Surface or On Surface Variant.
+- Primary actions use Primary with On Primary text.
+- Help tooltips use Inverse Surface with Inverse On Surface text.
+- Outline and Outline Variant are reserved for borders, grid lines, and other
+  non-text decoration.
+- Cube fills, axes, categorical colors, and count gradients derive from the CIFAR
+  primary, secondary, tertiary, error, and container roles.
+
+The CIFAR text, tooltip, and primary-action combinations exceed WCAG AA contrast
+requirements for normal text in both modes. Visual hierarchy is communicated with
+type size and weight rather than low-contrast text.
+
+All interface, SVG, and 3D text uses locally bundled Roboto. Browser text uses
+WOFF2 files for weights 400–700 plus regular italic; the Three.js text renderer
+uses WOFF regular and bold files because it does not support WOFF2. The required
+assets live in [`src/fonts`](src/fonts).
+
+When branding or typography changes, rebuild and synchronize the standalone HTML
+templates with `pixi run package-template` before committing.
+
 ## Repository Layout
 
 ```
@@ -99,6 +144,7 @@ This rebuilds the single-file bundle, stages it as `public/template.html`, and c
 | Treemap drilldown | `drilldown.type: treemap` | Click opens a hierarchical treemap of dataset/category breakdown |
 | Ghost datasets | `ghost_datasets` | Matching cells render as transparent wireframe (e.g. planned data) |
 | Accent datasets | `accent_datasets` / `accent_color` | Matching cells render in a fixed colour instead of the gradient |
+| Colour scheme | `colour_scheme` | Select `cifar` (default), `default` (classic), or `asap`; light/dark mode remains user-controlled |
 | Multi-column axis | `columns: [col1, col2]` | Combine multiple CSV columns into one axis value with a separator |
 | Per-column remapping | `column_value_labels` | Remap or drop individual components before combining |
 | Explicit label order | `value_order` | Control axis label order regardless of frequency or sort_by |

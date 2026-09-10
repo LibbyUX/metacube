@@ -262,7 +262,7 @@ export function TreemapOverlay({ cell, entries, config, onClose, panel = false, 
                     <text x={s.x0 + 4} y={s.y0 - 5} fontSize={11} fontWeight={700}
                       fill={isStudyHighlighted ? ACCENT : TEXT}
                       clipPath={`url(#${clipId})`}
-                      style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
+                      style={{ fontFamily: "Roboto, sans-serif" }}>
                       {displayTitle}
                       <tspan fill={TEXT_MUTED} fontWeight={500} fontSize={10}> ({fmt(s.total)})</tspan>
                     </text>
@@ -347,7 +347,7 @@ export function TreemapOverlay({ cell, entries, config, onClose, panel = false, 
         display: "flex", alignItems: "center", justifyContent: "center",
         background: BACKDROP, backdropFilter: "blur(8px)",
         animation: "treemapFadeIn 0.3s ease-out",
-        fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+        fontFamily: "Roboto, sans-serif",
       }}
       onClick={onClose}
     >

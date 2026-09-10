@@ -100,8 +100,8 @@ interface RawConfig {
   background?: string;
   /** Rotate grouped-axis headers to run parallel to their axis (vertical Y group headers). Default false. */
   tilt_group_labels?: boolean;
-  /** Named colour scheme: "default" or "asap". Light/dark is chosen at runtime. Defaults to "default". */
-  colour_scheme?: "default" | "asap";
+  /** Named colour scheme: "cifar", "default", or "asap". Light/dark is chosen at runtime. Defaults to "cifar". */
+  colour_scheme?: "cifar" | "default" | "asap";
   /** Concentration label thresholds on the effective number of sources (inverse Simpson): [skewedBelow, diverseAtOrAbove]. Default [2, 5]. */
   concentration_thresholds?: [number, number];
   datasets_column?: string;

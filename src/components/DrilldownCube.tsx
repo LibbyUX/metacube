@@ -10,6 +10,7 @@ import * as THREE from "three";
 import { scaleSqrt } from "d3-scale";
 import { PAGE_GRADIENT, TEXT_MUTED } from "../data/theme";
 import { useTheme, ThemeContext } from "../data/themeContext";
+import { ROBOTO_BOLD_3D_URL, ROBOTO_REGULAR_3D_URL } from "../data/typography";
 
 interface DrilldownEntry {
   d: string; // dataset title
@@ -137,6 +138,7 @@ function DrilldownScene({
 
       {/* Title */}
       <Text
+        font={ROBOTO_BOLD_3D_URL}
         position={[0, half + 0.4, 0]}
         fontSize={0.14}
         color={theme.text}
@@ -153,6 +155,7 @@ function DrilldownScene({
         const label = ds.length > 30 ? ds.slice(0, 28) + "..." : ds;
         return (
           <Text
+            font={ROBOTO_REGULAR_3D_URL}
             key={`xl-${i}`}
             position={[xOf(i), -half - 0.15, half]}
             fontSize={0.06}
@@ -166,6 +169,7 @@ function DrilldownScene({
         );
       })}
       <Text
+        font={ROBOTO_BOLD_3D_URL}
         position={[0, -half - 0.45, half]}
         fontSize={0.08}
         color={theme.text_muted}
@@ -179,6 +183,7 @@ function DrilldownScene({
       {/* Cell type labels (Y axis) */}
       {cellTypes.map((ct, j) => (
         <Text
+          font={ROBOTO_REGULAR_3D_URL}
           key={`yl-${j}`}
           position={[-half - 0.08, yOf(j), half]}
           fontSize={0.06}
@@ -191,6 +196,7 @@ function DrilldownScene({
         </Text>
       ))}
       <Text
+        font={ROBOTO_BOLD_3D_URL}
         position={[-half - 0.08, 0, half]}
         fontSize={0.08}
         color={theme.text_muted}
@@ -238,6 +244,7 @@ function DrilldownScene({
       {/* Tooltip as 3D text */}
       {hovered && (
         <Text
+          font={ROBOTO_REGULAR_3D_URL}
           position={[0, half + 0.15, 1]}
           fontSize={0.09}
           color={theme.text}
@@ -303,7 +310,7 @@ export function DrilldownCube({
           fontSize: 14,
           fontWeight: 600,
           cursor: "pointer",
-          fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+          fontFamily: "Roboto, sans-serif",
         }}
       >
         Close
@@ -319,7 +326,7 @@ export function DrilldownCube({
             padding: 40,
             color: TEXT_MUTED,
             fontSize: 16,
-            fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
+            fontFamily: "Roboto, sans-serif",
           }}
         >
           Loading drill-down data...

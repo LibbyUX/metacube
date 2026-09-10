@@ -5,7 +5,7 @@ import type { CubeConfig, ColorPaletteConfig, AxisGroup } from "../data/config";
 import { getColorScaleLegendStops } from "../data/colors";
 import {
   PAGE_GRADIENT, PANEL_BG, PANEL_BORDER, CARD_BG,
-  TEXT, TEXT_BODY, TEXT_MUTED, TEXT_DIM,
+  TEXT, TEXT_BODY, TEXT_MUTED, TEXT_DIM, TOOLTIP_BG, TOOLTIP_TEXT,
   ACCENT, ACCENT_SOFT_BG, ACCENT_SOFT_BORDER,
 } from "../data/theme";
 
@@ -47,7 +47,7 @@ import { DetailsPanel } from "./DetailsPanel";
 import { TreemapOverlay } from "./TreemapOverlay";
 import type { TreemapEntry } from "../data/dataModel";
 
-const FONT = "'Helvetica Neue', Helvetica, Arial, sans-serif";
+const FONT = "Roboto, sans-serif";
 
 interface InnerCubeZoomProps {
   outerCell: CubeCell;
@@ -100,7 +100,7 @@ function DescTooltip({ text, anchor = "bottom" }: { text: string; anchor?: "bott
       ...(anchor === "bottom"
         ? { bottom: "calc(100% + 5px)", left: 0 }
         : { top: "calc(100% + 5px)", left: 0 }),
-      background: "#1f2937", color: "#f9fafb",
+      background: TOOLTIP_BG, color: TOOLTIP_TEXT,
       padding: "9px 12px", borderRadius: 7,
       fontSize: 11, whiteSpace: "pre-line", minWidth: 160, maxWidth: 260,
       pointerEvents: "none", zIndex: 600,

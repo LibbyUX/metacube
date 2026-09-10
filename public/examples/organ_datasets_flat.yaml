@@ -1,0 +1,20 @@
+title: "Organ Imaging Datasets"
+
+axes:
+  x:
+    label: "Scale"
+    column: "scale"
+  y:
+    label: "Age (years)"
+    column: "age"
+  z:
+    label: "Organ"
+    column: "organ"
+
+size_colour: "count"
+count_label: "datasets"
+
+info_box:
+  columns:
+    dataset: "dataset"
+    sex:     "sex"
