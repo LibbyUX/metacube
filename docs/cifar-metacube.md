@@ -7,6 +7,7 @@
 - Selecting a cube navigates immediately to its `href`.
 - On wide screens, the dataset name and metadata appear on pointer hover or keyboard focus.
 - Axis titles and values are selectable HTML text, with a concise equivalent summary for screen readers.
+- Hover and keyboard focus subtly lift a cube and strengthen its edges; `prefers-reduced-motion: reduce` removes the movement while preserving the stronger visual state.
 - Keyboard users follow the same link order as the document and receive a high-contrast focus indicator.
 - Wide screens use a flat isometric arrangement. Below 768 px, the links reflow into a card grid instead of shrinking the interaction targets.
 - `current` items remain links and expose `aria-current="page"`. `unavailable` items are displayed without a link.
@@ -109,4 +110,4 @@ interface CifarMetacubeItem {
 }
 ```
 
-`position` contains zero-based categorical indexes: x is Scale, y is Age, and z is Organ. Categories are projected from the center of their cells rather than the frame vertices, keeping every interactive cube inside the canvas. Array order determines keyboard, screen-reader, and mobile grid order, so provide items in a meaningful sequence.
+`position` contains zero-based categorical indexes: x is Scale, y is Age, and z is Organ. Categories are projected from the center of their cells rather than the frame vertices, keeping every interactive cube inside the canvas. Each cube is then constructed from eight projected 3D corners, so its face shape and perspective correspond to its unique position rather than using a repeated cube template. Array order determines keyboard, screen-reader, and mobile grid order, so provide items in a meaningful sequence.
