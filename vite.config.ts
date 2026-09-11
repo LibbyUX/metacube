@@ -16,7 +16,7 @@ export default defineConfig({
           input: {
             main:       resolve(__dirname, "index.html"),
             playground: resolve(__dirname, "playground/index.html"),
-            cifarMetacube: resolve(__dirname, "cifar-metacube/index.html"),
+            "cifar-cube": resolve(__dirname, "cifar-cube/index.html"),
           },
         },
       },

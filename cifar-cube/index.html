@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Preview component</title>
+    <script>
+      (() => {
+        const storageKey = "metacube-theme-mode";
+        let mode;
+        try {
+          const savedMode = localStorage.getItem(storageKey);
+          if (savedMode === "light" || savedMode === "dark") mode = savedMode;
+        } catch { /* localStorage unavailable */ }
+        mode ??= matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        document.documentElement.dataset.theme = mode;
+      })();
+    </script>
+    <link rel="stylesheet" href="../src/components/global-navigation.css" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="global-navigation">
+      <a class="global-navigation__brand" href="./index.html">Preview Component</a>
+      <div class="global-navigation__utilities">
+        <nav aria-label="Metacube views">
+          <ul class="global-navigation__list">
+            <li><a class="global-navigation__link" href="./index.html" aria-current="page">Preview component</a></li>
+            <li><a class="global-navigation__link" href="../playground/index.html?dataset=cifar_organs&amp;view=implementation">CIFAR metacube demo</a></li>
+            <li><a class="global-navigation__link" href="../playground/index.html">Build a metacube</a></li>
+          </ul>
+        </nav>
+        <fieldset class="global-navigation__theme-controls">
+          <legend class="global-navigation__sr-only">Theme</legend>
+          <span class="global-navigation__theme-label" aria-hidden="true">Theme</span>
+          <div class="global-navigation__theme-options">
+            <button class="global-navigation__theme-button" type="button" data-theme-option="light" aria-pressed="true">Light</button>
+            <button class="global-navigation__theme-button" type="button" data-theme-option="dark" aria-pressed="false">Dark</button>
+          </div>
+        </fieldset>
+      </div>
+    </header>
+    <header class="preview-header">
+      <div class="preview-header__content">
+        <p class="preview-eyebrow">Preview component</p>
+        <h1>Explore multiscale human data</h1>
+        <p class="preview-intro">Organ imaging datasets presented as direct links to their metadata.</p>
+        <a class="preview-action" href="#cifar-cube-preview">
+          Explore datasets
+          <span aria-hidden="true">↓</span>
+        </a>
+      </div>
+    </header>
+
+    <main>
+      <section id="cifar-cube-preview" class="cifar-cube-preview" aria-labelledby="cifar-cube-heading">
+        <h2 id="cifar-cube-heading" class="visually-hidden">Explore organ imaging datasets</h2>
+        <cifar-cube label="Organ imaging datasets"></cifar-cube>
+      </section>
+
+      <section class="metadata-preview" aria-labelledby="metadata-heading">
+        <h2 id="metadata-heading">Preview metadata destinations</h2>
+        <p>These anchors stand in for the separate metadata pages in the host application.</p>
+        <div id="metadata-destinations" class="metadata-preview__grid"></div>
+      </section>
+    </main>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

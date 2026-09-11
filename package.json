@@ -1,18 +1,30 @@
 {
   "name": "metacube",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Interactive 3D cube visualization for categorical tabular data.",
+  "private": true,
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:embed": "vite build --config vite.embed.config.ts && tsc -p packages/cifar-cube/tsconfig.build.json",
     "preview": "vite preview",
+    "test": "node --experimental-strip-types --test tests/data-model.test.mjs tests/cifar-cube-validation.test.mjs tests/cifar-cube-projection.test.mjs tests/cifar-cube-styles.test.mjs",
+    "test:browser": "vite --config vite.browser-test.config.ts",
+    "test:browser:build": "vite build --config vite.browser-test.config.ts",
+    "test:embed": "node tests/embed-import.test.mjs",
+    "test:package": "npm pack ./packages/cifar-cube --dry-run --json --cache .npm-cache",
     "typecheck": "tsc --noEmit",
     "export:index": "SF_ENTRY=index vite build --outDir dist-index"
   },
-  "keywords": [],
-  "author": "",
-  "license": "WTFPL",
+  "keywords": [
+    "data-visualization",
+    "three.js"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
   "dependencies": {
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",

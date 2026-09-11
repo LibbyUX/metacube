@@ -1,0 +1,26 @@
+{
+  "name": "@cifar/cifar-cube",
+  "version": "0.1.0",
+  "description": "Accessible organ-imaging dataset preview web component handoff.",
+  "private": true,
+  "type": "module",
+  "main": "./dist/cifar-cube.js",
+  "module": "./dist/cifar-cube.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/cifar-cube.js",
+      "default": "./dist/cifar-cube.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "LICENSE",
+    "README.md",
+    "tsconfig.build.json"
+  ],
+  "sideEffects": false,
+  "license": "MIT"
+}
