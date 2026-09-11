@@ -94,7 +94,7 @@ function DescBadge({ text }: { text: string }) {
 }
 
 const panelStyle: React.CSSProperties = {
-  position: "fixed",
+  position: "absolute",
   top: 12, left: 12, width: 224,
   background: PANEL_BG,
   border: `1px solid ${PANEL_BORDER}`,
@@ -102,7 +102,7 @@ const panelStyle: React.CSSProperties = {
   padding: "10px 13px",
   fontSize: 13, color: TEXT_BODY,
   zIndex: 100,
-  maxHeight: "calc(100vh - 76px)",
+  maxHeight: "calc(100% - 24px)",
   overflowY: "auto",
   backdropFilter: "blur(12px)",
   boxShadow: "0 8px 28px rgba(0,0,0,0.4)",
