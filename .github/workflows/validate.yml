@@ -26,3 +26,5 @@ jobs:
       - run: npm run build
       - run: npm run build:embed
       - run: npm run test:embed
+      - run: npm run test:browser:build
+      - run: npm run test:package

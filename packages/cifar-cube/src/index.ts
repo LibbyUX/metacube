@@ -17,4 +17,4 @@ export {
   type CifarCubeValidationSeverity,
 } from "./types";
 
-export { isSafeMetadataHref, validateAxes, validateItems } from "./validation";
+export { isSafeMetadataHref, validateAxes, validateItems, type ValidationResult } from "./validation";

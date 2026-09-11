@@ -392,7 +392,7 @@
   .cifar-cube__select:hover .cifar-cube__right { fill: Highlight; stroke: HighlightText; }
   .cifar-cube__item--selected .cifar-cube__select .cifar-cube__edge,
   .cifar-cube__select:hover .cifar-cube__edge { stroke: HighlightText; }
-  .cifar-cube__item--unavailable .cifar-cube__cube { opacity: 1; }
+  .cifar-cube__item--unavailable .cifar-cube__cube { opacity: 1; filter: none; }
   .cifar-cube__card, .cifar-cube__details, .cifar-cube__compact-card, .cifar-cube__unpositioned { border-color: CanvasText; box-shadow: none; }
   .cifar-cube__details-action, .cifar-cube__compact-action, .cifar-cube__unpositioned-button { border: 1px solid ButtonText; }
   .cifar-cube__select:focus-visible, .cifar-cube__details-action:focus-visible,

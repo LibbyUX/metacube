@@ -13,6 +13,7 @@ export const EMPTY_AXES: CifarCubeAxes = {
   z: { label: "Z axis", values: [] },
 };
 
+/** A normalized value and the issues found while producing it. */
 export interface ValidationResult<T> {
   value: T;
   issues: CifarCubeValidationIssue[];

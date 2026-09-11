@@ -5,8 +5,11 @@
 
 # node
 node_modules/
+.npm-cache/
 dist/
 dist*/
+!packages/cifar-cube/dist/
+!packages/cifar-cube/dist/**
 
 # OS
 .DS_Store

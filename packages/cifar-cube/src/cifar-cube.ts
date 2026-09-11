@@ -27,6 +27,17 @@ export type {
 export const CIFAR_CUBE_SELECTION_EVENT = "cifar-cube-selection-change";
 export const CIFAR_CUBE_VALIDATION_EVENT = "cifar-cube-validation";
 
+declare global {
+  interface HTMLElementTagNameMap {
+    "cifar-cube": CifarCube;
+  }
+
+  interface GlobalEventHandlersEventMap {
+    "cifar-cube-selection-change": CustomEvent<CifarCubeSelectionDetail>;
+    "cifar-cube-validation": CustomEvent<CifarCubeValidationDetail>;
+  }
+}
+
 const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 const HTMLElementBase = (
   typeof HTMLElement === "undefined" ? class {} : HTMLElement
@@ -169,6 +180,7 @@ function getAccessibleItemDescription(item: CifarCubeItem, axes: CifarCubeAxes) 
   return `${parts.join(". ")}.`;
 }
 
+/** Accessible, responsive dataset preview custom element. */
 export class CifarCube extends HTMLElementBase {
   static observedAttributes = ["items", "axes", "label"];
   #sourceItems: unknown = [];
@@ -186,38 +198,56 @@ export class CifarCube extends HTMLElementBase {
   #plot: HTMLElement | null = null;
   #detailsId = `${this.#instanceId}-details`;
   #detailsHeadingId = `${this.#instanceId}-details-heading`;
+  #updateScheduled = false;
+  #validationPending = false;
 
+  /** Normalized datasets currently available to the component. */
   get items() { return this.#items; }
   set items(value: CifarCubeItem[]) {
     this.#sourceItems = value;
     this.#applyItems();
-    this.#render();
-    this.#reportValidation();
+    this.#scheduleUpdate(true);
   }
+  /** Normalized categorical axes used by the desktop visualization. */
   get axes() { return this.#axes; }
   set axes(value: CifarCubeAxes) {
     this.#applyAxes(value);
-    this.#render();
-    this.#reportValidation();
+    this.#scheduleUpdate(true);
   }
+  /** Current configuration errors and warnings. */
   get validationIssues() { return [...this.#attributeIssues, ...this.#axisIssues, ...this.#itemIssues]; }
+  /** ID selected in the desktop visualization, or null. */
   get selectedId() { return this.#selectedId; }
   set selectedId(value: string | null) {
     this.#selectedId = this.#items.some((item) => item.id === value) ? value : null;
-    this.#render();
+    this.#scheduleUpdate(false);
   }
   connectedCallback() {
     this.#readJsonAttribute("axes", false);
     this.#readJsonAttribute("items", false);
-    this.#render();
-    this.#reportValidation();
+    this.#scheduleUpdate(true);
   }
   attributeChangedCallback(name: string) {
     if (name !== "label") this.#readJsonAttribute(name as "axes" | "items", true);
-    if (this.isConnected) {
+    this.#scheduleUpdate(name !== "label");
+  }
+
+  /**
+   * Coalesces synchronous property and attribute changes into one render and validation event.
+   * @param reportValidation - Whether this update changes component configuration.
+   * @returns Nothing.
+   */
+  #scheduleUpdate(reportValidation: boolean) {
+    this.#validationPending ||= reportValidation;
+    if (this.#updateScheduled) return;
+    this.#updateScheduled = true;
+    queueMicrotask(() => {
+      this.#updateScheduled = false;
+      if (!this.isConnected) return;
       this.#render();
-      this.#reportValidation();
-    }
+      if (this.#validationPending) this.#reportValidation();
+      this.#validationPending = false;
+    });
   }
 
   #applyItems() {
@@ -438,6 +468,10 @@ export class CifarCube extends HTMLElementBase {
   }
 }
 
+/**
+ * Registers the `cifar-cube` custom element once when the Custom Elements API is available.
+ * @returns Nothing.
+ */
 export function defineCifarCube() {
   if (typeof customElements === "undefined") return;
   if (!customElements.get("cifar-cube")) customElements.define("cifar-cube", CifarCube);

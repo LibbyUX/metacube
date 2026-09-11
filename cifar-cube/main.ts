@@ -3,7 +3,7 @@ import {
   defineCifarCube,
   type CifarCubeAxes,
   type CifarCubeItem,
-} from "../src/embeds/cifar-cube";
+} from "../packages/cifar-cube/src";
 
 const ORGAN_DATASET_AXES: CifarCubeAxes = {
   x: { label: "Spatial scale", values: ["100-microns", "10-centimeters"] },

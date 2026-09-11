@@ -5,11 +5,11 @@ export default defineConfig({
   publicDir: false,
   build: {
     lib: {
-      entry: resolve(__dirname, "src/embeds/cifar-cube/index.ts"),
+      entry: resolve(__dirname, "packages/cifar-cube/src/index.ts"),
       formats: ["es"],
       fileName: "cifar-cube",
     },
-    outDir: "dist-embed",
+    outDir: "packages/cifar-cube/dist",
     sourcemap: true,
   },
 });

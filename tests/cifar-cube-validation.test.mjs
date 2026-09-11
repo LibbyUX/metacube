@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { isSafeMetadataHref, validateAxes, validateItems } from "../src/embeds/cifar-cube/validation.ts";
+import { isSafeMetadataHref, validateAxes, validateItems } from "../packages/cifar-cube/src/validation.ts";
 
 const validAxes = {
   x: { label: "Spatial scale", values: ["small", "large"] },

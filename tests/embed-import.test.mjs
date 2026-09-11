@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 
-const cifarCubeModule = await import("../dist-embed/cifar-cube.js");
+const cifarCubeModule = await import("../packages/cifar-cube/dist/cifar-cube.js");
 
 assert.equal(typeof cifarCubeModule.CifarCube, "function");
 assert.equal(typeof cifarCubeModule.defineCifarCube, "function");

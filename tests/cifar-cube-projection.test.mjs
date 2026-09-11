@@ -7,7 +7,7 @@ import {
   getProjectedCubeGeometry,
   getScenePosition,
   projectPoint,
-} from "../src/embeds/cifar-cube/projection.ts";
+} from "../packages/cifar-cube/src/projection.ts";
 
 const axes = {
   x: { label: "X", values: ["one", "two"] },

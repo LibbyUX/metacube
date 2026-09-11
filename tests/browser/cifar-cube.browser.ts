@@ -5,7 +5,7 @@ import {
   defineCifarCube,
   type CifarCubeAxes,
   type CifarCubeItem,
-} from "../../src/embeds/cifar-cube";
+} from "../../packages/cifar-cube/src";
 
 const axes: CifarCubeAxes = {
   x: { label: "Spatial scale", values: ["small", "large"] },
@@ -100,6 +100,24 @@ await test("unpositioned datasets remain selectable without a fabricated cube", 
   assert(component.validationIssues.some((issue) => issue.code === "item.position.missing"), "Missing position was not reported.");
 });
 
+await test("synchronous Angular-style property updates render and report once", async () => {
+  const batchedComponent = document.createElement("cifar-cube") as CifarCube;
+  let validationEventCount = 0;
+  let reportedIssueCodes: string[] = [];
+  batchedComponent.addEventListener(CIFAR_CUBE_VALIDATION_EVENT, (event) => {
+    validationEventCount += 1;
+    reportedIssueCodes = event.detail.issues.map((issue) => issue.code);
+  });
+  fixture?.append(batchedComponent);
+  batchedComponent.items = items;
+  batchedComponent.axes = axes;
+  await nextLayout();
+  assert(validationEventCount === 1, "Synchronous property updates should emit one final validation result.");
+  assert(!reportedIssueCodes.includes("item.position.out-of-range"), "Validation reported a transient axes-order issue.");
+  assert(batchedComponent.shadowRoot?.querySelectorAll(".cifar-cube__select").length === 2, "Final property values were not rendered.");
+  batchedComponent.remove();
+});
+
 await test("compact mode exposes direct cards and removes the selection step", async () => {
   if (!fixture) throw new Error("Fixture container is missing.");
   fixture.style.width = "50rem";
@@ -129,7 +147,7 @@ await test("malformed JSON attributes expose validation issues instead of retain
   invalidComponent.setAttribute("items", "{invalid");
   let reportedIssueCode: string | undefined;
   fixture?.addEventListener(CIFAR_CUBE_VALIDATION_EVENT, (event) => {
-    reportedIssueCode = (event as CustomEvent<{ issues: Array<{ code: string }> }>).detail.issues[0]?.code;
+    reportedIssueCode = event.detail.issues[0]?.code;
   }, { once: true });
   fixture?.append(invalidComponent);
   await nextLayout();
