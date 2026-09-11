@@ -97,7 +97,9 @@
   pointer-events: auto;
 }
 .cifar-cube__item--unpositioned { display: none; }
-.cifar-cube__item:hover, .cifar-cube__item:focus-within { z-index: 20000; }
+.cifar-cube__item--selected { z-index: 10000; }
+.cifar-cube__item:not(.cifar-cube__item--selected):hover,
+.cifar-cube__item:not(.cifar-cube__item--selected):focus-within { z-index: 20000; }
 .cifar-cube__select {
   position: relative;
   display: block;
@@ -174,7 +176,7 @@
 }
 .cifar-cube__item--card-left .cifar-cube__card { right: calc(100% + 0.75rem); left: auto; }
 .cifar-cube__select:hover .cifar-cube__card, .cifar-cube__select:focus-visible .cifar-cube__card { opacity: 1; }
-.cifar-cube__item--selected .cifar-cube__card { opacity: 0; }
+.cifar-cube__item--selected .cifar-cube__select .cifar-cube__card { opacity: 0; }
 .cifar-cube__label { display: block; color: var(--_on-surface); font-size: 0.875rem; font-weight: 700; line-height: 1.25; }
 .cifar-cube__metadata {
   display: grid;
