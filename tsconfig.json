@@ -17,5 +17,5 @@
     "noFallthroughCasesInSwitch": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src", "playground", "cifar-cube"]
+  "include": ["src", "playground", "cifar-cube", "tests/browser"]
 }

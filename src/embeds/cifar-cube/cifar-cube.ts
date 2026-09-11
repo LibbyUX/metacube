@@ -1,141 +1,42 @@
 import styles from "./cifar-cube.css?inline";
 import { createCompactCard, createDetails, createPreviewCard, updateDetails } from "./cifar-cube-cards";
+import { getCategoryCenter, getProjectedCubeGeometry, getScenePosition, projectPoint, type Point } from "./projection";
+import type {
+  CifarCubeAxes,
+  CifarCubeAxis,
+  CifarCubeItem,
+  CifarCubePosition,
+  CifarCubeSelectionDetail,
+  CifarCubeValidationDetail,
+  CifarCubeValidationIssue,
+} from "./types";
+import { EMPTY_AXES, validateAxes, validateItems } from "./validation";
 
-export type CifarCubeItemStatus = "available" | "current" | "unavailable";
-export interface CifarCubePosition { x: number; y: number; z: number; }
-export interface CifarCubeAxis { label: string; values: string[]; }
-export interface CifarCubeAxes { x: CifarCubeAxis; y: CifarCubeAxis; z: CifarCubeAxis; }
-export interface CifarCubeItem {
-  id: string;
-  label: string;
-  href?: string;
-  metadata?: Record<string, string | number | null | undefined>;
-  position?: CifarCubePosition;
-  status?: CifarCubeItemStatus;
-}
-
-export interface CifarCubeSelectionDetail {
-  item: CifarCubeItem;
-}
+export type {
+  CifarCubeAxes,
+  CifarCubeAxis,
+  CifarCubeItem,
+  CifarCubeItemStatus,
+  CifarCubePosition,
+  CifarCubeSelectionDetail,
+  CifarCubeValidationDetail,
+  CifarCubeValidationIssue,
+  CifarCubeValidationSeverity,
+} from "./types";
 
 export const CIFAR_CUBE_SELECTION_EVENT = "cifar-cube-selection-change";
-
-const EMPTY_AXES: CifarCubeAxes = {
-  x: { label: "X axis", values: [] },
-  y: { label: "Y axis", values: [] },
-  z: { label: "Z axis", values: [] },
-};
+export const CIFAR_CUBE_VALIDATION_EVENT = "cifar-cube-validation";
 
 const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 const HTMLElementBase = (
   typeof HTMLElement === "undefined" ? class {} : HTMLElement
 ) as typeof HTMLElement;
-interface Point { x: number; y: number; }
-interface NormalizedPosition { x: number; y: number; z: number; }
 let instanceCount = 0;
-
-// Percentage coordinates traced from the reference perspective. Each plane is
-// ordered front, left, back, right so points can be projected bilinearly.
-const FRAME_PLANES = {
-  top: {
-    front: { x: 57.31, y: 31.81 },
-    left: { x: 15.15, y: 11.92 },
-    back: { x: 57.31, y: 0.53 },
-    right: { x: 99.47, y: 11.92 },
-  },
-  bottom: {
-    front: { x: 57.31, y: 99.16 },
-    left: { x: 22.4, y: 67.43 },
-    back: { x: 57.31, y: 46.7 },
-    right: { x: 92.49, y: 67.43 },
-  },
-} as const;
 
 function createSvgElement<K extends keyof SVGElementTagNameMap>(tagName: K, attributes: Record<string, string>) {
   const element = document.createElementNS(SVG_NAMESPACE, tagName);
   Object.entries(attributes).forEach(([name, value]) => element.setAttribute(name, value));
   return element;
-}
-
-/**
- * Places a categorical index at the center of its equal-width axis cell.
- * @param value - Zero-based category index.
- * @param count - Total categories on the axis.
- * @returns A normalized position between zero and one.
- */
-function getCategoryCenter(value: number, count: number) {
-  return count > 0 ? (value + 0.5) / count : 0.5;
-}
-
-/**
- * Projects two normalized horizontal axes onto one perspective plane.
- * @param plane - Four corners of the top or bottom plane.
- * @param x - Normalized spatial-scale-axis position.
- * @param z - Normalized Organ-axis position.
- * @returns A percentage coordinate inside the component.
- */
-function interpolatePlane(plane: typeof FRAME_PLANES.top | typeof FRAME_PLANES.bottom, x: number, z: number): Point {
-  const weights = {
-    front: (1 - x) * (1 - z),
-    left: x * (1 - z),
-    back: x * z,
-    right: (1 - x) * z,
-  };
-  return {
-    x: plane.front.x * weights.front + plane.left.x * weights.left + plane.back.x * weights.back + plane.right.x * weights.right,
-    y: plane.front.y * weights.front + plane.left.y * weights.left + plane.back.y * weights.back + plane.right.y * weights.right,
-  };
-}
-
-/**
- * Interpolates between the reference frame's bottom and top planes.
- * @param x - Normalized spatial-scale-axis position.
- * @param y - Normalized Age-axis position.
- * @param z - Normalized Organ-axis position.
- * @returns A perspective-projected percentage coordinate.
- */
-function projectPoint(x: number, y: number, z: number): Point {
-  const top = interpolatePlane(FRAME_PLANES.top, x, z);
-  const bottom = interpolatePlane(FRAME_PLANES.bottom, x, z);
-  return {
-    x: bottom.x + (top.x - bottom.x) * y,
-    y: bottom.y + (top.y - bottom.y) * y,
-  };
-}
-
-/**
- * Maps categorical axis indexes to the flat perspective coordinate system.
- * @param position - Axis indexes where x is spatial scale, y is Age, and z is Organ.
- * @param index - Item index used only when no explicit position is supplied.
- * @param axes - Axis definitions used to normalize categorical indexes.
- * @returns CSS-ready position, stacking, and tooltip placement values.
- */
-function getNormalizedPosition(
-  position: CifarCubePosition | undefined,
-  index: number,
-  axes: CifarCubeAxes,
-): NormalizedPosition {
-  const resolved = position ?? {
-    x: index % Math.max(axes.x.values.length, 1),
-    y: index % Math.max(axes.y.values.length, 1),
-    z: index % Math.max(axes.z.values.length, 1),
-  };
-  // The first x category starts at the far-left end of the spatial scale axis.
-  const x = 1 - getCategoryCenter(resolved.x, axes.x.values.length);
-  const y = getCategoryCenter(resolved.y, axes.y.values.length);
-  const z = getCategoryCenter(resolved.z, axes.z.values.length);
-  return { x, y, z };
-}
-
-function getScenePosition(position: CifarCubePosition | undefined, index: number, axes: CifarCubeAxes) {
-  const normalized = getNormalizedPosition(position, index, axes);
-  const point = projectPoint(normalized.x, normalized.y, normalized.z);
-  return {
-    left: `${point.x}%`,
-    top: `${point.y}%`,
-    layer: `${Math.round(point.y * 10)}`,
-    cardSide: point.x > 66 ? "left" : "right",
-  };
 }
 
 /**
@@ -195,48 +96,19 @@ interface ProjectedCube {
 
 /**
  * Constructs a cube from projected 3D corners, giving every location its true perspective.
- * @param position - Axis indexes where x is spatial scale, y is Age, and z is Organ.
- * @param index - Item index used only when no explicit position is supplied.
+ * @param position - Validated axis indexes where x is spatial scale, y is Age, and z is Organ.
  * @param axes - Axis definitions used to normalize categorical indexes.
  * @returns The decorative cube SVG and its exact percentage bounds.
  */
-function createProjectedCube(
-  position: CifarCubePosition | undefined,
-  index: number,
-  axes: CifarCubeAxes,
-): ProjectedCube {
-  const center = getNormalizedPosition(position, index, axes);
-  const halfSize = 0.5 / Math.max(axes.x.values.length, axes.y.values.length, axes.z.values.length, 1);
-  const low = (value: number) => Math.max(0, value - halfSize);
-  const high = (value: number) => Math.min(1, value + halfSize);
-  const x0 = low(center.x);
-  const x1 = high(center.x);
-  const y0 = low(center.y);
-  const y1 = high(center.y);
-  const z0 = low(center.z);
-  const z1 = high(center.z);
-  const corners = {
-    topFront: projectPoint(x0, y1, z0),
-    topLeft: projectPoint(x1, y1, z0),
-    topBack: projectPoint(x1, y1, z1),
-    topRight: projectPoint(x0, y1, z1),
-    bottomFront: projectPoint(x0, y0, z0),
-    bottomLeft: projectPoint(x1, y0, z0),
-    bottomRight: projectPoint(x0, y0, z1),
-  };
-  const points = Object.values(corners);
-  const padding = 0.3;
-  const left = Math.min(...points.map((point) => point.x)) - padding;
-  const top = Math.min(...points.map((point) => point.y)) - padding;
-  const right = Math.max(...points.map((point) => point.x)) + padding;
-  const bottom = Math.max(...points.map((point) => point.y)) + padding;
+function createProjectedCube(position: CifarCubePosition, axes: CifarCubeAxes): ProjectedCube {
+  const { corners, bounds } = getProjectedCubeGeometry(position, axes);
   const pointList = (...facePoints: Point[]) => facePoints.map((point) => `${point.x},${point.y}`).join(" ");
   const path = (...pathPoints: Point[]) => pathPoints
     .map((point, pointIndex) => `${pointIndex === 0 ? "M" : "L"}${point.x} ${point.y}`)
     .join("");
   const svg = createSvgElement("svg", {
     class: "cifar-cube__cube",
-    viewBox: `${left} ${top} ${right - left} ${bottom - top}`,
+    viewBox: `${bounds.left} ${bounds.top} ${bounds.width} ${bounds.height}`,
     preserveAspectRatio: "none",
     "aria-hidden": "true",
   });
@@ -260,7 +132,7 @@ function createProjectedCube(
       "vector-effect": "non-scaling-stroke",
     }),
   );
-  return { svg, bounds: { left, top, width: right - left, height: bottom - top } };
+  return { svg, bounds };
 }
 
 function createAccessibleAxisSummary(axes: CifarCubeAxes) {
@@ -299,52 +171,106 @@ function getAccessibleItemDescription(item: CifarCubeItem, axes: CifarCubeAxes) 
 
 export class CifarCube extends HTMLElementBase {
   static observedAttributes = ["items", "axes", "label"];
+  #sourceItems: unknown = [];
   #items: CifarCubeItem[] = [];
   #axes: CifarCubeAxes = EMPTY_AXES;
+  #axisIssues: CifarCubeValidationIssue[] = [];
+  #itemIssues: CifarCubeValidationIssue[] = [];
+  #attributeIssues: CifarCubeValidationIssue[] = [];
   #selectedId: string | null = null;
   #shadow = this.attachShadow({ mode: "open" });
   #instanceId = `cifar-cube-${++instanceCount}`;
   #section: HTMLElement | null = null;
   #details: HTMLElement | null = null;
+  #stage: HTMLElement | null = null;
   #plot: HTMLElement | null = null;
   #detailsId = `${this.#instanceId}-details`;
   #detailsHeadingId = `${this.#instanceId}-details-heading`;
 
   get items() { return this.#items; }
   set items(value: CifarCubeItem[]) {
-    this.#items = Array.isArray(value) ? value : [];
-    if (!this.#items.some((item) => item.id === this.#selectedId)) this.#selectedId = null;
+    this.#sourceItems = value;
+    this.#applyItems();
     this.#render();
+    this.#reportValidation();
   }
   get axes() { return this.#axes; }
   set axes(value: CifarCubeAxes) {
-    this.#axes = value ?? EMPTY_AXES;
+    this.#applyAxes(value);
     this.#render();
+    this.#reportValidation();
   }
+  get validationIssues() { return [...this.#attributeIssues, ...this.#axisIssues, ...this.#itemIssues]; }
   get selectedId() { return this.#selectedId; }
   set selectedId(value: string | null) {
     this.#selectedId = this.#items.some((item) => item.id === value) ? value : null;
     this.#render();
   }
   connectedCallback() {
-    this.#readJsonAttributes();
+    this.#readJsonAttribute("axes", false);
+    this.#readJsonAttribute("items", false);
     this.#render();
+    this.#reportValidation();
   }
-  attributeChangedCallback() {
-    this.#readJsonAttributes();
-    if (this.isConnected) this.#render();
+  attributeChangedCallback(name: string) {
+    if (name !== "label") this.#readJsonAttribute(name as "axes" | "items", true);
+    if (this.isConnected) {
+      this.#render();
+      this.#reportValidation();
+    }
   }
 
-  #readJsonAttributes() {
-    const parseAttribute = <T,>(name: string): T | undefined => {
-      const serializedValue = this.getAttribute(name);
-      if (!serializedValue) return undefined;
-      try { return JSON.parse(serializedValue) as T; } catch { return undefined; }
-    };
-    const parsedItems = parseAttribute<unknown>("items");
-    if (Array.isArray(parsedItems)) this.#items = parsedItems as CifarCubeItem[];
-    const parsedAxes = parseAttribute<CifarCubeAxes>("axes");
-    if (parsedAxes?.x && parsedAxes?.y && parsedAxes?.z) this.#axes = parsedAxes;
+  #applyItems() {
+    const result = validateItems(this.#sourceItems, this.#axes);
+    this.#items = result.value;
+    this.#itemIssues = result.issues;
+    if (!this.#items.some((item) => item.id === this.#selectedId)) this.#selectedId = null;
+  }
+
+  #applyAxes(value: unknown) {
+    const result = validateAxes(value);
+    this.#axes = result.value;
+    this.#axisIssues = result.issues;
+    this.#applyItems();
+  }
+
+  #readJsonAttribute(name: "axes" | "items", clearWhenMissing: boolean) {
+    this.#attributeIssues = this.#attributeIssues.filter((validationIssue) => validationIssue.path !== name);
+    const serializedValue = this.getAttribute(name);
+    if (serializedValue === null) {
+      if (clearWhenMissing) {
+        if (name === "axes") this.#applyAxes(EMPTY_AXES);
+        else {
+          this.#sourceItems = [];
+          this.#applyItems();
+        }
+      }
+      return;
+    }
+
+    let value: unknown;
+    try { value = JSON.parse(serializedValue) as unknown; } catch {
+      this.#attributeIssues.push({
+        code: `${name}.json.invalid`,
+        message: `${name} contains invalid JSON.`,
+        path: name,
+        severity: "error",
+      });
+    }
+    if (name === "axes") this.#applyAxes(value);
+    else {
+      this.#sourceItems = value;
+      this.#applyItems();
+    }
+  }
+
+  #reportValidation() {
+    if (!this.isConnected) return;
+    this.dispatchEvent(new CustomEvent<CifarCubeValidationDetail>(CIFAR_CUBE_VALIDATION_EVENT, {
+      bubbles: true,
+      composed: true,
+      detail: { issues: this.validationIssues },
+    }));
   }
 
   #selectItem(item: CifarCubeItem, moveFocusToAction: boolean) {
@@ -388,47 +314,108 @@ export class CifarCube extends HTMLElementBase {
     this.#shadow.replaceChildren(style, section);
     this.#section = section;
     this.#details = details;
+    this.#stage = stage;
     this.#plot = plot;
   }
 
   #updateSelection() {
     const selectedItem = this.#items.find((item) => item.id === this.#selectedId) ?? null;
     this.#section?.classList.toggle("cifar-cube--has-selection", Boolean(selectedItem));
-    this.#shadow.querySelectorAll<HTMLElement>(".cifar-cube__item").forEach((listItem) => {
-      const button = listItem.querySelector<HTMLButtonElement>(".cifar-cube__select");
-      const selected = button?.dataset.itemId === selectedItem?.id;
-      listItem.classList.toggle("cifar-cube__item--selected", selected);
-      button?.setAttribute("aria-pressed", String(selected));
+    this.#shadow.querySelectorAll<HTMLButtonElement>("[data-item-id]").forEach((button) => {
+      const selected = button.dataset.itemId === selectedItem?.id;
+      button.closest("li")?.classList.toggle("cifar-cube__item--selected", selected);
+      button.setAttribute("aria-pressed", String(selected));
     });
   }
 
+  #configureSelectionButton(button: HTMLButtonElement, item: CifarCubeItem, descriptionId: string) {
+    button.type = "button";
+    button.dataset.itemId = item.id;
+    button.setAttribute("aria-label", `Select ${item.label}`);
+    button.setAttribute("aria-describedby", descriptionId);
+    button.setAttribute("aria-controls", this.#detailsId);
+    button.setAttribute("aria-pressed", String(item.id === this.#selectedId));
+    button.addEventListener("click", (event) => this.#selectItem(item, event.detail === 0));
+  }
+
+  #createUnpositionedList(items: CifarCubeItem[], itemIndexes: Map<string, number>) {
+    const region = document.createElement("section");
+    region.className = "cifar-cube__unpositioned";
+    const heading = document.createElement("h2");
+    heading.className = "cifar-cube__unpositioned-heading";
+    heading.textContent = "Not plotted";
+    const guidance = document.createElement("p");
+    guidance.className = "cifar-cube__unpositioned-guidance";
+    guidance.textContent = "These datasets do not include usable visualization coordinates.";
+    const list = document.createElement("ul");
+    list.className = "cifar-cube__unpositioned-list";
+    items.forEach((item) => {
+      const index = itemIndexes.get(item.id) ?? 0;
+      const listItem = document.createElement("li");
+      listItem.className = "cifar-cube__unpositioned-item";
+      if (item.id === this.#selectedId) listItem.classList.add("cifar-cube__item--selected");
+      const description = document.createElement("span");
+      description.className = "cifar-cube__sr-only";
+      description.id = `${this.#instanceId}-unpositioned-${index}-description`;
+      description.textContent = getAccessibleItemDescription(item, this.#axes);
+      const button = document.createElement("button");
+      button.className = "cifar-cube__unpositioned-button";
+      button.textContent = item.label;
+      this.#configureSelectionButton(button, item, description.id);
+      listItem.append(description, button);
+      list.append(listItem);
+    });
+    region.append(heading, guidance, list);
+    return region;
+  }
+
   #render() {
-    if (!this.#section || !this.#details || !this.#plot) this.#createStructure();
-    if (!this.#section || !this.#details || !this.#plot) return;
+    if (!this.#section || !this.#details || !this.#stage || !this.#plot) this.#createStructure();
+    if (!this.#section || !this.#details || !this.#stage || !this.#plot) return;
 
     this.#section.setAttribute("aria-label", this.getAttribute("label") ?? "Metadata datasets");
-    this.#plot.replaceChildren(createCoordinateFrame(), createAxisLabels(this.#axes), createAccessibleAxisSummary(this.#axes));
+    this.#stage.querySelector(".cifar-cube__unpositioned")?.remove();
+    const axesCanBePlotted = this.#axes.x.values.length > 0 && this.#axes.y.values.length > 0 && this.#axes.z.values.length > 0;
+    if (axesCanBePlotted) {
+      this.#plot.replaceChildren(createCoordinateFrame(), createAxisLabels(this.#axes), createAccessibleAxisSummary(this.#axes));
+    } else {
+      const unavailable = document.createElement("p");
+      unavailable.className = "cifar-cube__plot-unavailable";
+      unavailable.textContent = "Visualization unavailable because the axis data is incomplete.";
+      this.#plot.replaceChildren(unavailable);
+    }
     const selectedItem = this.#items.find((item) => item.id === this.#selectedId) ?? null;
     this.#section.classList.toggle("cifar-cube--has-selection", Boolean(selectedItem));
     updateDetails(this.#details, selectedItem, this.#detailsHeadingId);
     if (this.#items.length === 0) {
-      const empty = document.createElement("p");
-      empty.className = "cifar-cube__empty";
-      empty.textContent = "No datasets are available.";
-      this.#plot.append(empty);
+      if (axesCanBePlotted) {
+        const empty = document.createElement("p");
+        empty.className = "cifar-cube__empty";
+        empty.textContent = "No datasets are available.";
+        this.#plot.append(empty);
+      }
       return;
     }
 
     const list = document.createElement("ul");
     list.className = "cifar-cube__list";
+    const itemIndexes = new Map(this.#items.map((item, index) => [item.id, index]));
     this.#items.forEach((item, index) => {
       const status = item.status ?? "available";
       const selected = item.id === this.#selectedId;
-      const position = getScenePosition(item.position, index, this.#axes);
-      const cube = createProjectedCube(item.position, index, this.#axes);
       const listItem = document.createElement("li");
-      listItem.className = `cifar-cube__item cifar-cube__item--${status} cifar-cube__item--card-${position.cardSide}`;
+      listItem.className = `cifar-cube__item cifar-cube__item--${status}`;
       if (selected) listItem.classList.add("cifar-cube__item--selected");
+      if (!item.position) {
+        listItem.classList.add("cifar-cube__item--unpositioned");
+        listItem.append(createCompactCard(item));
+        list.append(listItem);
+        return;
+      }
+
+      const position = getScenePosition(item.position, this.#axes);
+      const cube = createProjectedCube(item.position, this.#axes);
+      listItem.classList.add(`cifar-cube__item--card-${position.cardSide}`);
       listItem.style.setProperty("--cube-left", `${cube.bounds.left}%`);
       listItem.style.setProperty("--cube-top", `${cube.bounds.top}%`);
       listItem.style.setProperty("--cube-width", `${cube.bounds.width}%`);
@@ -436,22 +423,18 @@ export class CifarCube extends HTMLElementBase {
       listItem.style.setProperty("--cube-layer", position.layer);
       const button = document.createElement("button");
       button.className = "cifar-cube__select";
-      button.type = "button";
-      button.dataset.itemId = item.id;
-      button.setAttribute("aria-label", `Select ${item.label}`);
       const description = document.createElement("span");
       description.className = "cifar-cube__sr-only";
       description.id = `${this.#instanceId}-item-${index}-description`;
       description.textContent = getAccessibleItemDescription(item, this.#axes);
-      button.setAttribute("aria-describedby", description.id);
-      button.setAttribute("aria-controls", this.#detailsId);
-      button.setAttribute("aria-pressed", String(selected));
+      this.#configureSelectionButton(button, item, description.id);
       button.append(cube.svg, createPreviewCard(item));
-      button.addEventListener("click", (event) => this.#selectItem(item, event.detail === 0));
       listItem.append(description, button, createCompactCard(item));
       list.append(listItem);
     });
     this.#plot.append(list);
+    const unpositionedItems = this.#items.filter((item) => !item.position);
+    if (unpositionedItems.length > 0) this.#stage.append(this.#createUnpositionedList(unpositionedItems, itemIndexes));
   }
 }
 

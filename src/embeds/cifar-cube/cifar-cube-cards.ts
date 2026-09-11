@@ -1,4 +1,4 @@
-import type { CifarCubeItem } from "./cifar-cube";
+import type { CifarCubeItem } from "./types";
 
 type MetadataEntry = [string, string | number];
 

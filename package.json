@@ -9,7 +9,9 @@
     "build": "vite build",
     "build:embed": "vite build --config vite.embed.config.ts",
     "preview": "vite preview",
-    "test": "node --experimental-strip-types --test tests/data-model.test.mjs",
+    "test": "node --experimental-strip-types --test tests/data-model.test.mjs tests/cifar-cube-validation.test.mjs tests/cifar-cube-projection.test.mjs tests/cifar-cube-styles.test.mjs",
+    "test:browser": "vite --config vite.browser-test.config.ts",
+    "test:browser:build": "vite build --config vite.browser-test.config.ts",
     "test:embed": "node tests/embed-import.test.mjs",
     "typecheck": "tsc --noEmit",
     "export:index": "SF_ENTRY=index vite build --outDir dist-index"
