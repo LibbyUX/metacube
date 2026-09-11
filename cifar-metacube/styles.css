@@ -104,24 +104,6 @@ h1 {
   line-height: 1.5;
 }
 
-.theme-toggle {
-  min-height: 2.75rem;
-  flex: 0 0 auto;
-  padding: 0.65rem 1rem;
-  border: 0;
-  border-radius: 999px;
-  background: var(--mat-sys-primary);
-  color: var(--mat-sys-on-primary);
-  font: inherit;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.theme-toggle:focus-visible {
-  outline: 3px solid var(--mat-sys-primary);
-  outline-offset: 3px;
-}
-
 cifar-metacube {
   display: block;
 }
