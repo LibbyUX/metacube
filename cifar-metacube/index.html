@@ -5,18 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light dark" />
     <title>CIFAR Metacube preview</title>
+    <link rel="stylesheet" href="../src/components/global-navigation.css" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
+    <header class="global-navigation">
+      <a class="global-navigation__brand" href="../playground/index.html?dataset=cifar_organs&amp;view=implementation">Metacube Preview Prototype</a>
+      <div class="global-navigation__utilities">
+        <nav aria-label="Metacube views">
+          <ul class="global-navigation__list">
+            <li><a class="global-navigation__link" href="../playground/index.html?dataset=cifar_organs&amp;view=implementation">CIFAR demo</a></li>
+            <li><a class="global-navigation__link" href="../playground/index.html">Build a metacube</a></li>
+            <li><a class="global-navigation__link" href="./index.html" aria-current="page">Component preview</a></li>
+          </ul>
+        </nav>
+        <div class="global-navigation__theme-controls">
+          <span class="global-navigation__theme-label">Theme</span>
+          <button class="global-navigation__theme-button" type="button" data-theme-option="light" aria-pressed="true">Light</button>
+          <button class="global-navigation__theme-button" type="button" data-theme-option="dark" aria-pressed="false">Dark</button>
+        </div>
+      </div>
+    </header>
     <header class="preview-header">
       <div>
         <p class="preview-eyebrow">Component preview</p>
         <h1>CIFAR Metacube</h1>
         <p class="preview-intro">Organ imaging datasets presented as direct links to their metadata.</p>
       </div>
-      <button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false">
-        Use dark theme
-      </button>
     </header>
 
     <main>
@@ -32,4 +47,3 @@
     <script type="module" src="./main.ts"></script>
   </body>
 </html>
-

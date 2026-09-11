@@ -2,7 +2,6 @@ import { useState } from "react";
 import type { CubeConfig, ColorPaletteConfig, AxisGroup } from "../data/config";
 import { getColorScaleLegendStops, getGroupColor } from "../data/colors";
 import { useTheme } from "../data/themeContext";
-import type { ThemeMode } from "../data/theme";
 import {
   PANEL_BG, PANEL_BORDER, CARD_BG, TEXT, TEXT_BODY, TEXT_MUTED, TEXT_DIM,
   ACCENT, ACCENT_SOFT_BG, ACCENT_SOFT_BORDER, TOOLTIP_BG, TOOLTIP_TEXT,
@@ -234,7 +233,7 @@ export function ControlPanel({
   cellOpacity, setCellOpacity,
   maxColorValue, minColorValue = 0, onResetView, onClearSelection,
 }: ControlPanelProps) {
-  const { mode, setMode, theme } = useTheme();
+  const { theme } = useTheme();
   // Only show the count gradient when the cube is actually gradient-coloured
   // (size_colour/colour set). A uniform cube has counts too, so gating on
   // maxColorValue alone wrongly shows a scale for single-coloured cubes.
@@ -243,26 +242,8 @@ export function ControlPanel({
     ? getColorScaleLegendStops(maxColorValue, minColorValue, config.colorPalette)
     : null;
 
-  const modeBtn = (m: ThemeMode, label: string): React.CSSProperties => ({
-    flex: 1,
-    padding: "3px 0",
-    fontSize: 11,
-    fontWeight: 600,
-    cursor: "pointer",
-    borderRadius: 5,
-    fontFamily: "inherit",
-    background: mode === m ? ACCENT_SOFT_BG : CARD_BG,
-    border: `1px solid ${mode === m ? ACCENT_SOFT_BORDER : PANEL_BORDER}`,
-    color: mode === m ? ACCENT : TEXT_MUTED,
-  });
-
   return (
     <div style={panelStyle}>
-      {/* Light / dark mode toggle */}
-      <div style={{ display: "flex", gap: 4, marginBottom: 8 }}>
-        <button style={modeBtn("light", "Light")} onClick={() => setMode("light")}>☀ Light</button>
-        <button style={modeBtn("dark", "Dark")} onClick={() => setMode("dark")}>☾ Dark</button>
-      </div>
       <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 8, color: TEXT }}>
         {config.title}
       </div>

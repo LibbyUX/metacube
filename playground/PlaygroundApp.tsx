@@ -1,8 +1,9 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import App from "../src/App";
 import FigureMode from "../src/FigureMode";
-import { ThemeProvider, useTheme } from "../src/data/themeContext";
+import { ThemeProvider } from "../src/data/themeContext";
 import { DEFAULT_SCHEME } from "../src/data/theme";
+import { GlobalNavigation } from "../src/components/GlobalNavigation";
 import { transformCsvYaml } from "./transform";
 import { downloadStandaloneHtml } from "./download";
 import type { CubeData, ChartSpec } from "../src/data/dataModel";
@@ -64,6 +65,7 @@ const EXAMPLES: ExampleDef[] = [
 const _urlParams = new URLSearchParams(window.location.search);
 const DATASET_PARAM = _urlParams.get("dataset");
 const FIGURE_PARAM = _urlParams.get("figure");
+const IS_FULL_IMPLEMENTATION = _urlParams.get("view") === "implementation";
 
 const FONT = "Roboto, sans-serif";
 
@@ -187,9 +189,14 @@ export default function PlaygroundApp() {
     const BAR_H = 52; // DownloadBar height: 8px padding × 2 + ~36px buttons
     return (
       <ThemeProvider scheme={phase.data.config.colour_scheme ?? DEFAULT_SCHEME}>
-        <div style={{ width: "100vw", height: `calc(100vh - ${BAR_H}px)`, position: "relative", overflow: "hidden" }} key={phase.key}>
-          <App data={phase.data} />
-          <DownloadBar onDownload={handleDownload} onReset={handleReset} />
+        <div className="global-navigation-shell">
+          <GlobalNavigation activePage={IS_FULL_IMPLEMENTATION ? "implementation" : "configuration"} />
+          <main className="global-navigation-shell__content">
+            <div style={{ width: "100%", height: IS_FULL_IMPLEMENTATION ? "100%" : `calc(100% - ${BAR_H}px)`, position: "relative", overflow: "hidden" }} key={phase.key}>
+              <App data={phase.data} />
+              {!IS_FULL_IMPLEMENTATION && <DownloadBar onDownload={handleDownload} onReset={handleReset} />}
+            </div>
+          </main>
         </div>
       </ThemeProvider>
     );
@@ -197,34 +204,21 @@ export default function PlaygroundApp() {
 
   return (
     <ThemeProvider scheme={DEFAULT_SCHEME}>
-      <LandingPanel
-        phase={phase}
-        csvFile={csvFile}
-        yamlFile={yamlFile}
-        onCsvChange={setCsvFile}
-        onYamlChange={setYamlFile}
-        onUpload={handleUpload}
-        onExample={handleExample}
-      />
+      <div className="global-navigation-shell">
+        <GlobalNavigation activePage={IS_FULL_IMPLEMENTATION ? "implementation" : "configuration"} />
+        <main className="global-navigation-shell__content">
+          <LandingPanel
+            phase={phase}
+            csvFile={csvFile}
+            yamlFile={yamlFile}
+            onCsvChange={setCsvFile}
+            onYamlChange={setYamlFile}
+            onUpload={handleUpload}
+            onExample={handleExample}
+          />
+        </main>
+      </div>
     </ThemeProvider>
-  );
-}
-
-// Compact light/dark toggle for the landing page (top-right corner).
-function LandingModeToggle() {
-  const { mode, setMode } = useTheme();
-  const btn = (m: "light" | "dark"): React.CSSProperties => ({
-    padding: "4px 9px", fontSize: 13, cursor: "pointer", lineHeight: 1,
-    borderRadius: 6, fontFamily: FONT,
-    background: mode === m ? CARD_BG : "transparent",
-    border: `1px solid ${mode === m ? TEXT_MUTED : PANEL_BORDER}`,
-    color: mode === m ? TEXT : TEXT_DIM,
-  });
-  return (
-    <div style={{ position: "fixed", top: 14, right: 14, display: "flex", gap: 4, zIndex: 10 }}>
-      <button style={btn("light")} onClick={() => setMode("light")} title="Light mode">☀</button>
-      <button style={btn("dark")} onClick={() => setMode("dark")} title="Dark mode">☾</button>
-    </div>
   );
 }
 
@@ -245,7 +239,8 @@ function LandingPanel({ phase, csvFile, yamlFile, onCsvChange, onYamlChange, onU
 
   return (
     <div style={{
-      minHeight: "100vh",
+      minHeight: "100%",
+      position: "relative",
       background: PAGE_GRADIENT,
       display: "flex",
       alignItems: "center",
@@ -253,7 +248,6 @@ function LandingPanel({ phase, csvFile, yamlFile, onCsvChange, onYamlChange, onU
       fontFamily: FONT,
       padding: 24,
     }}>
-      <LandingModeToggle />
       <div style={{
         background: PANEL_BG,
         backdropFilter: "blur(10px)",

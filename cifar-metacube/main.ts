@@ -65,12 +65,31 @@ if (metacube) {
   metacube.items = datasets;
 }
 
-const themeToggle = document.querySelector<HTMLButtonElement>("#theme-toggle");
-themeToggle?.addEventListener("click", () => {
-  const useDarkTheme = document.documentElement.dataset.theme !== "dark";
-  document.documentElement.dataset.theme = useDarkTheme ? "dark" : "light";
-  themeToggle.setAttribute("aria-pressed", String(useDarkTheme));
-  themeToggle.textContent = useDarkTheme ? "Use light theme" : "Use dark theme";
+const THEME_STORAGE_KEY = "metacube-theme-mode";
+const themeButtons = document.querySelectorAll<HTMLButtonElement>("[data-theme-option]");
+
+function setTheme(mode: "light" | "dark", persist = true) {
+  document.documentElement.dataset.theme = mode;
+  themeButtons.forEach((button) => {
+    button.setAttribute("aria-pressed", String(button.dataset.themeOption === mode));
+  });
+  if (persist) {
+    try { localStorage.setItem(THEME_STORAGE_KEY, mode); } catch { /* localStorage unavailable */ }
+  }
+}
+
+let initialTheme: "light" | "dark" = "light";
+try {
+  const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+  if (savedTheme === "light" || savedTheme === "dark") initialTheme = savedTheme;
+  else if (window.matchMedia?.("(prefers-color-scheme: dark)").matches) initialTheme = "dark";
+} catch {
+  if (window.matchMedia?.("(prefers-color-scheme: dark)").matches) initialTheme = "dark";
+}
+setTheme(initialTheme, false);
+
+themeButtons.forEach((button) => {
+  button.addEventListener("click", () => setTheme(button.dataset.themeOption as "light" | "dark"));
 });
 
 const metadataDestinations = document.querySelector("#metadata-destinations");
