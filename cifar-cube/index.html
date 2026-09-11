@@ -22,20 +22,23 @@
   </head>
   <body>
     <header class="global-navigation">
-      <a class="global-navigation__brand" href="../playground/index.html?dataset=cifar_organs&amp;view=implementation">Metacube Preview Prototype</a>
+      <a class="global-navigation__brand" href="./index.html">Preview Component</a>
       <div class="global-navigation__utilities">
         <nav aria-label="Metacube views">
           <ul class="global-navigation__list">
-            <li><a class="global-navigation__link" href="../playground/index.html?dataset=cifar_organs&amp;view=implementation">CIFAR demo</a></li>
+            <li><a class="global-navigation__link" href="./index.html" aria-current="page">Preview component</a></li>
+            <li><a class="global-navigation__link" href="../playground/index.html?dataset=cifar_organs&amp;view=implementation">CIFAR metacube demo</a></li>
             <li><a class="global-navigation__link" href="../playground/index.html">Build a metacube</a></li>
-            <li><a class="global-navigation__link" href="./index.html" aria-current="page">Component preview</a></li>
           </ul>
         </nav>
-        <div class="global-navigation__theme-controls">
-          <span class="global-navigation__theme-label">Theme</span>
-          <button class="global-navigation__theme-button" type="button" data-theme-option="light" aria-pressed="true">Light</button>
-          <button class="global-navigation__theme-button" type="button" data-theme-option="dark" aria-pressed="false">Dark</button>
-        </div>
+        <fieldset class="global-navigation__theme-controls">
+          <legend class="global-navigation__sr-only">Theme</legend>
+          <span class="global-navigation__theme-label" aria-hidden="true">Theme</span>
+          <div class="global-navigation__theme-options">
+            <button class="global-navigation__theme-button" type="button" data-theme-option="light" aria-pressed="true">Light</button>
+            <button class="global-navigation__theme-button" type="button" data-theme-option="dark" aria-pressed="false">Dark</button>
+          </div>
+        </fieldset>
       </div>
     </header>
     <header class="preview-header">

@@ -376,7 +376,7 @@ export class CifarCube extends HTMLElementBase {
     compactHeading.textContent = "Browse human organ imaging datasets";
     const compactDescription = document.createElement("p");
     compactDescription.className = "cifar-cube__compact-description";
-    compactDescription.textContent = "Compare datasets across spatial scale, age, and organ, then open the metadata you need.";
+    compactDescription.textContent = "Review key details, then open the full metadata.";
     compactIntro.append(compactEyebrow, compactHeading, compactDescription);
     const stage = document.createElement("div");
     stage.className = "cifar-cube__stage";
