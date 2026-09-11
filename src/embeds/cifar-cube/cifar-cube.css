@@ -12,7 +12,7 @@
   --_focus: var(--cifar-cube-focus, var(--mat-sys-primary, #8b1510));
   display: block;
   box-sizing: border-box;
-  container-type: inline-size;
+  container: cifar-cube-host / inline-size;
   min-width: 0;
   width: 100%;
   max-width: 100%;
@@ -271,7 +271,7 @@
   border: 0;
 }
 
-@container (max-width: 64rem) {
+@container cifar-cube-host (max-width: 64rem) {
   .cifar-cube { display: flex; min-height: 0; height: auto; padding: clamp(1.5rem, 4vw, 2.5rem) 0 0; overflow: visible; flex-direction: column; }
   .cifar-cube__compact-intro {
     display: block;
@@ -327,7 +327,7 @@
   .cifar-cube__empty { position: static; }
 }
 
-@container (max-width: 40rem) {
+@container cifar-cube-host (max-width: 40rem) {
   .cifar-cube__list { grid-template-columns: minmax(0, 1fr); }
 }
 

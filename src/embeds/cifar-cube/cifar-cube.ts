@@ -1,5 +1,5 @@
 import styles from "./cifar-cube.css?inline";
-import { createCompactCard, createDetails, createPreviewCard } from "./cifar-cube-cards";
+import { createCompactCard, createDetails, createPreviewCard, updateDetails } from "./cifar-cube-cards";
 
 export type CifarCubeItemStatus = "available" | "current" | "unavailable";
 export interface CifarCubePosition { x: number; y: number; z: number; }
@@ -32,6 +32,7 @@ const HTMLElementBase = (
 ) as typeof HTMLElement;
 interface Point { x: number; y: number; }
 interface NormalizedPosition { x: number; y: number; z: number; }
+let instanceCount = 0;
 
 // Percentage coordinates traced from the reference perspective. Each plane is
 // ordered front, left, back, right so points can be projected bilinearly.
@@ -269,12 +270,45 @@ function createAccessibleAxisSummary(axes: CifarCubeAxes) {
   return summary;
 }
 
+/**
+ * Summarizes one dataset's metadata, visualization position, and availability.
+ * @param item - Dataset represented by a cube control.
+ * @param axes - Axis definitions used to describe its plotted position.
+ * @returns A concise accessible description for the dataset control.
+ */
+function getAccessibleItemDescription(item: CifarCubeItem, axes: CifarCubeAxes) {
+  const metadata = Object.entries(item.metadata ?? {})
+    .filter((entry): entry is [string, string | number] => entry[1] !== null && entry[1] !== undefined)
+    .map(([key, value]) => `${key}: ${value}`);
+  const position = item.position;
+  const axisEntries: Array<[CifarCubeAxis, number]> = position ? [
+    [axes.x, position.x],
+    [axes.y, position.y],
+    [axes.z, position.z],
+  ] : [];
+  const axisPosition = axisEntries.map(([axis, index]) => `${axis.label}: ${axis.values[index] ?? "unknown"}`);
+  const status = item.status ?? "available";
+  const statusText = status === "current" ? "Current page" : status === "unavailable" ? "Metadata unavailable" : "Metadata available";
+  const parts = [
+    metadata.length > 0 ? metadata.join(", ") : "No dataset details provided",
+    axisPosition.length > 0 ? `Visualization position: ${axisPosition.join(", ")}` : "Visualization position not provided",
+    statusText,
+  ];
+  return `${parts.join(". ")}.`;
+}
+
 export class CifarCube extends HTMLElementBase {
   static observedAttributes = ["items", "axes", "label"];
   #items: CifarCubeItem[] = [];
   #axes: CifarCubeAxes = EMPTY_AXES;
   #selectedId: string | null = null;
   #shadow = this.attachShadow({ mode: "open" });
+  #instanceId = `cifar-cube-${++instanceCount}`;
+  #section: HTMLElement | null = null;
+  #details: HTMLElement | null = null;
+  #plot: HTMLElement | null = null;
+  #detailsId = `${this.#instanceId}-details`;
+  #detailsHeadingId = `${this.#instanceId}-details-heading`;
 
   get items() { return this.#items; }
   set items(value: CifarCubeItem[]) {
@@ -313,9 +347,13 @@ export class CifarCube extends HTMLElementBase {
     if (parsedAxes?.x && parsedAxes?.y && parsedAxes?.z) this.#axes = parsedAxes;
   }
 
-  #selectItem(item: CifarCubeItem) {
+  #selectItem(item: CifarCubeItem, moveFocusToAction: boolean) {
     this.#selectedId = item.id;
-    this.#render(item.id);
+    this.#updateSelection();
+    if (this.#details) updateDetails(this.#details, item, this.#detailsHeadingId);
+    if (moveFocusToAction) {
+      this.#details?.querySelector<HTMLAnchorElement>(".cifar-cube__details-action")?.focus();
+    }
     this.dispatchEvent(new CustomEvent<CifarCubeSelectionDetail>(CIFAR_CUBE_SELECTION_EVENT, {
       bubbles: true,
       composed: true,
@@ -323,12 +361,11 @@ export class CifarCube extends HTMLElementBase {
     }));
   }
 
-  #render(focusItemId?: string) {
+  #createStructure() {
     const style = document.createElement("style");
     style.textContent = styles;
     const section = document.createElement("section");
     section.className = "cifar-cube";
-    section.setAttribute("aria-label", this.getAttribute("label") ?? "Metadata datasets");
     const compactIntro = document.createElement("header");
     compactIntro.className = "cifar-cube__compact-intro";
     const compactEyebrow = document.createElement("p");
@@ -341,22 +378,44 @@ export class CifarCube extends HTMLElementBase {
     compactDescription.className = "cifar-cube__compact-description";
     compactDescription.textContent = "Compare datasets across spatial scale, age, and organ, then open the metadata you need.";
     compactIntro.append(compactEyebrow, compactHeading, compactDescription);
-    section.append(compactIntro);
-    const selectedItem = this.#items.find((item) => item.id === this.#selectedId) ?? null;
-    if (selectedItem) section.classList.add("cifar-cube--has-selection");
     const stage = document.createElement("div");
     stage.className = "cifar-cube__stage";
     const plot = document.createElement("div");
     plot.className = "cifar-cube__plot";
-    plot.append(createCoordinateFrame(), createAxisLabels(this.#axes), createAccessibleAxisSummary(this.#axes));
+    stage.append(plot);
+    const details = createDetails(this.#detailsId, this.#detailsHeadingId);
+    section.append(compactIntro, stage, details);
+    this.#shadow.replaceChildren(style, section);
+    this.#section = section;
+    this.#details = details;
+    this.#plot = plot;
+  }
+
+  #updateSelection() {
+    const selectedItem = this.#items.find((item) => item.id === this.#selectedId) ?? null;
+    this.#section?.classList.toggle("cifar-cube--has-selection", Boolean(selectedItem));
+    this.#shadow.querySelectorAll<HTMLElement>(".cifar-cube__item").forEach((listItem) => {
+      const button = listItem.querySelector<HTMLButtonElement>(".cifar-cube__select");
+      const selected = button?.dataset.itemId === selectedItem?.id;
+      listItem.classList.toggle("cifar-cube__item--selected", selected);
+      button?.setAttribute("aria-pressed", String(selected));
+    });
+  }
+
+  #render() {
+    if (!this.#section || !this.#details || !this.#plot) this.#createStructure();
+    if (!this.#section || !this.#details || !this.#plot) return;
+
+    this.#section.setAttribute("aria-label", this.getAttribute("label") ?? "Metadata datasets");
+    this.#plot.replaceChildren(createCoordinateFrame(), createAxisLabels(this.#axes), createAccessibleAxisSummary(this.#axes));
+    const selectedItem = this.#items.find((item) => item.id === this.#selectedId) ?? null;
+    this.#section.classList.toggle("cifar-cube--has-selection", Boolean(selectedItem));
+    updateDetails(this.#details, selectedItem, this.#detailsHeadingId);
     if (this.#items.length === 0) {
       const empty = document.createElement("p");
       empty.className = "cifar-cube__empty";
       empty.textContent = "No datasets are available.";
-      plot.append(empty);
-      stage.append(plot);
-      section.append(createDetails(null), stage);
-      this.#shadow.replaceChildren(style, section);
+      this.#plot.append(empty);
       return;
     }
 
@@ -380,21 +439,19 @@ export class CifarCube extends HTMLElementBase {
       button.type = "button";
       button.dataset.itemId = item.id;
       button.setAttribute("aria-label", `Select ${item.label}`);
+      const description = document.createElement("span");
+      description.className = "cifar-cube__sr-only";
+      description.id = `${this.#instanceId}-item-${index}-description`;
+      description.textContent = getAccessibleItemDescription(item, this.#axes);
+      button.setAttribute("aria-describedby", description.id);
+      button.setAttribute("aria-controls", this.#detailsId);
       button.setAttribute("aria-pressed", String(selected));
       button.append(cube.svg, createPreviewCard(item));
-      button.addEventListener("click", () => this.#selectItem(item));
-      listItem.append(button, createCompactCard(item));
+      button.addEventListener("click", (event) => this.#selectItem(item, event.detail === 0));
+      listItem.append(description, button, createCompactCard(item));
       list.append(listItem);
     });
-    plot.append(list);
-    stage.append(plot);
-    section.append(createDetails(selectedItem), stage);
-    this.#shadow.replaceChildren(style, section);
-    if (focusItemId) {
-      const selectedButton = [...this.#shadow.querySelectorAll<HTMLButtonElement>(".cifar-cube__select")]
-        .find((button) => button.dataset.itemId === focusItemId);
-      selectedButton?.focus();
-    }
+    this.#plot.append(list);
   }
 }
 

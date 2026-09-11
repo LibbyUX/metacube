@@ -52,6 +52,7 @@ function createDestination(item: CifarCubeItem, actionClassName: string) {
   const action = document.createElement("a");
   action.className = actionClassName;
   action.href = item.href;
+  action.setAttribute("aria-label", `View metadata for ${item.label}${status === "current" ? ", current page" : ""}`);
   action.textContent = "View metadata";
   return action;
 }
@@ -97,20 +98,37 @@ export function createPreviewCard(item: CifarCubeItem) {
 
 /**
  * Creates the persistent desktop details region for the selected dataset.
- * @param item - Selected dataset, or null before a selection is made.
+ * @param detailsId - Stable ID used by dataset controls to reference the panel.
+ * @param headingId - Stable ID used to label the details landmark.
  * @returns An accessible details panel with an explicit destination action.
  */
-export function createDetails(item: CifarCubeItem | null) {
+export function createDetails(detailsId: string, headingId: string) {
   const details = document.createElement("aside");
   details.className = "cifar-cube__details";
+  details.id = detailsId;
   details.setAttribute("aria-live", "polite");
   details.setAttribute("aria-atomic", "true");
+  details.setAttribute("aria-labelledby", headingId);
+  updateDetails(details, null, headingId);
+  return details;
+}
+
+/**
+ * Updates the mounted desktop details region after selection changes.
+ * @param details - Stable details landmark whose content should be replaced.
+ * @param item - Selected dataset, or null before a selection is made.
+ * @param headingId - Stable ID used to label the details landmark.
+ * @returns The updated details landmark.
+ */
+export function updateDetails(details: HTMLElement, item: CifarCubeItem | null, headingId: string) {
+  details.replaceChildren();
 
   const eyebrow = document.createElement("p");
   eyebrow.className = "cifar-cube__details-eyebrow";
   eyebrow.textContent = item ? "Selected dataset" : "Organ imaging datasets";
   const heading = document.createElement("h2");
   heading.className = "cifar-cube__details-heading";
+  heading.id = headingId;
   heading.textContent = item?.label ?? "Explore organ imaging datasets";
   details.append(eyebrow, heading);
 
