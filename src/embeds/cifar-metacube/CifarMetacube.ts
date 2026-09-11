@@ -20,6 +20,9 @@ export const ORGAN_DATASET_AXES: CifarMetacubeAxes = {
 };
 
 const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
+const HTMLElementBase = (
+  typeof HTMLElement === "undefined" ? class {} : HTMLElement
+) as typeof HTMLElement;
 interface Point { x: number; y: number; }
 interface NormalizedPosition { x: number; y: number; z: number; }
 
@@ -295,7 +298,7 @@ function createAccessibleAxisSummary(axes: CifarMetacubeAxes) {
   return summary;
 }
 
-export class CifarMetacube extends HTMLElement {
+export class CifarMetacube extends HTMLElementBase {
   static observedAttributes = ["items", "axes", "label"];
   #items: CifarMetacubeItem[] = [];
   #axes: CifarMetacubeAxes = ORGAN_DATASET_AXES;
@@ -377,5 +380,6 @@ export class CifarMetacube extends HTMLElement {
 }
 
 export function defineCifarMetacube() {
+  if (typeof customElements === "undefined") return;
   if (!customElements.get("cifar-metacube")) customElements.define("cifar-metacube", CifarMetacube);
 }
