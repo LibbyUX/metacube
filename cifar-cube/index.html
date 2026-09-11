@@ -1,10 +1,22 @@
 <!doctype html>
-<html lang="en" data-theme="light">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light dark" />
-    <title>CIFAR Metacube preview</title>
+    <title>Preview component</title>
+    <script>
+      (() => {
+        const storageKey = "metacube-theme-mode";
+        let mode;
+        try {
+          const savedMode = localStorage.getItem(storageKey);
+          if (savedMode === "light" || savedMode === "dark") mode = savedMode;
+        } catch { /* localStorage unavailable */ }
+        mode ??= matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        document.documentElement.dataset.theme = mode;
+      })();
+    </script>
     <link rel="stylesheet" href="../src/components/global-navigation.css" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
@@ -27,15 +39,22 @@
       </div>
     </header>
     <header class="preview-header">
-      <div>
-        <p class="preview-eyebrow">Component preview</p>
-        <h1>CIFAR Metacube</h1>
+      <div class="preview-header__content">
+        <p class="preview-eyebrow">Preview component</p>
+        <h1>Explore multiscale human data</h1>
         <p class="preview-intro">Organ imaging datasets presented as direct links to their metadata.</p>
+        <a class="preview-action" href="#cifar-cube-preview">
+          Explore datasets
+          <span aria-hidden="true">↓</span>
+        </a>
       </div>
     </header>
 
     <main>
-      <cifar-metacube label="Organ imaging datasets"></cifar-metacube>
+      <section id="cifar-cube-preview" class="cifar-cube-preview" aria-labelledby="cifar-cube-heading">
+        <h2 id="cifar-cube-heading" class="visually-hidden">Explore organ imaging datasets</h2>
+        <cifar-cube label="Organ imaging datasets"></cifar-cube>
+      </section>
 
       <section class="metadata-preview" aria-labelledby="metadata-heading">
         <h2 id="metadata-heading">Preview metadata destinations</h2>

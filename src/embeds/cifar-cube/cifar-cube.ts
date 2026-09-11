@@ -1,22 +1,29 @@
-import styles from "./cifar-metacube.css?inline";
+import styles from "./cifar-cube.css?inline";
+import { createCompactCard, createDetails, createPreviewCard } from "./cifar-cube-cards";
 
-export type CifarMetacubeItemStatus = "available" | "current" | "unavailable";
-export interface CifarMetacubePosition { x: number; y: number; z: number; }
-export interface CifarMetacubeAxis { label: string; values: string[]; }
-export interface CifarMetacubeAxes { x: CifarMetacubeAxis; y: CifarMetacubeAxis; z: CifarMetacubeAxis; }
-export interface CifarMetacubeItem {
+export type CifarCubeItemStatus = "available" | "current" | "unavailable";
+export interface CifarCubePosition { x: number; y: number; z: number; }
+export interface CifarCubeAxis { label: string; values: string[]; }
+export interface CifarCubeAxes { x: CifarCubeAxis; y: CifarCubeAxis; z: CifarCubeAxis; }
+export interface CifarCubeItem {
   id: string;
   label: string;
-  href: string;
+  href?: string;
   metadata?: Record<string, string | number | null | undefined>;
-  position?: CifarMetacubePosition;
-  status?: CifarMetacubeItemStatus;
+  position?: CifarCubePosition;
+  status?: CifarCubeItemStatus;
 }
 
-export const ORGAN_DATASET_AXES: CifarMetacubeAxes = {
-  x: { label: "Scale", values: ["100-microns", "10-centimeters"] },
-  y: { label: "Age (years)", values: ["45", "63", "85", "~40–70", "4–5 months", "7–47"] },
-  z: { label: "Organ", values: ["Thymus", "Heart", "Kidney", "Liver"] },
+export interface CifarCubeSelectionDetail {
+  item: CifarCubeItem;
+}
+
+export const CIFAR_CUBE_SELECTION_EVENT = "cifar-cube-selection-change";
+
+const EMPTY_AXES: CifarCubeAxes = {
+  x: { label: "X axis", values: [] },
+  y: { label: "Y axis", values: [] },
+  z: { label: "Z axis", values: [] },
 };
 
 const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
@@ -62,7 +69,7 @@ function getCategoryCenter(value: number, count: number) {
 /**
  * Projects two normalized horizontal axes onto one perspective plane.
  * @param plane - Four corners of the top or bottom plane.
- * @param x - Normalized Scale-axis position.
+ * @param x - Normalized spatial-scale-axis position.
  * @param z - Normalized Organ-axis position.
  * @returns A percentage coordinate inside the component.
  */
@@ -81,7 +88,7 @@ function interpolatePlane(plane: typeof FRAME_PLANES.top | typeof FRAME_PLANES.b
 
 /**
  * Interpolates between the reference frame's bottom and top planes.
- * @param x - Normalized Scale-axis position.
+ * @param x - Normalized spatial-scale-axis position.
  * @param y - Normalized Age-axis position.
  * @param z - Normalized Organ-axis position.
  * @returns A perspective-projected percentage coordinate.
@@ -97,29 +104,29 @@ function projectPoint(x: number, y: number, z: number): Point {
 
 /**
  * Maps categorical axis indexes to the flat perspective coordinate system.
- * @param position - Axis indexes where x is Scale, y is Age, and z is Organ.
+ * @param position - Axis indexes where x is spatial scale, y is Age, and z is Organ.
  * @param index - Item index used only when no explicit position is supplied.
  * @param axes - Axis definitions used to normalize categorical indexes.
  * @returns CSS-ready position, stacking, and tooltip placement values.
  */
 function getNormalizedPosition(
-  position: CifarMetacubePosition | undefined,
+  position: CifarCubePosition | undefined,
   index: number,
-  axes: CifarMetacubeAxes,
+  axes: CifarCubeAxes,
 ): NormalizedPosition {
   const resolved = position ?? {
     x: index % Math.max(axes.x.values.length, 1),
     y: index % Math.max(axes.y.values.length, 1),
     z: index % Math.max(axes.z.values.length, 1),
   };
-  // The first x category starts at the far-left end of the Scale axis.
+  // The first x category starts at the far-left end of the spatial scale axis.
   const x = 1 - getCategoryCenter(resolved.x, axes.x.values.length);
   const y = getCategoryCenter(resolved.y, axes.y.values.length);
   const z = getCategoryCenter(resolved.z, axes.z.values.length);
   return { x, y, z };
 }
 
-function getScenePosition(position: CifarMetacubePosition | undefined, index: number, axes: CifarMetacubeAxes) {
+function getScenePosition(position: CifarCubePosition | undefined, index: number, axes: CifarCubeAxes) {
   const normalized = getNormalizedPosition(position, index, axes);
   const point = projectPoint(normalized.x, normalized.y, normalized.z);
   return {
@@ -136,21 +143,21 @@ function getScenePosition(position: CifarMetacubePosition | undefined, index: nu
  */
 function createCoordinateFrame() {
   const svg = createSvgElement("svg", {
-    class: "metacube__frame",
+    class: "cifar-cube__frame",
     viewBox: "0 0 1000 868",
     preserveAspectRatio: "xMidYMid meet",
     "aria-hidden": "true",
   });
   svg.append(createSvgElement("path", {
-    class: "metacube__frame-line",
+    class: "cifar-cube__frame-line",
     d: "M573 5 152 103 573 276 995 103 573 5M152 103 224 586 573 861 925 586 995 103M573 276 573 861M573 5 573 405M224 586 573 405 925 586",
   }));
   return svg;
 }
 
-function createAxisLabels(axes: CifarMetacubeAxes) {
+function createAxisLabels(axes: CifarCubeAxes) {
   const labels = document.createElement("div");
-  labels.className = "metacube__axes";
+  labels.className = "cifar-cube__axes";
   labels.setAttribute("aria-hidden", "true");
   const addLabel = (text: string, className: string, point: Point) => {
     const label = document.createElement("span");
@@ -161,21 +168,21 @@ function createAxisLabels(axes: CifarMetacubeAxes) {
     labels.append(label);
   };
 
-  addLabel(axes.y.label, "metacube__axis-title metacube__axis-title--y", { x: 4.5, y: 7.5 });
-  addLabel(axes.x.label, "metacube__axis-title metacube__axis-title--x", { x: 30, y: 89 });
-  addLabel(axes.z.label, "metacube__axis-title metacube__axis-title--z", { x: 84.5, y: 91.5 });
+  addLabel(axes.y.label, "cifar-cube__axis-title cifar-cube__axis-title--y", { x: 4.5, y: 7.5 });
+  addLabel(axes.x.label, "cifar-cube__axis-title cifar-cube__axis-title--x", { x: 30, y: 89 });
+  addLabel(axes.z.label, "cifar-cube__axis-title cifar-cube__axis-title--z", { x: 84.5, y: 91.5 });
   axes.y.values.forEach((value, index) => {
     const point = projectPoint(1, getCategoryCenter(index, axes.y.values.length), 0);
-    addLabel(value, "metacube__axis-value metacube__axis-value--y", { x: point.x - 5, y: point.y });
+    addLabel(value, "cifar-cube__axis-value cifar-cube__axis-value--y", { x: point.x - 5, y: point.y });
   });
   axes.x.values.forEach((value, index) => {
     const x = 1 - getCategoryCenter(index, axes.x.values.length);
     const point = projectPoint(x, 0, 0);
-    addLabel(value, "metacube__axis-value metacube__axis-value--x", { x: point.x - 4.5, y: point.y + 1.8 });
+    addLabel(value, "cifar-cube__axis-value cifar-cube__axis-value--x", { x: point.x - 4.5, y: point.y + 1.8 });
   });
   axes.z.values.forEach((value, index) => {
     const point = projectPoint(0, 0, getCategoryCenter(index, axes.z.values.length));
-    addLabel(value, "metacube__axis-value metacube__axis-value--z", { x: point.x + 2.5, y: point.y + 1.7 });
+    addLabel(value, "cifar-cube__axis-value cifar-cube__axis-value--z", { x: point.x + 2.5, y: point.y + 1.7 });
   });
   return labels;
 }
@@ -187,15 +194,15 @@ interface ProjectedCube {
 
 /**
  * Constructs a cube from projected 3D corners, giving every location its true perspective.
- * @param position - Axis indexes where x is Scale, y is Age, and z is Organ.
+ * @param position - Axis indexes where x is spatial scale, y is Age, and z is Organ.
  * @param index - Item index used only when no explicit position is supplied.
  * @param axes - Axis definitions used to normalize categorical indexes.
  * @returns The decorative cube SVG and its exact percentage bounds.
  */
 function createProjectedCube(
-  position: CifarMetacubePosition | undefined,
+  position: CifarCubePosition | undefined,
   index: number,
-  axes: CifarMetacubeAxes,
+  axes: CifarCubeAxes,
 ): ProjectedCube {
   const center = getNormalizedPosition(position, index, axes);
   const halfSize = 0.5 / Math.max(axes.x.values.length, axes.y.values.length, axes.z.values.length, 1);
@@ -227,7 +234,7 @@ function createProjectedCube(
     .map((point, pointIndex) => `${pointIndex === 0 ? "M" : "L"}${point.x} ${point.y}`)
     .join("");
   const svg = createSvgElement("svg", {
-    class: "metacube__cube",
+    class: "cifar-cube__cube",
     viewBox: `${left} ${top} ${right - left} ${bottom - top}`,
     preserveAspectRatio: "none",
     "aria-hidden": "true",
@@ -236,11 +243,11 @@ function createProjectedCube(
   const leftFace = [corners.topFront, corners.topLeft, corners.bottomLeft, corners.bottomFront];
   const rightFace = [corners.topFront, corners.topRight, corners.bottomRight, corners.bottomFront];
   svg.append(
-    createSvgElement("polygon", { class: "metacube__top", points: pointList(...topFace), "vector-effect": "non-scaling-stroke" }),
-    createSvgElement("polygon", { class: "metacube__left", points: pointList(...leftFace), "vector-effect": "non-scaling-stroke" }),
-    createSvgElement("polygon", { class: "metacube__right", points: pointList(...rightFace), "vector-effect": "non-scaling-stroke" }),
+    createSvgElement("polygon", { class: "cifar-cube__top", points: pointList(...topFace), "vector-effect": "non-scaling-stroke" }),
+    createSvgElement("polygon", { class: "cifar-cube__left", points: pointList(...leftFace), "vector-effect": "non-scaling-stroke" }),
+    createSvgElement("polygon", { class: "cifar-cube__right", points: pointList(...rightFace), "vector-effect": "non-scaling-stroke" }),
     createSvgElement("path", {
-      class: "metacube__edge",
+      class: "cifar-cube__edge",
       d: [
         path(corners.topFront, corners.topBack),
         path(corners.topLeft, corners.topRight),
@@ -255,63 +262,34 @@ function createProjectedCube(
   return { svg, bounds: { left, top, width: right - left, height: bottom - top } };
 }
 
-/**
- * Creates the hover/focus card that also provides the native link's accessible name.
- * @param item - Dataset represented by the cube.
- * @returns A card element containing safely escaped text nodes.
- */
-function createCard(item: CifarMetacubeItem) {
-  const card = document.createElement("span");
-  card.className = "metacube__card";
-  const label = document.createElement("span");
-  label.className = "metacube__label";
-  label.textContent = item.label;
-  card.append(label);
-  const metadataEntries = Object.entries(item.metadata ?? {}).filter(
-    (entry): entry is [string, string | number] => entry[1] !== null && entry[1] !== undefined,
-  );
-  if (metadataEntries.length > 0) {
-    const metadata = document.createElement("dl");
-    metadata.className = "metacube__metadata";
-    metadataEntries.forEach(([key, value]) => {
-      const term = document.createElement("dt");
-      const description = document.createElement("dd");
-      term.textContent = key;
-      description.textContent = String(value);
-      metadata.append(term, description);
-    });
-    card.append(metadata);
-  }
-  if (item.status === "current" || item.status === "unavailable") {
-    const status = document.createElement("span");
-    status.className = "metacube__status";
-    status.textContent = item.status === "current" ? "Current page" : "Unavailable";
-    card.append(status);
-  }
-  return card;
-}
-
-function createAccessibleAxisSummary(axes: CifarMetacubeAxes) {
+function createAccessibleAxisSummary(axes: CifarCubeAxes) {
   const summary = document.createElement("p");
-  summary.className = "metacube__sr-only";
+  summary.className = "cifar-cube__sr-only";
   summary.textContent = [axes.x, axes.y, axes.z].map((axis) => `${axis.label}: ${axis.values.join(", ")}`).join(". ");
   return summary;
 }
 
-export class CifarMetacube extends HTMLElementBase {
+export class CifarCube extends HTMLElementBase {
   static observedAttributes = ["items", "axes", "label"];
-  #items: CifarMetacubeItem[] = [];
-  #axes: CifarMetacubeAxes = ORGAN_DATASET_AXES;
+  #items: CifarCubeItem[] = [];
+  #axes: CifarCubeAxes = EMPTY_AXES;
+  #selectedId: string | null = null;
   #shadow = this.attachShadow({ mode: "open" });
 
   get items() { return this.#items; }
-  set items(value: CifarMetacubeItem[]) {
+  set items(value: CifarCubeItem[]) {
     this.#items = Array.isArray(value) ? value : [];
+    if (!this.#items.some((item) => item.id === this.#selectedId)) this.#selectedId = null;
     this.#render();
   }
   get axes() { return this.#axes; }
-  set axes(value: CifarMetacubeAxes) {
-    this.#axes = value ?? ORGAN_DATASET_AXES;
+  set axes(value: CifarCubeAxes) {
+    this.#axes = value ?? EMPTY_AXES;
+    this.#render();
+  }
+  get selectedId() { return this.#selectedId; }
+  set selectedId(value: string | null) {
+    this.#selectedId = this.#items.some((item) => item.id === value) ? value : null;
     this.#render();
   }
   connectedCallback() {
@@ -330,56 +308,97 @@ export class CifarMetacube extends HTMLElementBase {
       try { return JSON.parse(serializedValue) as T; } catch { return undefined; }
     };
     const parsedItems = parseAttribute<unknown>("items");
-    if (Array.isArray(parsedItems)) this.#items = parsedItems as CifarMetacubeItem[];
-    const parsedAxes = parseAttribute<CifarMetacubeAxes>("axes");
+    if (Array.isArray(parsedItems)) this.#items = parsedItems as CifarCubeItem[];
+    const parsedAxes = parseAttribute<CifarCubeAxes>("axes");
     if (parsedAxes?.x && parsedAxes?.y && parsedAxes?.z) this.#axes = parsedAxes;
   }
 
-  #render() {
+  #selectItem(item: CifarCubeItem) {
+    this.#selectedId = item.id;
+    this.#render(item.id);
+    this.dispatchEvent(new CustomEvent<CifarCubeSelectionDetail>(CIFAR_CUBE_SELECTION_EVENT, {
+      bubbles: true,
+      composed: true,
+      detail: { item },
+    }));
+  }
+
+  #render(focusItemId?: string) {
     const style = document.createElement("style");
     style.textContent = styles;
     const section = document.createElement("section");
-    section.className = "metacube";
+    section.className = "cifar-cube";
     section.setAttribute("aria-label", this.getAttribute("label") ?? "Metadata datasets");
-    section.append(createCoordinateFrame(), createAxisLabels(this.#axes), createAccessibleAxisSummary(this.#axes));
+    const compactIntro = document.createElement("header");
+    compactIntro.className = "cifar-cube__compact-intro";
+    const compactEyebrow = document.createElement("p");
+    compactEyebrow.className = "cifar-cube__compact-eyebrow";
+    compactEyebrow.textContent = "Organ imaging datasets";
+    const compactHeading = document.createElement("h2");
+    compactHeading.className = "cifar-cube__compact-section-heading";
+    compactHeading.textContent = "Browse human organ imaging datasets";
+    const compactDescription = document.createElement("p");
+    compactDescription.className = "cifar-cube__compact-description";
+    compactDescription.textContent = "Compare datasets across spatial scale, age, and organ, then open the metadata you need.";
+    compactIntro.append(compactEyebrow, compactHeading, compactDescription);
+    section.append(compactIntro);
+    const selectedItem = this.#items.find((item) => item.id === this.#selectedId) ?? null;
+    if (selectedItem) section.classList.add("cifar-cube--has-selection");
+    const stage = document.createElement("div");
+    stage.className = "cifar-cube__stage";
+    const plot = document.createElement("div");
+    plot.className = "cifar-cube__plot";
+    plot.append(createCoordinateFrame(), createAxisLabels(this.#axes), createAccessibleAxisSummary(this.#axes));
     if (this.#items.length === 0) {
       const empty = document.createElement("p");
-      empty.className = "metacube__empty";
+      empty.className = "cifar-cube__empty";
       empty.textContent = "No datasets are available.";
-      section.append(empty);
+      plot.append(empty);
+      stage.append(plot);
+      section.append(createDetails(null), stage);
       this.#shadow.replaceChildren(style, section);
       return;
     }
 
     const list = document.createElement("ul");
-    list.className = "metacube__list";
+    list.className = "cifar-cube__list";
     this.#items.forEach((item, index) => {
       const status = item.status ?? "available";
+      const selected = item.id === this.#selectedId;
       const position = getScenePosition(item.position, index, this.#axes);
       const cube = createProjectedCube(item.position, index, this.#axes);
       const listItem = document.createElement("li");
-      listItem.className = `metacube__item metacube__item--${status} metacube__item--card-${position.cardSide}`;
+      listItem.className = `cifar-cube__item cifar-cube__item--${status} cifar-cube__item--card-${position.cardSide}`;
+      if (selected) listItem.classList.add("cifar-cube__item--selected");
       listItem.style.setProperty("--cube-left", `${cube.bounds.left}%`);
       listItem.style.setProperty("--cube-top", `${cube.bounds.top}%`);
       listItem.style.setProperty("--cube-width", `${cube.bounds.width}%`);
       listItem.style.setProperty("--cube-height", `${cube.bounds.height}%`);
       listItem.style.setProperty("--cube-layer", position.layer);
-      const content = status === "unavailable" ? document.createElement("div") : document.createElement("a");
-      content.className = status === "unavailable" ? "metacube__unavailable" : "metacube__link";
-      if (content instanceof HTMLAnchorElement) {
-        content.href = item.href;
-        if (status === "current") content.setAttribute("aria-current", "page");
-      }
-      content.append(cube.svg, createCard(item));
-      listItem.append(content);
+      const button = document.createElement("button");
+      button.className = "cifar-cube__select";
+      button.type = "button";
+      button.dataset.itemId = item.id;
+      button.setAttribute("aria-label", `Select ${item.label}`);
+      button.setAttribute("aria-pressed", String(selected));
+      button.append(cube.svg, createPreviewCard(item));
+      button.addEventListener("click", () => this.#selectItem(item));
+      listItem.append(button, createCompactCard(item));
       list.append(listItem);
     });
-    section.append(list);
+    plot.append(list);
+    stage.append(plot);
+    section.append(createDetails(selectedItem), stage);
     this.#shadow.replaceChildren(style, section);
+    if (focusItemId) {
+      const selectedButton = [...this.#shadow.querySelectorAll<HTMLButtonElement>(".cifar-cube__select")]
+        .find((button) => button.dataset.itemId === focusItemId);
+      selectedButton?.focus();
+    }
   }
 }
 
-export function defineCifarMetacube() {
+export function defineCifarCube() {
   if (typeof customElements === "undefined") return;
-  if (!customElements.get("cifar-metacube")) customElements.define("cifar-metacube", CifarMetacube);
+  if (!customElements.get("cifar-cube")) customElements.define("cifar-cube", CifarCube);
 }

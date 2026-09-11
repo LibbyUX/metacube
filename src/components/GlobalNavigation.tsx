@@ -9,7 +9,7 @@ export type GlobalNavigationPage = "implementation" | "configuration" | "preview
 const destinations: Array<{ page: GlobalNavigationPage; label: string; href: string }> = [
   { page: "implementation", label: "CIFAR demo", href: FULL_IMPLEMENTATION_URL },
   { page: "configuration", label: "Build a metacube", href: `${BASE}playground/index.html` },
-  { page: "preview", label: "Component preview", href: `${BASE}cifar-metacube/index.html` },
+  { page: "preview", label: "Component preview", href: `${BASE}cifar-cube/index.html` },
 ];
 
 /**
