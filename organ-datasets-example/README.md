@@ -15,7 +15,7 @@ along three axes.
 
 | dataset | sex | scale | age | organ |
 |---|---|---|---|---|
-| bader-liver-sem-sbf | Male | 100-microns | 45 | Liver |
+| bader-liver-sbf-sem | Male | 100-microns | 45 | Liver |
 | lee-kidney-hipct-63 | Male | 10-centimeters | 63 | Kidney |
 | lee-kidney-hipct-85 | Male | 10-centimeters | 85 | Kidney |
 | lee-heart-hipct | Male | 10-centimeters | 63 | Heart |

@@ -1,5 +1,5 @@
 dataset,sex,scale,age,organ,count
-bader-liver-sem-sbf,Male,100-microns,45,Liver,1
+bader-liver-sbf-sem,Male,100-microns,45,Liver,1
 lee-kidney-hipct-63,Male,10-centimeters,63,Kidney,1
 lee-kidney-hipct-85,Male,10-centimeters,85,Kidney,1
 lee-heart-hipct,Male,10-centimeters,63,Heart,1

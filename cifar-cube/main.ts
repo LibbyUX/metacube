@@ -15,9 +15,9 @@ type PreviewDataset = CifarCubeItem & { href: string };
 
 const datasets: PreviewDataset[] = [
   {
-    id: "bader-liver-sem-sbf",
-    label: "Bader liver SEM/SBF",
-    href: "#metadata-bader-liver-sem-sbf",
+    id: "bader-liver-sbf-sem",
+    label: "Bader liver SBF/SEM",
+    href: "#metadata-bader-liver-sbf-sem",
     metadata: { Organ: "Liver", "Spatial scale": "100-microns", Age: "45", Sex: "Male" },
     position: { x: 0, y: 0, z: 3 },
   },
