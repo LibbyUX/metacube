@@ -63,7 +63,8 @@ export declare function getScenePosition(position: CifarCubePosition, axes: Cifa
  * Computes projected corners and bounds for a cube at a validated position.
  * @param position - Validated axis indexes.
  * @param axes - Validated axes used to size and place the cube.
+ * @param cubeScale - Relative cube size greater than zero and no larger than one.
  * @returns Projected corners and percentage bounds.
  */
-export declare function getProjectedCubeGeometry(position: CifarCubePosition, axes: CifarCubeAxes): ProjectedCubeGeometry;
+export declare function getProjectedCubeGeometry(position: CifarCubePosition, axes: CifarCubeAxes, cubeScale?: number): ProjectedCubeGeometry;
 //# sourceMappingURL=projection.d.ts.map

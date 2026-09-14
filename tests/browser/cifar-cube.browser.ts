@@ -30,6 +30,14 @@ async function nextLayout() {
   await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
 }
 
+async function waitFor(predicate: () => boolean, timeout = 1000) {
+  const start = performance.now();
+  while (!predicate()) {
+    if (performance.now() - start > timeout) throw new Error("Timed out waiting for the component update.");
+    await nextLayout();
+  }
+}
+
 async function test(name: string, callback: () => void | Promise<void>) {
   const result = document.createElement("li");
   try {
@@ -54,6 +62,13 @@ await nextLayout();
 const shadow = component.shadowRoot;
 if (!shadow) throw new Error("Component shadow root was not created.");
 
+await test("one introduction remains available across responsive layouts", () => {
+  const intro = shadow.querySelectorAll(".cifar-cube__intro");
+  assert(intro.length === 1, "The component should render one shared introduction.");
+  assert(Boolean(intro[0].querySelector(".cifar-cube__intro-heading")), "The introduction heading is missing.");
+  assert(Boolean(intro[0].querySelector(".cifar-cube__intro-description")), "The introduction guidance is missing.");
+});
+
 await test("cube controls have unique names, descriptions, state, and details relationships", () => {
   const buttons = [...shadow.querySelectorAll<HTMLButtonElement>(".cifar-cube__select")];
   assert(buttons.length === 2, "Only positioned datasets should create cube controls.");
@@ -67,15 +82,33 @@ await test("cube controls have unique names, descriptions, state, and details re
   });
 });
 
-await test("keyboard activation focuses the action and keeps the live region mounted", () => {
+await test("keyboard activation focuses the action and keeps the live region mounted", async () => {
   const details = shadow.querySelector<HTMLElement>(".cifar-cube__details");
   const button = shadow.querySelector<HTMLButtonElement>(".cifar-cube__select");
   assert(details && button, "Fixture is missing interaction elements.");
   button.dispatchEvent(new MouseEvent("click", { bubbles: true, detail: 0 }));
+  await waitFor(() => Boolean(shadow.querySelector(".cifar-cube__details-action")));
   const action = shadow.querySelector<HTMLAnchorElement>(".cifar-cube__details-action");
   assert(shadow.querySelector(".cifar-cube__details") === details, "Live region was replaced.");
   assert(shadow.activeElement === action, "Keyboard selection did not move focus to the metadata action.");
   assert(action?.getAttribute("aria-label") === "View metadata for Dataset one", "Action name does not identify its dataset.");
+});
+
+await test("desktop layout keeps the intro visible above the selected dataset card", async () => {
+  const section = shadow.querySelector<HTMLElement>(".cifar-cube");
+  const intro = shadow.querySelector<HTMLElement>(".cifar-cube__intro");
+  const details = shadow.querySelector<HTMLElement>(".cifar-cube__details");
+  const button = shadow.querySelectorAll<HTMLButtonElement>(".cifar-cube__select")[1];
+  assert(section && intro && details && button, "Fixture is missing desktop layout elements.");
+  assert(getComputedStyle(section).gridTemplateAreas.includes("content stage"), "Desktop content should precede the visualization.");
+  button.click();
+  if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    assert(details.getAnimations().length > 0, "Detail card should animate after selection.");
+  }
+  await waitFor(() => details.querySelector(".cifar-cube__details-heading")?.textContent === "Dataset two");
+  assert(intro.isConnected, "Selecting a dataset should not replace the introduction.");
+  assert(details.querySelector("h3.cifar-cube__details-heading"), "The selected dataset title should be a level-three heading.");
+  assert(Boolean(details.querySelector(".cifar-cube__details-card")), "Selection should render a dataset card below the introduction.");
 });
 
 await test("pointer selection retains the cube control focus", () => {

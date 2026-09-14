@@ -15,17 +15,16 @@ along three axes.
 
 | dataset | sex | scale | age | organ |
 |---|---|---|---|---|
-| bader-liver-sem-sbf | Male | 100-microns | 45 | Liver |
-| lee-kidney-hipct | Male | 10-centimeters | 63 | Kidney |
-| lee-kidney-hipct | Male | 10-centimeters | 85 | Kidney |
+| bader-liver-sbf-sem | Male | 100-microns | 45 | Liver |
+| lee-kidney-hipct-63 | Male | 10-centimeters | 63 | Kidney |
+| lee-kidney-hipct-85 | Male | 10-centimeters | 85 | Kidney |
 | lee-heart-hipct | Male | 10-centimeters | 63 | Heart |
 | teichmann-heart-hra-pop | Male & female (multiple) | 100-microns | ~40-70 | Heart |
 | zandstra-thymus-codex | Male & female (multiple) | 100-microns | 4-5 months | Thymus |
 | bader-liver-xenium | Male & female (multiple) | 100-microns | 7-47 | Liver |
 
 **Notes / caveats:**
-- `lee-kidney-hipct` listed two ages (63 and 85) in the source table, so it's
-  split into two rows here — same dataset, two age entries.
+- The two Lee kidney HiP-CT datasets are distinguished by age in their IDs.
 - `age` is mixed units and formats (single years, ranges, "~40-70", "4-5 months"),
   so metacube treats it as a categorical axis (each distinct string is its own
   tick), not a continuous numeric scale.

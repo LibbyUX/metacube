@@ -28,6 +28,7 @@ export declare class CifarCube extends HTMLElementBase {
     get selectedId(): string | null;
     set selectedId(value: string | null);
     connectedCallback(): void;
+    disconnectedCallback(): void;
     attributeChangedCallback(name: string): void;
 }
 /**

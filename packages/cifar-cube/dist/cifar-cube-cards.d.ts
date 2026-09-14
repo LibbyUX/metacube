@@ -1,17 +1,21 @@
 import type { CifarCubeItem } from "./types";
 /**
+ * Creates the component introduction shared by desktop and compact layouts.
+ * @returns A heading group containing the configured introduction copy.
+ */
+export declare function createIntro(): HTMLElement;
+/**
  * Creates the transient preview shown beside a desktop cube.
  * @param item - Dataset represented by the cube.
  * @returns A presentation-only card containing safely escaped text nodes.
  */
 export declare function createPreviewCard(item: CifarCubeItem): HTMLSpanElement;
 /**
- * Creates the persistent desktop details region for the selected dataset.
+ * Creates the persistent live region for desktop dataset details.
  * @param detailsId - Stable ID used by dataset controls to reference the panel.
- * @param headingId - Stable ID used to label the details landmark.
- * @returns An accessible details panel with an explicit destination action.
+ * @returns An empty live region populated after a dataset is selected.
  */
-export declare function createDetails(detailsId: string, headingId: string): HTMLElement;
+export declare function createDetails(detailsId: string): HTMLDivElement;
 /**
  * Updates the mounted desktop details region after selection changes.
  * @param details - Stable details landmark whose content should be replaced.

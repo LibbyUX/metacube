@@ -34,6 +34,8 @@ export interface CifarCubeItem {
     metadata?: Record<string, string | number | null | undefined>;
     /** Optional categorical indexes; omitted datasets remain available but unplotted. */
     position?: CifarCubePosition;
+    /** Optional relative cube size greater than zero and no larger than one. */
+    cubeScale?: number;
     /** Availability state; defaults to available when a valid destination exists. */
     status?: CifarCubeItemStatus;
 }

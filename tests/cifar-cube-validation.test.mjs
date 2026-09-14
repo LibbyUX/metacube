@@ -96,6 +96,17 @@ test("validateItems removes unsafe destinations and unsupported metadata values"
   assert.ok(result.issues.some((validationIssue) => validationIssue.code === "item.metadata.value.invalid"));
 });
 
+test("validateItems preserves valid cube scales and rejects invalid values", () => {
+  const result = validateItems([
+    { id: "smaller", label: "Smaller", href: "#smaller", cubeScale: 0.8, position: { x: 0, y: 0, z: 0 } },
+    { id: "invalid", label: "Invalid", href: "#invalid", cubeScale: 2, position: { x: 1, y: 1, z: 1 } },
+  ], validAxes);
+
+  assert.equal(result.value[0].cubeScale, 0.8);
+  assert.equal(result.value[1].cubeScale, undefined);
+  assert.ok(result.issues.some((validationIssue) => validationIssue.code === "item.cube-scale.invalid"));
+});
+
 test("isSafeMetadataHref allows web destinations and rejects executable schemes", () => {
   assert.equal(isSafeMetadataHref("#local-metadata"), true);
   assert.equal(isSafeMetadataHref("../metadata/dataset"), true);
