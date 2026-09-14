@@ -1,11 +1,17 @@
 import styles from "./cifar-cube.css?inline";
-import { createCompactCard, createDetails, createPreviewCard, updateDetails } from "./cifar-cube-cards";
-import { getCategoryCenter, getProjectedCubeGeometry, getScenePosition, projectPoint, type Point } from "./projection";
+import { createCompactCard, createDetails, createIntro, createPreviewCard, updateDetails } from "./cifar-cube-cards";
+import {
+  createAccessibleAxisSummary,
+  createAxisLabels,
+  createCoordinateFrame,
+  createProjectedCube,
+  getAccessibleItemDescription,
+} from "./cifar-cube-visualization";
+import { DetailsTransition } from "./details-transition";
+import { getScenePosition } from "./projection";
 import type {
   CifarCubeAxes,
-  CifarCubeAxis,
   CifarCubeItem,
-  CifarCubePosition,
   CifarCubeSelectionDetail,
   CifarCubeValidationDetail,
   CifarCubeValidationIssue,
@@ -38,147 +44,10 @@ declare global {
   }
 }
 
-const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 const HTMLElementBase = (
   typeof HTMLElement === "undefined" ? class {} : HTMLElement
 ) as typeof HTMLElement;
 let instanceCount = 0;
-
-function createSvgElement<K extends keyof SVGElementTagNameMap>(tagName: K, attributes: Record<string, string>) {
-  const element = document.createElementNS(SVG_NAMESPACE, tagName);
-  Object.entries(attributes).forEach(([name, value]) => element.setAttribute(name, value));
-  return element;
-}
-
-/**
- * Creates the reference-style perspective bounding cube.
- * @returns A decorative SVG element with crisp, non-scaling frame lines.
- */
-function createCoordinateFrame() {
-  const svg = createSvgElement("svg", {
-    class: "cifar-cube__frame",
-    viewBox: "0 0 1000 868",
-    preserveAspectRatio: "xMidYMid meet",
-    "aria-hidden": "true",
-  });
-  svg.append(createSvgElement("path", {
-    class: "cifar-cube__frame-line",
-    d: "M573 5 152 103 573 276 995 103 573 5M152 103 224 586 573 861 925 586 995 103M573 276 573 861M573 5 573 405M224 586 573 405 925 586",
-  }));
-  return svg;
-}
-
-function createAxisLabels(axes: CifarCubeAxes) {
-  const labels = document.createElement("div");
-  labels.className = "cifar-cube__axes";
-  labels.setAttribute("aria-hidden", "true");
-  const addLabel = (text: string, className: string, point: Point) => {
-    const label = document.createElement("span");
-    label.className = className;
-    label.textContent = text;
-    label.style.left = `${point.x}%`;
-    label.style.top = `${point.y}%`;
-    labels.append(label);
-  };
-
-  addLabel(axes.y.label, "cifar-cube__axis-title cifar-cube__axis-title--y", { x: 4.5, y: 7.5 });
-  addLabel(axes.x.label, "cifar-cube__axis-title cifar-cube__axis-title--x", { x: 30, y: 89 });
-  addLabel(axes.z.label, "cifar-cube__axis-title cifar-cube__axis-title--z", { x: 84.5, y: 91.5 });
-  axes.y.values.forEach((value, index) => {
-    const point = projectPoint(1, getCategoryCenter(index, axes.y.values.length), 0);
-    addLabel(value, "cifar-cube__axis-value cifar-cube__axis-value--y", { x: point.x - 5, y: point.y });
-  });
-  axes.x.values.forEach((value, index) => {
-    const x = 1 - getCategoryCenter(index, axes.x.values.length);
-    const point = projectPoint(x, 0, 0);
-    addLabel(value, "cifar-cube__axis-value cifar-cube__axis-value--x", { x: point.x - 4.5, y: point.y + 1.8 });
-  });
-  axes.z.values.forEach((value, index) => {
-    const point = projectPoint(0, 0, getCategoryCenter(index, axes.z.values.length));
-    addLabel(value, "cifar-cube__axis-value cifar-cube__axis-value--z", { x: point.x + 2.5, y: point.y + 1.7 });
-  });
-  return labels;
-}
-
-interface ProjectedCube {
-  svg: SVGSVGElement;
-  bounds: { left: number; top: number; width: number; height: number };
-}
-
-/**
- * Constructs a cube from projected 3D corners, giving every location its true perspective.
- * @param position - Validated axis indexes where x is spatial scale, y is Age, and z is Organ.
- * @param axes - Axis definitions used to normalize categorical indexes.
- * @returns The decorative cube SVG and its exact percentage bounds.
- */
-function createProjectedCube(position: CifarCubePosition, axes: CifarCubeAxes): ProjectedCube {
-  const { corners, bounds } = getProjectedCubeGeometry(position, axes);
-  const pointList = (...facePoints: Point[]) => facePoints.map((point) => `${point.x},${point.y}`).join(" ");
-  const path = (...pathPoints: Point[]) => pathPoints
-    .map((point, pointIndex) => `${pointIndex === 0 ? "M" : "L"}${point.x} ${point.y}`)
-    .join("");
-  const svg = createSvgElement("svg", {
-    class: "cifar-cube__cube",
-    viewBox: `${bounds.left} ${bounds.top} ${bounds.width} ${bounds.height}`,
-    preserveAspectRatio: "none",
-    "aria-hidden": "true",
-  });
-  const topFace = [corners.topFront, corners.topLeft, corners.topBack, corners.topRight];
-  const leftFace = [corners.topFront, corners.topLeft, corners.bottomLeft, corners.bottomFront];
-  const rightFace = [corners.topFront, corners.topRight, corners.bottomRight, corners.bottomFront];
-  svg.append(
-    createSvgElement("polygon", { class: "cifar-cube__top", points: pointList(...topFace), "vector-effect": "non-scaling-stroke" }),
-    createSvgElement("polygon", { class: "cifar-cube__left", points: pointList(...leftFace), "vector-effect": "non-scaling-stroke" }),
-    createSvgElement("polygon", { class: "cifar-cube__right", points: pointList(...rightFace), "vector-effect": "non-scaling-stroke" }),
-    createSvgElement("path", {
-      class: "cifar-cube__edge",
-      d: [
-        path(corners.topFront, corners.topBack),
-        path(corners.topLeft, corners.topRight),
-        path(corners.topFront, corners.bottomLeft),
-        path(corners.topLeft, corners.bottomFront),
-        path(corners.topFront, corners.bottomRight),
-        path(corners.topRight, corners.bottomFront),
-      ].join(""),
-      "vector-effect": "non-scaling-stroke",
-    }),
-  );
-  return { svg, bounds };
-}
-
-function createAccessibleAxisSummary(axes: CifarCubeAxes) {
-  const summary = document.createElement("p");
-  summary.className = "cifar-cube__sr-only";
-  summary.textContent = [axes.x, axes.y, axes.z].map((axis) => `${axis.label}: ${axis.values.join(", ")}`).join(". ");
-  return summary;
-}
-
-/**
- * Summarizes one dataset's metadata, visualization position, and availability.
- * @param item - Dataset represented by a cube control.
- * @param axes - Axis definitions used to describe its plotted position.
- * @returns A concise accessible description for the dataset control.
- */
-function getAccessibleItemDescription(item: CifarCubeItem, axes: CifarCubeAxes) {
-  const metadata = Object.entries(item.metadata ?? {})
-    .filter((entry): entry is [string, string | number] => entry[1] !== null && entry[1] !== undefined)
-    .map(([key, value]) => `${key}: ${value}`);
-  const position = item.position;
-  const axisEntries: Array<[CifarCubeAxis, number]> = position ? [
-    [axes.x, position.x],
-    [axes.y, position.y],
-    [axes.z, position.z],
-  ] : [];
-  const axisPosition = axisEntries.map(([axis, index]) => `${axis.label}: ${axis.values[index] ?? "unknown"}`);
-  const status = item.status ?? "available";
-  const statusText = status === "current" ? "Current page" : status === "unavailable" ? "Metadata unavailable" : "Metadata available";
-  const parts = [
-    metadata.length > 0 ? metadata.join(", ") : "No dataset details provided",
-    axisPosition.length > 0 ? `Visualization position: ${axisPosition.join(", ")}` : "Visualization position not provided",
-    statusText,
-  ];
-  return `${parts.join(". ")}.`;
-}
 
 /** Accessible, responsive dataset preview custom element. */
 export class CifarCube extends HTMLElementBase {
@@ -200,6 +69,7 @@ export class CifarCube extends HTMLElementBase {
   #detailsHeadingId = `${this.#instanceId}-details-heading`;
   #updateScheduled = false;
   #validationPending = false;
+  #detailsTransition = new DetailsTransition();
 
   /** Normalized datasets currently available to the component. */
   get items() { return this.#items; }
@@ -226,6 +96,9 @@ export class CifarCube extends HTMLElementBase {
     this.#readJsonAttribute("axes", false);
     this.#readJsonAttribute("items", false);
     this.#scheduleUpdate(true);
+  }
+  disconnectedCallback() {
+    this.#detailsTransition.cancel();
   }
   attributeChangedCallback(name: string) {
     if (name !== "label") this.#readJsonAttribute(name as "axes" | "items", true);
@@ -303,11 +176,25 @@ export class CifarCube extends HTMLElementBase {
     }));
   }
 
+  /**
+   * Applies a desktop selection and coordinates focus, animation, and the public event.
+   * @param item - Validated dataset selected by the user.
+   * @param moveFocusToAction - Whether keyboard activation should focus the resulting metadata link.
+   * @returns Nothing.
+   */
   #selectItem(item: CifarCubeItem, moveFocusToAction: boolean) {
+    const selectionChanged = this.#selectedId !== item.id;
     this.#selectedId = item.id;
     this.#updateSelection();
-    if (this.#details) updateDetails(this.#details, item, this.#detailsHeadingId);
-    if (moveFocusToAction) {
+    if (selectionChanged && this.#details) {
+      this.#detailsTransition.run(this.#details, () => {
+        if (!this.#details) return;
+        updateDetails(this.#details, item, this.#detailsHeadingId);
+        if (moveFocusToAction) {
+          this.#details.querySelector<HTMLAnchorElement>(".cifar-cube__details-action")?.focus();
+        }
+      });
+    } else if (moveFocusToAction) {
       this.#details?.querySelector<HTMLAnchorElement>(".cifar-cube__details-action")?.focus();
     }
     this.dispatchEvent(new CustomEvent<CifarCubeSelectionDetail>(CIFAR_CUBE_SELECTION_EVENT, {
@@ -317,30 +204,25 @@ export class CifarCube extends HTMLElementBase {
     }));
   }
 
+  /**
+   * Creates the stable Shadow DOM regions that survive incremental selection updates.
+   * @returns Nothing.
+   */
   #createStructure() {
     const style = document.createElement("style");
     style.textContent = styles;
     const section = document.createElement("section");
     section.className = "cifar-cube";
-    const compactIntro = document.createElement("header");
-    compactIntro.className = "cifar-cube__compact-intro";
-    const compactEyebrow = document.createElement("p");
-    compactEyebrow.className = "cifar-cube__compact-eyebrow";
-    compactEyebrow.textContent = "Organ imaging datasets";
-    const compactHeading = document.createElement("h2");
-    compactHeading.className = "cifar-cube__compact-section-heading";
-    compactHeading.textContent = "Browse human organ imaging datasets";
-    const compactDescription = document.createElement("p");
-    compactDescription.className = "cifar-cube__compact-description";
-    compactDescription.textContent = "Review key details, then open the full metadata.";
-    compactIntro.append(compactEyebrow, compactHeading, compactDescription);
+    const content = document.createElement("div");
+    content.className = "cifar-cube__content";
+    const details = createDetails(this.#detailsId);
+    content.append(createIntro(), details);
     const stage = document.createElement("div");
     stage.className = "cifar-cube__stage";
     const plot = document.createElement("div");
     plot.className = "cifar-cube__plot";
     stage.append(plot);
-    const details = createDetails(this.#detailsId, this.#detailsHeadingId);
-    section.append(compactIntro, stage, details);
+    section.append(content, stage);
     this.#shadow.replaceChildren(style, section);
     this.#section = section;
     this.#details = details;
@@ -348,6 +230,10 @@ export class CifarCube extends HTMLElementBase {
     this.#plot = plot;
   }
 
+  /**
+   * Synchronizes cube controls and visual selection classes without rebuilding the scene.
+   * @returns Nothing.
+   */
   #updateSelection() {
     const selectedItem = this.#items.find((item) => item.id === this.#selectedId) ?? null;
     this.#section?.classList.toggle("cifar-cube--has-selection", Boolean(selectedItem));
@@ -358,6 +244,13 @@ export class CifarCube extends HTMLElementBase {
     });
   }
 
+  /**
+   * Adds the shared accessible state and interaction behavior to a dataset control.
+   * @param button - Native button associated with a dataset.
+   * @param item - Validated dataset controlled by the button.
+   * @param descriptionId - ID of the button's accessible dataset description.
+   * @returns Nothing.
+   */
   #configureSelectionButton(button: HTMLButtonElement, item: CifarCubeItem, descriptionId: string) {
     button.type = "button";
     button.dataset.itemId = item.id;
@@ -368,10 +261,16 @@ export class CifarCube extends HTMLElementBase {
     button.addEventListener("click", (event) => this.#selectItem(item, event.detail === 0));
   }
 
+  /**
+   * Creates the desktop fallback for datasets without usable plot coordinates.
+   * @param items - Validated datasets that cannot be positioned on the cube.
+   * @param itemIndexes - Stable source indexes used to generate unique description IDs.
+   * @returns A selectable fallback region for unpositioned datasets.
+   */
   #createUnpositionedList(items: CifarCubeItem[], itemIndexes: Map<string, number>) {
     const region = document.createElement("section");
     region.className = "cifar-cube__unpositioned";
-    const heading = document.createElement("h2");
+    const heading = document.createElement("h3");
     heading.className = "cifar-cube__unpositioned-heading";
     heading.textContent = "Not plotted";
     const guidance = document.createElement("p");
@@ -399,6 +298,10 @@ export class CifarCube extends HTMLElementBase {
     return region;
   }
 
+  /**
+   * Reconciles validated data with the stable component structure.
+   * @returns Nothing.
+   */
   #render() {
     if (!this.#section || !this.#details || !this.#stage || !this.#plot) this.#createStructure();
     if (!this.#section || !this.#details || !this.#stage || !this.#plot) return;
@@ -416,6 +319,7 @@ export class CifarCube extends HTMLElementBase {
     }
     const selectedItem = this.#items.find((item) => item.id === this.#selectedId) ?? null;
     this.#section.classList.toggle("cifar-cube--has-selection", Boolean(selectedItem));
+    this.#detailsTransition.cancel();
     updateDetails(this.#details, selectedItem, this.#detailsHeadingId);
     if (this.#items.length === 0) {
       if (axesCanBePlotted) {
@@ -444,7 +348,7 @@ export class CifarCube extends HTMLElementBase {
       }
 
       const position = getScenePosition(item.position, this.#axes);
-      const cube = createProjectedCube(item.position, this.#axes);
+      const cube = createProjectedCube(item.position, this.#axes, item.cubeScale);
       listItem.classList.add(`cifar-cube__item--card-${position.cardSide}`);
       listItem.style.setProperty("--cube-left", `${cube.bounds.left}%`);
       listItem.style.setProperty("--cube-top", `${cube.bounds.top}%`);

@@ -1,0 +1,1 @@
+{"version":3,"file":"cifar-cube-copy.d.ts","sourceRoot":"","sources":["../src/cifar-cube-copy.ts"],"names":[],"mappings":"AAAA,MAAM,WAAW,kBAAkB;IACjC,OAAO,CAAC,EAAE,MAAM,CAAC;IACjB,OAAO,EAAE,MAAM,CAAC;IAChB,WAAW,EAAE,MAAM,CAAC;CACrB;AAED,eAAO,MAAM,qBAAqB,EAAE,kBAInC,CAAC"}

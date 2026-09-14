@@ -1,6 +1,30 @@
 import type { CifarCubeItem } from "./types";
+import { CIFAR_CUBE_INTRO_COPY } from "./cifar-cube-copy";
 
 type MetadataEntry = [string, string | number];
+
+/**
+ * Creates the component introduction shared by desktop and compact layouts.
+ * @returns A heading group containing the configured introduction copy.
+ */
+export function createIntro() {
+  const intro = document.createElement("header");
+  intro.className = "cifar-cube__intro";
+  if (CIFAR_CUBE_INTRO_COPY.eyebrow) {
+    const eyebrow = document.createElement("p");
+    eyebrow.className = "cifar-cube__intro-eyebrow";
+    eyebrow.textContent = CIFAR_CUBE_INTRO_COPY.eyebrow;
+    intro.append(eyebrow);
+  }
+  const heading = document.createElement("h2");
+  heading.className = "cifar-cube__intro-heading";
+  heading.textContent = CIFAR_CUBE_INTRO_COPY.heading;
+  const description = document.createElement("p");
+  description.className = "cifar-cube__intro-description";
+  description.textContent = CIFAR_CUBE_INTRO_COPY.description;
+  intro.append(heading, description);
+  return intro;
+}
 
 /**
  * Preserves present metadata while excluding explicitly absent values.
@@ -97,19 +121,16 @@ export function createPreviewCard(item: CifarCubeItem) {
 }
 
 /**
- * Creates the persistent desktop details region for the selected dataset.
+ * Creates the persistent live region for desktop dataset details.
  * @param detailsId - Stable ID used by dataset controls to reference the panel.
- * @param headingId - Stable ID used to label the details landmark.
- * @returns An accessible details panel with an explicit destination action.
+ * @returns An empty live region populated after a dataset is selected.
  */
-export function createDetails(detailsId: string, headingId: string) {
-  const details = document.createElement("aside");
+export function createDetails(detailsId: string) {
+  const details = document.createElement("div");
   details.className = "cifar-cube__details";
   details.id = detailsId;
   details.setAttribute("aria-live", "polite");
   details.setAttribute("aria-atomic", "true");
-  details.setAttribute("aria-labelledby", headingId);
-  updateDetails(details, null, headingId);
   return details;
 }
 
@@ -122,27 +143,24 @@ export function createDetails(detailsId: string, headingId: string) {
  */
 export function updateDetails(details: HTMLElement, item: CifarCubeItem | null, headingId: string) {
   details.replaceChildren();
+  if (!item) return details;
 
+  const card = document.createElement("article");
+  card.className = "cifar-cube__details-card";
+  card.setAttribute("aria-labelledby", headingId);
   const eyebrow = document.createElement("p");
   eyebrow.className = "cifar-cube__details-eyebrow";
-  eyebrow.textContent = item ? "Selected dataset" : "Organ imaging datasets";
-  const heading = document.createElement("h2");
+  eyebrow.textContent = "Selected dataset";
+  const heading = document.createElement("h3");
   heading.className = "cifar-cube__details-heading";
   heading.id = headingId;
-  heading.textContent = item?.label ?? "Explore organ imaging datasets";
-  details.append(eyebrow, heading);
-
-  if (!item) {
-    const guidance = document.createElement("p");
-    guidance.className = "cifar-cube__details-guidance";
-    guidance.textContent = "Select a dataset to inspect its details.";
-    details.append(guidance);
-    return details;
-  }
+  heading.textContent = item.label;
+  card.append(eyebrow, heading);
 
   const metadata = createMetadataList(item);
-  if (metadata) details.append(metadata);
-  details.append(createDestination(item, "cifar-cube__details-action"));
+  if (metadata) card.append(metadata);
+  card.append(createDestination(item, "cifar-cube__details-action"));
+  details.append(card);
   return details;
 }
 

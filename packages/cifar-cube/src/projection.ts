@@ -106,7 +106,7 @@ export function getScenePosition(position: CifarCubePosition, axes: CifarCubeAxe
   return {
     left: `${point.x}%`,
     top: `${point.y}%`,
-    layer: `${Math.round(point.y * 10)}`,
+    layer: `${Math.round((2 - normalized.x - normalized.z) * 1000)}`,
     cardSide: point.x > 66 ? "left" : "right",
   };
 }
@@ -115,11 +115,16 @@ export function getScenePosition(position: CifarCubePosition, axes: CifarCubeAxe
  * Computes projected corners and bounds for a cube at a validated position.
  * @param position - Validated axis indexes.
  * @param axes - Validated axes used to size and place the cube.
+ * @param cubeScale - Relative cube size greater than zero and no larger than one.
  * @returns Projected corners and percentage bounds.
  */
-export function getProjectedCubeGeometry(position: CifarCubePosition, axes: CifarCubeAxes): ProjectedCubeGeometry {
+export function getProjectedCubeGeometry(
+  position: CifarCubePosition,
+  axes: CifarCubeAxes,
+  cubeScale = 1,
+): ProjectedCubeGeometry {
   const center = getNormalizedPosition(position, axes);
-  const halfSize = 0.5 / Math.max(axes.x.values.length, axes.y.values.length, axes.z.values.length, 1);
+  const halfSize = (0.5 / Math.max(axes.x.values.length, axes.y.values.length, axes.z.values.length, 1)) * cubeScale;
   const low = (value: number) => Math.max(0, value - halfSize);
   const high = (value: number) => Math.min(1, value + halfSize);
   const x0 = low(center.x);

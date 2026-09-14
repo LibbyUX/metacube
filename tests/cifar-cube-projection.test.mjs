@@ -49,6 +49,14 @@ test("getProjectedCubeGeometry returns positive bounds around every corner", () 
   assert.ok(corners.every((point) => point.y <= geometry.bounds.top + geometry.bounds.height));
 });
 
+test("getProjectedCubeGeometry scales a cube around its projected position", () => {
+  const fullSize = getProjectedCubeGeometry({ x: 0, y: 0, z: 1 }, axes);
+  const smaller = getProjectedCubeGeometry({ x: 0, y: 0, z: 1 }, axes, 0.8);
+
+  assert.ok(smaller.bounds.width < fullSize.bounds.width);
+  assert.ok(smaller.bounds.height < fullSize.bounds.height);
+});
+
 test("getScenePosition provides CSS placement and deterministic layering", () => {
   const scenePosition = getScenePosition({ x: 0, y: 0, z: 0 }, axes);
 
@@ -56,4 +64,11 @@ test("getScenePosition provides CSS placement and deterministic layering", () =>
   assert.match(scenePosition.top, /%$/);
   assert.match(scenePosition.layer, /^\d+$/);
   assert.ok(scenePosition.cardSide === "left" || scenePosition.cardSide === "right");
+});
+
+test("getScenePosition paints nearer x and z positions over farther positions", () => {
+  const farther = getScenePosition({ x: 0, y: 0, z: 1 }, axes);
+  const nearer = getScenePosition({ x: 1, y: 0, z: 0 }, axes);
+
+  assert.ok(Number(nearer.layer) > Number(farther.layer));
 });

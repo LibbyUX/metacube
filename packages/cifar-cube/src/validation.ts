@@ -1,6 +1,5 @@
 import type {
   CifarCubeAxes,
-  CifarCubeAxis,
   CifarCubeItem,
   CifarCubeItemStatus,
   CifarCubePosition,
@@ -226,6 +225,15 @@ export function validateItems(input: unknown, axes: CifarCubeAxes): ValidationRe
     }
 
     const metadata = validateMetadata(candidate.metadata, `${path}.metadata`, id, issues);
+    let cubeScale: number | undefined;
+    if (candidate.cubeScale !== undefined) {
+      if (typeof candidate.cubeScale === "number" && Number.isFinite(candidate.cubeScale)
+        && candidate.cubeScale > 0 && candidate.cubeScale <= 1) {
+        cubeScale = candidate.cubeScale;
+      } else {
+        issues.push(issue("item.cube-scale.invalid", "Cube scale must be greater than zero and no larger than one; the default size is used.", `${path}.cubeScale`, "warning", id));
+      }
+    }
     let position = validatePosition(candidate.position, axes, `${path}.position`, id, issues);
     if (position) {
       const positionKey = `${position.x}:${position.y}:${position.z}`;
@@ -234,7 +242,15 @@ export function validateItems(input: unknown, axes: CifarCubeAxes): ValidationRe
         position = undefined;
       } else positions.add(positionKey);
     }
-    items.push({ id, label, ...(href ? { href } : {}), ...(metadata ? { metadata } : {}), ...(position ? { position } : {}), status });
+    items.push({
+      id,
+      label,
+      ...(href ? { href } : {}),
+      ...(metadata ? { metadata } : {}),
+      ...(position ? { position } : {}),
+      ...(cubeScale !== undefined ? { cubeScale } : {}),
+      status,
+    });
   });
 
   return { value: items, issues };
