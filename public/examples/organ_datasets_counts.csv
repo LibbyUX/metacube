@@ -1,7 +1,7 @@
 dataset,sex,scale,age,organ,count
 bader-liver-sem-sbf,Male,100-microns,45,Liver,1
-lee-kidney-hipct,Male,10-centimeters,63,Kidney,1
-lee-kidney-hipct,Male,10-centimeters,85,Kidney,1
+lee-kidney-hipct-63,Male,10-centimeters,63,Kidney,1
+lee-kidney-hipct-85,Male,10-centimeters,85,Kidney,1
 lee-heart-hipct,Male,10-centimeters,63,Heart,1
 teichmann-heart-hra-pop,Male & female (multiple),100-microns,~40-70,Heart,1
 zandstra-thymus-codex,Male & female (multiple),100-microns,4-5 months,Thymus,1

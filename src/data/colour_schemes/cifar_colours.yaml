@@ -1,6 +1,5 @@
-# CIFAR Angular Material theme. Values map only to the stable `Schemes` groups
-# in src/CIFAR Light.tokens.json and src/CIFAR Dark.tokens.json. Alpha is added
-# only where metacube overlays need to reveal the 3D scene beneath them.
+# CIFAR Angular Material theme. Values use semantic Material color roles.
+# Alpha is added only where metacube overlays need to reveal the 3D scene.
 
 light:
   background:          "#FCFCFC" # Background

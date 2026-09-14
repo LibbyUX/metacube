@@ -121,7 +121,7 @@ uniqueDestinations.forEach((dataset, href) => {
   heading.textContent = dataset.label;
 
   const identifier = document.createElement("p");
-  identifier.textContent = `Metadata ID: ${dataset.id.replace(/-\d+$/, "")}`;
+  identifier.textContent = `Metadata ID: ${dataset.id}`;
 
   article.append(heading, identifier);
   metadataDestinations?.append(article);
