@@ -43,6 +43,7 @@ The package intentionally contains no `dependencies` or `devDependencies`. The r
 | `src/validation.ts` | Runtime normalization, URL safety, and validation issues. |
 | `src/cifar-cube-copy.ts` | Editable introduction copy. |
 | `src/cifar-cube.css` | Encapsulated responsive presentation and state styling. |
+| `src/cifar-cube-data.css` | Dimension key and dataset-detail presentation. |
 
 ## Acknowledgment
 
@@ -161,11 +162,11 @@ Read `element.items`, `element.axes`, and `element.validationIssues` to inspect 
 
 ### Events
 
-`cifar-cube-selection-change` fires after a desktop dataset is selected:
+`cifar-cube-selection-change` fires after a desktop selection changes. Closing the selected-dataset card emits `null`:
 
 ```ts
 element.addEventListener("cifar-cube-selection-change", (event) => {
-  console.log(event.detail.item);
+  console.log(event.detail.item ?? "Selection cleared");
 });
 ```
 
@@ -207,20 +208,25 @@ The current handoff intentionally has no quantitative color scale. Cube fill com
 
 ### Typography
 
-The component consumes Angular Material system typography properties when the host defines them and uses matching Material 3 fallbacks otherwise. The desktop introduction uses `display-small`; the compact introduction uses `headline-medium`. The intro, eyebrows, and axis titles are the only intentional 600-weight treatments. Other label roles defer to their M3 weight tokens, while dataset-card headings and stat terms retain their approved 500-weight treatment. The desktop intro and selected-card column does not create an independent scroll region.
+The component consumes Angular Material system typography properties when the host defines them and uses matching Material 3 fallbacks otherwise. The desktop introduction uses `headline-large`; the compact introduction uses `headline-medium`. Introduction headings use their role-specific weight tokens with an approved 600-weight fallback, while dimension-key headers, eyebrows, and axis titles use the approved 600-weight treatment. Other roles defer to their M3 weight tokens, while dataset-card headings and stat terms retain their approved 500-weight treatment. The desktop intro and selected-card column does not create an independent scroll region.
 
 The host application owns font loading. The Roboto files used by this repository belong to the preview page and are not runtime dependencies of the web component.
 
 ### Intro copy
 
-The prototype introduction is managed in `src/cifar-cube-copy.ts`. `heading` and `description` are required; `eyebrow` is optional and disappears without leaving an empty element when omitted. This is an internal handoff configuration, not a public custom-element property. The receiving team can keep it internal or expose host-provided copy if reuse requires that flexibility.
+The prototype introduction is managed in `src/cifar-cube-copy.ts`. The eyebrow and heading are shared across layouts. Above `64rem`, a compact, divider-separated dimension key with visual column headings explains the cube and includes selection guidance. Selecting a cube replaces the dimension key and its headings with a closable dataset card in the same left-column position; closing it restores the key and returns focus to the selected cube. The Metacube acknowledgment remains anchored to the bottom of the desktop content column in either state. At `64rem` and below, visualization-specific content is removed from the layout and accessibility tree and replaced by a dataset-focused description above the direct metadata cards.
+
+The dimension key and dataset cards use semantic definition lists with subtle row separators. Selected desktop cards and direct compact cards use the container surface. The preview titles use a consistent organ and spatial-scale sequence; the component itself continues to display whatever label the host supplies.
+
+The structured copy includes `visualization` and `compactDescription` variants; `eyebrow` remains optional and disappears without leaving an empty element when omitted. This is an internal handoff configuration, not a public custom-element property. The receiving team can keep it internal or expose host-provided copy if reuse requires that flexibility.
 
 ## Accessibility behavior
 
 - Desktop cubes are native buttons with unique accessible names, descriptions, selected state, and a relationship to the persistent details region.
 - Keyboard activation moves focus directly to the selected dataset's metadata action. Pointer activation keeps focus on the cube.
 - Compact layouts remove the selection step and expose a direct metadata link on every card.
-- The introduction remains visible after desktop selection. The details region remains mounted, inserts a semantically headed dataset card beneath it, and announces selection changes politely.
+- Visualization dimensions and card metadata use semantic definition lists.
+- The introduction remains visible after desktop selection. The persistent details region replaces the dimension key with a semantically headed dataset card and announces selection changes politely. Closing the card restores the key and returns focus to the previously selected cube.
 - Current, unavailable, hover, focus, and selected states do not rely on color alone.
 - Reduced-motion and Windows forced-colors preferences are supported.
 - Axis text has an equivalent screen-reader summary; decorative SVG geometry is hidden from assistive technology.

@@ -39,9 +39,9 @@ export interface CifarCubeItem {
     /** Availability state; defaults to available when a valid destination exists. */
     status?: CifarCubeItemStatus;
 }
-/** Detail emitted when a dataset is selected on the desktop canvas. */
+/** Detail emitted when a desktop selection changes. */
 export interface CifarCubeSelectionDetail {
-    item: CifarCubeItem;
+    item: CifarCubeItem | null;
 }
 export type CifarCubeValidationSeverity = "error" | "warning";
 /** One actionable problem found while normalizing component input. */
