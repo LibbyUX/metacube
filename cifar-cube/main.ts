@@ -6,12 +6,12 @@ import {
 } from "../packages/cifar-cube/src";
 
 const SPATIAL_SCALES = {
-  hundredMicrons: { label: "100-microns", notation: "10⁻⁴" },
-  tenCentimeters: { label: "10-centimeters", notation: "10⁻¹" },
+  hundredMicrons: { label: "100 µm" },
+  tenCentimeters: { label: "100 mm" },
 } as const;
 
-function createDatasetLabel(label: string, spatialScale: { notation: string }) {
-  return `${label}, ${spatialScale.notation}`;
+function createDatasetLabel(label: string, spatialScale: { label: string }) {
+  return `${label}, ${spatialScale.label}`;
 }
 
 const ORGAN_DATASET_AXES: CifarCubeAxes = {

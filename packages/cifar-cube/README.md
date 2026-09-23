@@ -237,6 +237,8 @@ npm run dev
 
 Open `/cifar-cube/index.html` for the component preview.
 
+The example configuration displays its spatial-scale categories as `100 µm` and `100 mm`. These labels are preview data rather than hard-coded component defaults, and the preview uses them consistently in the axes, dataset headings, metadata, and accessible descriptions.
+
 Run the non-installing validation commands:
 
 ```bash
