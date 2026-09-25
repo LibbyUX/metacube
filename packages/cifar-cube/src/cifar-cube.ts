@@ -1,5 +1,6 @@
 import styles from "./cifar-cube.css?inline";
-import { createCompactCard, createDetails, createIntro, createPreviewCard, updateDetails } from "./cifar-cube-cards";
+import dataStyles from "./cifar-cube-data.css?inline";
+import { createCompactCard, createDetails, createIntro, createPreviewCard, getAccessibleDatasetName, updateDetails } from "./cifar-cube-cards";
 import {
   createAccessibleAxisSummary,
   createAxisLabels,
@@ -189,7 +190,7 @@ export class CifarCube extends HTMLElementBase {
     if (selectionChanged && this.#details) {
       this.#detailsTransition.run(this.#details, () => {
         if (!this.#details) return;
-        updateDetails(this.#details, item, this.#detailsHeadingId);
+        updateDetails(this.#details, item, this.#detailsHeadingId, () => this.#closeDetails());
         if (moveFocusToAction) {
           this.#details.querySelector<HTMLAnchorElement>(".cifar-cube__details-action")?.focus();
         }
@@ -205,18 +206,39 @@ export class CifarCube extends HTMLElementBase {
   }
 
   /**
+   * Clears the desktop selection, restores the dimension key, and returns focus to its cube.
+   * @returns Nothing.
+   */
+  #closeDetails() {
+    const selectedId = this.#selectedId;
+    if (!selectedId || !this.#details) return;
+    const selectedButton = [...this.#shadow.querySelectorAll<HTMLButtonElement>("[data-item-id]")]
+      .find((button) => button.dataset.itemId === selectedId);
+    this.#detailsTransition.cancel();
+    this.#selectedId = null;
+    this.#updateSelection();
+    updateDetails(this.#details, null, this.#detailsHeadingId, () => this.#closeDetails());
+    selectedButton?.focus();
+    this.dispatchEvent(new CustomEvent<CifarCubeSelectionDetail>(CIFAR_CUBE_SELECTION_EVENT, {
+      bubbles: true,
+      composed: true,
+      detail: { item: null },
+    }));
+  }
+
+  /**
    * Creates the stable Shadow DOM regions that survive incremental selection updates.
    * @returns Nothing.
    */
   #createStructure() {
     const style = document.createElement("style");
-    style.textContent = styles;
+    style.textContent = `${styles}\n${dataStyles}`;
     const section = document.createElement("section");
     section.className = "cifar-cube";
     const content = document.createElement("div");
     content.className = "cifar-cube__content";
     const details = createDetails(this.#detailsId);
-    content.append(createIntro(), details);
+    content.append(createIntro(details));
     const stage = document.createElement("div");
     stage.className = "cifar-cube__stage";
     const plot = document.createElement("div");
@@ -254,7 +276,7 @@ export class CifarCube extends HTMLElementBase {
   #configureSelectionButton(button: HTMLButtonElement, item: CifarCubeItem, descriptionId: string) {
     button.type = "button";
     button.dataset.itemId = item.id;
-    button.setAttribute("aria-label", `Select ${item.label}`);
+    button.setAttribute("aria-label", `Select ${getAccessibleDatasetName(item)}`);
     button.setAttribute("aria-describedby", descriptionId);
     button.setAttribute("aria-controls", this.#detailsId);
     button.setAttribute("aria-pressed", String(item.id === this.#selectedId));
@@ -320,7 +342,7 @@ export class CifarCube extends HTMLElementBase {
     const selectedItem = this.#items.find((item) => item.id === this.#selectedId) ?? null;
     this.#section.classList.toggle("cifar-cube--has-selection", Boolean(selectedItem));
     this.#detailsTransition.cancel();
-    updateDetails(this.#details, selectedItem, this.#detailsHeadingId);
+    updateDetails(this.#details, selectedItem, this.#detailsHeadingId, () => this.#closeDetails());
     if (this.#items.length === 0) {
       if (axesCanBePlotted) {
         const empty = document.createElement("p");

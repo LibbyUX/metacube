@@ -62,11 +62,29 @@ await nextLayout();
 const shadow = component.shadowRoot;
 if (!shadow) throw new Error("Component shadow root was not created.");
 
-await test("one introduction remains available across responsive layouts", () => {
+await test("desktop introduction explains the visualization with semantic dimensions", () => {
   const intro = shadow.querySelectorAll(".cifar-cube__intro");
   assert(intro.length === 1, "The component should render one shared introduction.");
   assert(Boolean(intro[0].querySelector(".cifar-cube__intro-heading")), "The introduction heading is missing.");
-  assert(Boolean(intro[0].querySelector(".cifar-cube__intro-description")), "The introduction guidance is missing.");
+  const visualization = intro[0].querySelector<HTMLElement>(".cifar-cube__intro-visualization");
+  const compactDescription = intro[0].querySelector<HTMLElement>(".cifar-cube__intro-compact");
+  assert(visualization && getComputedStyle(visualization).display !== "none", "Visualization guidance should be visible on desktop.");
+  assert(compactDescription && getComputedStyle(compactDescription).display === "none", "Compact guidance should be hidden on desktop.");
+  assert(
+    visualization.querySelector(".cifar-cube__intro-summary")?.textContent === "This visualization compares datasets across three dimensions. Select a cube to view its details.",
+    "Visualization guidance should combine the comparison and selection instructions.",
+  );
+  const dimensionKey = visualization.querySelector<HTMLDListElement>("dl.cifar-cube__intro-dimensions");
+  const dimensionHeadings = [...visualization.querySelectorAll(".cifar-cube__intro-dimensions-header span")].map((heading) => heading.textContent);
+  const terms = [...(dimensionKey?.querySelectorAll("dt") ?? [])].map((term) => term.textContent);
+  assert(dimensionHeadings.join(",") === "Dimension,What it represents", "The dimension key should expose its visual column headings.");
+  assert(terms.join(",") === "Spatial scale,Age (years),Organ", "Visualization dimensions should use semantic terms.");
+  const attribution = visualization.querySelector<HTMLAnchorElement>(".cifar-cube__intro-attribution a");
+  assert(attribution?.getAttribute("href") === "https://github.com/Chair-for-Clinical-Bioinformatics/metacube", "Visualization attribution is missing.");
+  assert(
+    attribution?.parentElement?.textContent === "Visualization inspired by Metacube from the Chair for Clinical Bioinformatics.",
+    "Visualization attribution should credit the Metacube source.",
+  );
 });
 
 await test("cube controls have unique names, descriptions, state, and details relationships", () => {
@@ -91,15 +109,17 @@ await test("keyboard activation focuses the action and keeps the live region mou
   const action = shadow.querySelector<HTMLAnchorElement>(".cifar-cube__details-action");
   assert(shadow.querySelector(".cifar-cube__details") === details, "Live region was replaced.");
   assert(shadow.activeElement === action, "Keyboard selection did not move focus to the metadata action.");
-  assert(action?.getAttribute("aria-label") === "View metadata for Dataset one", "Action name does not identify its dataset.");
+  assert(action?.getAttribute("aria-label") === "View metadata for Dataset one; Organ: Heart", "Action name does not identify its dataset and metadata.");
 });
 
-await test("desktop layout keeps the intro visible above the selected dataset card", async () => {
+await test("desktop selection swaps the dimension key for a closable dataset card", async () => {
   const section = shadow.querySelector<HTMLElement>(".cifar-cube");
   const intro = shadow.querySelector<HTMLElement>(".cifar-cube__intro");
   const details = shadow.querySelector<HTMLElement>(".cifar-cube__details");
+  const dimensionKey = shadow.querySelector<HTMLElement>(".cifar-cube__intro-dimensions");
+  const dimensionHeader = shadow.querySelector<HTMLElement>(".cifar-cube__intro-dimensions-header");
   const button = shadow.querySelectorAll<HTMLButtonElement>(".cifar-cube__select")[1];
-  assert(section && intro && details && button, "Fixture is missing desktop layout elements.");
+  assert(section && intro && details && dimensionKey && dimensionHeader && button, "Fixture is missing desktop layout elements.");
   assert(getComputedStyle(section).gridTemplateAreas.includes("content stage"), "Desktop content should precede the visualization.");
   button.click();
   if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -107,8 +127,29 @@ await test("desktop layout keeps the intro visible above the selected dataset ca
   }
   await waitFor(() => details.querySelector(".cifar-cube__details-heading")?.textContent === "Dataset two");
   assert(intro.isConnected, "Selecting a dataset should not replace the introduction.");
+  assert(details.parentElement?.classList.contains("cifar-cube__intro-visualization"), "Details should occupy the dimension key region.");
+  assert(getComputedStyle(dimensionHeader).display === "none", "The dimension headings should be hidden while details are open.");
+  assert(getComputedStyle(dimensionKey).display === "none", "The dimension key should be hidden while details are open.");
   assert(details.querySelector("h3.cifar-cube__details-heading"), "The selected dataset title should be a level-three heading.");
-  assert(Boolean(details.querySelector(".cifar-cube__details-card")), "Selection should render a dataset card below the introduction.");
+  assert(Boolean(details.querySelector(".cifar-cube__details-card")), "Selection should render a dataset card in the introduction.");
+  const metadata = details.querySelector("dl.cifar-cube__details-metadata");
+  const metadataTerms = [...(metadata?.querySelectorAll("dt") ?? [])].map((term) => term.textContent);
+  assert(metadata && metadataTerms.includes("Organ") && metadataTerms.includes("Lead author"), "Selected metadata needs semantic labels.");
+  let clearedItem: CifarCubeItem | null | undefined;
+  component.addEventListener(CIFAR_CUBE_SELECTION_EVENT, (event) => {
+    clearedItem = event.detail.item;
+  }, { once: true });
+  const close = details.querySelector<HTMLButtonElement>(".cifar-cube__details-close");
+  assert(close?.getAttribute("aria-label") === "Close dataset details", "The details card needs an accessible close button.");
+  const closeIcon = close.querySelector("svg.cifar-cube__details-close-icon");
+  assert(closeIcon?.getAttribute("fill") === "currentColor" && closeIcon.getAttribute("aria-hidden") === "true", "The close icon should inherit the on-surface color and remain decorative.");
+  close.click();
+  assert(component.selectedId === null && clearedItem === null, "Closing details should clear and report the selection.");
+  assert(details.childElementCount === 0, "Closing details should clear the persistent details region.");
+  assert(getComputedStyle(dimensionHeader).display === "grid", "Closing details should restore the dimension headings.");
+  assert(getComputedStyle(dimensionKey).display === "block", "Closing details should restore the dimension key.");
+  assert(shadow.activeElement === button, "Closing details should return focus to the previously selected cube.");
+  assert([...shadow.querySelectorAll(".cifar-cube__select")].every((control) => control.getAttribute("aria-pressed") === "false"), "Closing details should clear every pressed state.");
 });
 
 await test("pointer selection retains the cube control focus", () => {
@@ -121,7 +162,7 @@ await test("pointer selection retains the cube control focus", () => {
 await test("selection events cross the shadow boundary with the selected item", () => {
   let selectedId: string | undefined;
   component.addEventListener(CIFAR_CUBE_SELECTION_EVENT, (event) => {
-    selectedId = (event as CustomEvent<{ item: CifarCubeItem }>).detail.item.id;
+    selectedId = (event as CustomEvent<{ item: CifarCubeItem | null }>).detail.item?.id;
   }, { once: true });
   shadow.querySelector<HTMLButtonElement>(".cifar-cube__select")?.click();
   assert(selectedId === "one", "Selection event detail was not exposed.");
@@ -158,9 +199,15 @@ await test("compact mode exposes direct cards and removes the selection step", a
   const select = shadow.querySelector<HTMLElement>(".cifar-cube__select");
   const details = shadow.querySelector<HTMLElement>(".cifar-cube__details");
   const cards = [...shadow.querySelectorAll<HTMLElement>(".cifar-cube__compact-card")];
+  const visualization = shadow.querySelector<HTMLElement>(".cifar-cube__intro-visualization");
+  const compactDescription = shadow.querySelector<HTMLElement>(".cifar-cube__intro-compact");
   assert(select && getComputedStyle(select).display === "none", "Cube selection remains exposed in compact mode.");
   assert(details && getComputedStyle(details).display === "none", "Desktop details remain exposed in compact mode.");
+  assert(visualization && getComputedStyle(visualization).display === "none", "Visualization guidance remains exposed in compact mode.");
+  assert(compactDescription && getComputedStyle(compactDescription).display === "block", "Dataset guidance should be visible in compact mode.");
+  assert(!compactDescription.textContent?.toLowerCase().includes("cube"), "Compact guidance should describe the datasets rather than the visualization.");
   assert(cards.length === items.length && cards.every((card) => getComputedStyle(card).display === "flex"), "Every dataset needs a compact card.");
+  assert(cards.every((card) => card.querySelector("dl.cifar-cube__details-metadata")), "Every compact card needs a metadata description list.");
   const linkNames = cards.map((card) => card.querySelector("a")?.getAttribute("aria-label"));
   assert(new Set(linkNames).size === items.length, "Compact links need unique accessible names.");
 });

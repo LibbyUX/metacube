@@ -6,12 +6,18 @@ import {
 } from "../packages/cifar-cube/src";
 
 const SPATIAL_SCALES = {
-  hundredMicrons: { label: "100-microns", notation: "10⁻⁴" },
-  tenCentimeters: { label: "10-centimeters", notation: "10⁻¹" },
+  hundredMicrons: { label: "100 µm" },
+  tenCentimeters: { label: "100 mm" },
 } as const;
 
-function createDatasetLabel(label: string, spatialScale: { notation: string }) {
-  return `${label}, ${spatialScale.notation}`;
+/**
+ * Formats preview dataset titles in a consistent identifying sequence.
+ * @param organ - Tissue source represented by the dataset.
+ * @param spatialScale - Display scale assigned to the dataset.
+ * @returns A title ordered by organ and scale.
+ */
+function createDatasetLabel(organ: string, spatialScale: { label: string }) {
+  return `${organ}, ${spatialScale.label}`;
 }
 
 const ORGAN_DATASET_AXES: CifarCubeAxes = {
@@ -25,52 +31,52 @@ type PreviewDataset = CifarCubeItem & { href: string };
 const datasets: PreviewDataset[] = [
   {
     id: "bader-liver-sbf-sem",
-    label: createDatasetLabel("Bader liver SBF/SEM", SPATIAL_SCALES.hundredMicrons),
+    label: createDatasetLabel("Liver", SPATIAL_SCALES.hundredMicrons),
     href: "#metadata-bader-liver-sbf-sem",
-    metadata: { Organ: "Liver", "Spatial scale": SPATIAL_SCALES.hundredMicrons.label, Age: "45", Sex: "Male" },
+    metadata: { Organ: "Liver", "Spatial scale": SPATIAL_SCALES.hundredMicrons.label, Age: "45", Sex: "Male", "Lead author": "Gary Bader" },
     position: { x: 0, y: 0, z: 3 },
     cubeScale: 0.82,
   },
   {
     id: "lee-kidney-hipct-63",
-    label: createDatasetLabel("Lee kidney HiP-CT — age 63", SPATIAL_SCALES.tenCentimeters),
+    label: createDatasetLabel("Kidney", SPATIAL_SCALES.tenCentimeters),
     href: "#metadata-lee-kidney-hipct-63",
-    metadata: { Organ: "Kidney", "Spatial scale": SPATIAL_SCALES.tenCentimeters.label, Age: "63", Sex: "Male" },
+    metadata: { Organ: "Kidney", "Spatial scale": SPATIAL_SCALES.tenCentimeters.label, Age: "63", Sex: "Male", "Lead author": "Peter D. Lee" },
     position: { x: 1, y: 1, z: 2 },
   },
   {
     id: "lee-kidney-hipct-85",
-    label: createDatasetLabel("Lee kidney HiP-CT — age 85", SPATIAL_SCALES.tenCentimeters),
+    label: createDatasetLabel("Kidney", SPATIAL_SCALES.tenCentimeters),
     href: "#metadata-lee-kidney-hipct-85",
-    metadata: { Organ: "Kidney", "Spatial scale": SPATIAL_SCALES.tenCentimeters.label, Age: "85", Sex: "Male" },
+    metadata: { Organ: "Kidney", "Spatial scale": SPATIAL_SCALES.tenCentimeters.label, Age: "85", Sex: "Male", "Lead author": "Peter D. Lee" },
     position: { x: 1, y: 2, z: 2 },
   },
   {
     id: "lee-heart-hipct",
-    label: createDatasetLabel("Lee heart HiP-CT", SPATIAL_SCALES.tenCentimeters),
+    label: createDatasetLabel("Heart", SPATIAL_SCALES.tenCentimeters),
     href: "#metadata-lee-heart-hipct",
-    metadata: { Organ: "Heart", "Spatial scale": SPATIAL_SCALES.tenCentimeters.label, Age: "63", Sex: "Male" },
+    metadata: { Organ: "Heart", "Spatial scale": SPATIAL_SCALES.tenCentimeters.label, Age: "63", Sex: "Male", "Lead author": "Peter D. Lee" },
     position: { x: 1, y: 1, z: 1 },
   },
   {
     id: "teichmann-heart-hra-pop",
-    label: createDatasetLabel("Teichmann heart HRA population", SPATIAL_SCALES.hundredMicrons),
+    label: createDatasetLabel("Heart", SPATIAL_SCALES.hundredMicrons),
     href: "#metadata-teichmann-heart-hra-pop",
-    metadata: { Organ: "Heart", "Spatial scale": SPATIAL_SCALES.hundredMicrons.label, Age: "~40–70", Sex: "Multiple" },
+    metadata: { Organ: "Heart", "Spatial scale": SPATIAL_SCALES.hundredMicrons.label, Age: "~40–70", Sex: "Multiple", "Lead author": "Sarah Teichmann" },
     position: { x: 0, y: 3, z: 1 },
   },
   {
     id: "zandstra-thymus-codex",
-    label: createDatasetLabel("Zandstra thymus CODEX", SPATIAL_SCALES.hundredMicrons),
+    label: createDatasetLabel("Thymus", SPATIAL_SCALES.hundredMicrons),
     href: "#metadata-zandstra-thymus-codex",
-    metadata: { Organ: "Thymus", "Spatial scale": SPATIAL_SCALES.hundredMicrons.label, Age: "4–5 months", Sex: "Multiple" },
+    metadata: { Organ: "Thymus", "Spatial scale": SPATIAL_SCALES.hundredMicrons.label, Age: "4–5 months", Sex: "Multiple", "Lead author": "Peter W. Zandstra" },
     position: { x: 0, y: 4, z: 0 },
   },
   {
     id: "bader-liver-xenium",
-    label: createDatasetLabel("Bader liver Xenium", SPATIAL_SCALES.hundredMicrons),
+    label: createDatasetLabel("Liver", SPATIAL_SCALES.hundredMicrons),
     href: "#metadata-bader-liver-xenium",
-    metadata: { Organ: "Liver", "Spatial scale": SPATIAL_SCALES.hundredMicrons.label, Age: "7–47", Sex: "Multiple" },
+    metadata: { Organ: "Liver", "Spatial scale": SPATIAL_SCALES.hundredMicrons.label, Age: "7–47", Sex: "Multiple", "Lead author": "Gary Bader" },
     position: { x: 0, y: 5, z: 3 },
   },
 ];

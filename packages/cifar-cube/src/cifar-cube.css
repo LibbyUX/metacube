@@ -27,7 +27,7 @@
 * { box-sizing: border-box; }
 .cifar-cube {
   display: grid;
-  grid-template-columns: minmax(18rem, 26rem) minmax(0, 1fr);
+  grid-template-columns: minmax(22rem, 28rem) minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
   grid-template-areas: "content stage";
   gap: clamp(1.5rem, 3vw, 4rem);
@@ -40,13 +40,14 @@
 }
 .cifar-cube__content {
   grid-area: content;
-  align-self: start;
+  align-self: stretch;
   display: flex;
   flex-direction: column;
-  gap: clamp(2.5rem, 6vh, 4rem);
+  gap: clamp(1.5rem, 3vh, 2.5rem);
   width: 100%;
+  height: 100%;
   min-height: 0;
-  padding: clamp(1.5rem, 2.5vw, 2.25rem);
+  padding: 0 0 1rem;
 }
 .cifar-cube__stage {
   grid-area: stage;
@@ -296,6 +297,12 @@
   background: var(--_primary-container);
   color: var(--_on-primary-container);
 }
+.cifar-cube__intro {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
 .cifar-cube__intro-eyebrow,
 .cifar-cube__details-eyebrow {
   margin: 0 0 0.5rem;
@@ -309,11 +316,12 @@
 }
 .cifar-cube__intro-heading {
   margin: 0;
-  font-family: var(--mat-sys-display-small-font, Roboto, Arial, sans-serif);
-  font-size: var(--mat-sys-display-small-size, 2.25rem);
-  font-weight: 600;
-  line-height: var(--mat-sys-display-small-line-height, 2.75rem);
-  letter-spacing: var(--mat-sys-display-small-tracking, 0);
+  font-family: var(--mat-sys-headline-large-font, Roboto, Arial, sans-serif);
+  font-size: var(--mat-sys-headline-large-size, 2rem);
+  font-weight: var(--mat-sys-headline-large-weight, 600);
+  line-height: var(--mat-sys-headline-large-line-height, 2.5rem);
+  letter-spacing: var(--mat-sys-headline-large-tracking, 0);
+  white-space: nowrap;
 }
 .cifar-cube__details-heading,
 .cifar-cube__compact-heading {
@@ -324,7 +332,7 @@
   line-height: var(--mat-sys-title-large-line-height, 1.75rem);
   letter-spacing: var(--mat-sys-title-large-tracking, 0);
 }
-.cifar-cube__intro-description,
+.cifar-cube__intro-compact,
 .cifar-cube__details-unavailable {
   margin: 1rem 0 0;
   color: var(--_on-surface-variant);
@@ -334,6 +342,22 @@
   line-height: var(--mat-sys-body-large-line-height, 1.5rem);
   letter-spacing: var(--mat-sys-body-large-tracking, 0.03125rem);
 }
+.cifar-cube__intro-visualization {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  margin: 0.75rem 0 0;
+  color: var(--_on-surface-variant);
+  font-family: var(--mat-sys-body-medium-font, Roboto, Arial, sans-serif);
+  font-size: var(--mat-sys-body-medium-size, 0.875rem);
+  font-weight: var(--mat-sys-body-medium-weight, 400);
+  line-height: var(--mat-sys-body-medium-line-height, 1.25rem);
+  letter-spacing: var(--mat-sys-body-medium-tracking, 0.015625rem);
+}
+.cifar-cube__intro-summary,
+.cifar-cube__intro-attribution { margin: 0; }
+.cifar-cube__intro-compact { display: none; }
 .cifar-cube__details:empty { display: none; }
 .cifar-cube__details-card,
 .cifar-cube__compact-card {
@@ -343,28 +367,7 @@
 }
 .cifar-cube__details-card {
   width: 100%;
-  padding: 1.5rem;
-}
-.cifar-cube__details-metadata {
-  display: grid;
-  grid-template-columns: minmax(5rem, auto) 1fr;
-  gap: 0.625rem 1rem;
-  margin: 1.5rem 0 0;
-  font-family: var(--mat-sys-body-large-font, Roboto, Arial, sans-serif);
-  font-size: var(--mat-sys-body-large-size, 1rem);
-  font-weight: var(--mat-sys-body-large-weight, 400);
-  line-height: var(--mat-sys-body-large-line-height, 1.5rem);
-  letter-spacing: var(--mat-sys-body-large-tracking, 0.03125rem);
-}
-.cifar-cube__details-metadata dt, .cifar-cube__details-metadata dd { margin: 0; }
-.cifar-cube__details-metadata dt {
-  color: var(--_on-surface);
-  font-weight: 500;
-}
-.cifar-cube__details-metadata dd {
-  min-width: 0;
-  overflow-wrap: anywhere;
-  color: var(--_on-surface-variant);
+  padding: 1.25rem;
 }
 .cifar-cube__details-action, .cifar-cube__compact-action {
   display: inline-flex;
@@ -415,6 +418,9 @@
     padding: 0;
   }
   .cifar-cube__intro {
+    display: block;
+    height: auto;
+    min-height: 0;
     margin-bottom: 2rem;
   }
   .cifar-cube__intro-eyebrow {
@@ -423,11 +429,13 @@
   .cifar-cube__intro-heading {
     font-family: var(--mat-sys-headline-medium-font, Roboto, Arial, sans-serif);
     font-size: var(--mat-sys-headline-medium-size, 1.75rem);
-    font-weight: 600;
+    font-weight: var(--mat-sys-headline-medium-weight, 600);
     line-height: var(--mat-sys-headline-medium-line-height, 2.25rem);
     letter-spacing: var(--mat-sys-headline-medium-tracking, 0);
+    white-space: normal;
   }
-  .cifar-cube__intro-description { margin-top: 0.875rem; }
+  .cifar-cube__intro-visualization { display: none; }
+  .cifar-cube__intro-compact { display: block; margin-top: 0.875rem; }
   .cifar-cube__stage { display: block; container-type: normal; }
   .cifar-cube__plot { width: 100%; max-height: none; aspect-ratio: auto; }
   .cifar-cube__frame, .cifar-cube__axes { display: none; }
@@ -449,7 +457,6 @@
     padding: 1.25rem;
   }
   .cifar-cube__compact-heading { overflow-wrap: anywhere; }
-  .cifar-cube__compact-card .cifar-cube__details-metadata { margin-top: 0; }
   .cifar-cube__compact-action { align-self: flex-start; margin-top: auto; }
   .cifar-cube__compact-card .cifar-cube__details-unavailable { margin-top: auto; }
   .cifar-cube__details { display: none; }

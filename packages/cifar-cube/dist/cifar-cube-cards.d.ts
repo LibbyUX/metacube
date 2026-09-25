@@ -1,9 +1,16 @@
 import type { CifarCubeItem } from "./types";
 /**
  * Creates the component introduction shared by desktop and compact layouts.
- * @returns A heading group containing the configured introduction copy.
+ * @param details - Persistent desktop details region displayed in place of the dimension key.
+ * @returns A heading group containing the configured introduction copy and details region.
  */
-export declare function createIntro(): HTMLElement;
+export declare function createIntro(details: HTMLElement): HTMLElement;
+/**
+ * Combines a concise visible label with available metadata for a unique accessible name.
+ * @param item - Dataset whose label and metadata should be described.
+ * @returns A descriptive dataset name suitable for controls and links.
+ */
+export declare function getAccessibleDatasetName(item: CifarCubeItem): string;
 /**
  * Creates the transient preview shown beside a desktop cube.
  * @param item - Dataset represented by the cube.
@@ -21,9 +28,10 @@ export declare function createDetails(detailsId: string): HTMLDivElement;
  * @param details - Stable details landmark whose content should be replaced.
  * @param item - Selected dataset, or null before a selection is made.
  * @param headingId - Stable ID used to label the details landmark.
+ * @param closeDetails - Clears the current desktop selection.
  * @returns The updated details landmark.
  */
-export declare function updateDetails(details: HTMLElement, item: CifarCubeItem | null, headingId: string): HTMLElement;
+export declare function updateDetails(details: HTMLElement, item: CifarCubeItem | null, headingId: string, closeDetails: () => void): HTMLElement;
 /**
  * Creates a self-contained dataset card for layouts without the cube canvas.
  * @param item - Dataset represented by the card.
