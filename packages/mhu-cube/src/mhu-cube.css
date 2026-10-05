@@ -80,6 +80,12 @@
   stroke-width: 1.1;
   vector-effect: non-scaling-stroke;
 }
+.mhu-cube__frame-guide {
+  fill: none;
+  stroke: color-mix(in srgb, var(--_outline) 30%, transparent);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
 .mhu-cube__axes { position: absolute; z-index: 1; inset: 0; user-select: text; }
 .mhu-cube__axis-title, .mhu-cube__axis-value {
   position: absolute;
@@ -94,7 +100,7 @@
   line-height: var(--mat-sys-label-large-line-height, 1.25rem);
   letter-spacing: var(--mat-sys-label-large-tracking, 0.00625rem);
 }
-.mhu-cube__axis-title--y { transform: translate(0, -50%); }
+.mhu-cube__axis-title--time { transform: translate(0, -50%); }
 .mhu-cube__axis-value {
   color: var(--_on-surface-variant);
   font-family: var(--mat-sys-body-small-font, Roboto, Arial, sans-serif);
@@ -103,10 +109,10 @@
   line-height: var(--mat-sys-body-small-line-height, 1rem);
   letter-spacing: var(--mat-sys-body-small-tracking, 0.025rem);
 }
-.mhu-cube__axis-value--y { transform: translate(-100%, -50%); }
-.mhu-cube__axis-value--z { transform: translate(0, -50%); }
-.mhu-cube__axis-title--x, .mhu-cube__axis-title--z,
-.mhu-cube__axis-value--x, .mhu-cube__axis-value--z {
+.mhu-cube__axis-value--time { transform: translate(-100%, -50%); }
+.mhu-cube__axis-value--organ { transform: translate(0, -50%); }
+.mhu-cube__axis-title--space, .mhu-cube__axis-title--organ,
+.mhu-cube__axis-value--space, .mhu-cube__axis-value--organ {
   text-shadow:
     -2px -2px 0 var(--_surface),
     2px -2px 0 var(--_surface),
@@ -114,18 +120,16 @@
     2px 2px 0 var(--_surface);
 }
 .mhu-cube__list { position: absolute; z-index: 2; inset: 0; margin: 0; padding: 0; list-style: none; pointer-events: none; }
+/* Bounding boxes of tall blocks overlap their neighbors, so only painted faces receive pointer input. */
 .mhu-cube__item {
   position: absolute;
-  z-index: var(--cube-layer, 1);
   top: var(--cube-top);
   left: var(--cube-left);
   width: var(--cube-width);
   height: var(--cube-height);
-  pointer-events: auto;
+  pointer-events: none;
 }
 .mhu-cube__item--unpositioned { display: none; }
-.mhu-cube__item:not(.mhu-cube__item--selected):hover,
-.mhu-cube__item:not(.mhu-cube__item--selected):focus-within { z-index: 20000; }
 .mhu-cube__select {
   position: relative;
   display: block;
@@ -139,9 +143,13 @@
   font: inherit;
   text-align: left;
   cursor: pointer;
+  pointer-events: none;
 }
-.mhu-cube__select:focus-visible { outline: 3px solid var(--_focus); outline-offset: 5px; }
+.mhu-cube__select:focus-visible { z-index: 999; outline: 3px solid var(--_focus); outline-offset: 5px; }
+/* Paint order lives on the block itself so hover cards can rise above every block without reordering the scene. */
 .mhu-cube__cube {
+  position: relative;
+  z-index: var(--cube-layer, 1);
   display: block;
   width: 100%;
   height: 100%;
@@ -152,6 +160,7 @@
   stroke: color-mix(in srgb, var(--_outline) 75%, transparent);
   stroke-width: 0.85;
   stroke-linejoin: bevel;
+  pointer-events: fill;
   transition: fill-opacity 170ms ease, stroke 170ms ease, stroke-width 170ms ease;
 }
 .mhu-cube__top { fill: var(--_primary); fill-opacity: 0.4; }
@@ -161,6 +170,7 @@
   fill: none;
   stroke: color-mix(in srgb, var(--_on-surface) 38%, transparent);
   stroke-width: 0.75;
+  pointer-events: none;
   transition: stroke 170ms ease, stroke-width 170ms ease;
 }
 .mhu-cube__select:hover .mhu-cube__top, .mhu-cube__select:hover .mhu-cube__left,
@@ -189,7 +199,7 @@
 .mhu-cube__card {
   position: absolute;
   z-index: 1000;
-  top: 50%;
+  top: var(--card-top, 50%);
   left: calc(100% + 0.75rem);
   width: 15rem;
   padding: 0.75rem 0.85rem;
@@ -244,7 +254,9 @@
   letter-spacing: var(--mat-sys-label-small-tracking, 0.03125rem);
   text-transform: uppercase;
 }
-.mhu-cube__item--current .mhu-cube__cube { outline: 2px solid var(--_primary); outline-offset: 2px; }
+.mhu-cube__item--current .mhu-cube__top,
+.mhu-cube__item--current .mhu-cube__left,
+.mhu-cube__item--current .mhu-cube__right { stroke: var(--_primary); stroke-width: 2.5; }
 .mhu-cube__item--unavailable .mhu-cube__cube { opacity: 0.62; filter: grayscale(1); }
 .mhu-cube__item--unavailable .mhu-cube__top,
 .mhu-cube__item--unavailable .mhu-cube__left,
@@ -445,7 +457,7 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1rem;
   }
-  .mhu-cube__item { position: static; display: grid; min-width: 0; width: auto; height: auto; }
+  .mhu-cube__item { position: static; display: grid; min-width: 0; width: auto; height: auto; pointer-events: auto; }
   .mhu-cube__select { display: none; }
   .mhu-cube__compact-card {
     display: flex;
@@ -479,6 +491,7 @@
   .mhu-cube__left,
   .mhu-cube__right,
   .mhu-cube__edge { stroke: CanvasText; }
+  .mhu-cube__frame-guide { stroke: GrayText; }
   .mhu-cube__top, .mhu-cube__left, .mhu-cube__right { fill: Canvas; fill-opacity: 1; }
   .mhu-cube--has-selection .mhu-cube__item:not(.mhu-cube__item--selected) .mhu-cube__top,
   .mhu-cube--has-selection .mhu-cube__item:not(.mhu-cube__item--selected) .mhu-cube__left,

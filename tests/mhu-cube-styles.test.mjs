@@ -58,8 +58,30 @@ test("the visualization preview cannot expand the page scroll width", () => {
 
 test("selection preserves scene depth while active preview cards remain visible", () => {
   assert.doesNotMatch(styles, /\.mhu-cube__item--selected \{[^}]*z-index:/);
-  assert.match(styles, /\.mhu-cube__item:not\(\.mhu-cube__item--selected\):hover,[\s\S]*?z-index: 20000;/);
+  assert.doesNotMatch(styles, /z-index: 20000/);
+  assert.match(styles, /\.mhu-cube__cube \{[^}]*position: relative;[^}]*z-index: var\(--cube-layer, 1\);/);
+  assert.match(styles, /\.mhu-cube__card \{[^}]*z-index: 1000;[^}]*top: var\(--card-top, 50%\);/);
+  assert.match(styles, /\.mhu-cube__select:focus-visible \{ z-index: 999;/);
   assert.match(styles, /\.mhu-cube__item--selected \.mhu-cube__select \.mhu-cube__card \{ opacity: 0; \}/);
+});
+
+test("only painted block faces receive pointer input on desktop", () => {
+  assert.match(styles, /\.mhu-cube__item \{[^}]*pointer-events: none;/);
+  assert.match(styles, /\.mhu-cube__select \{[^}]*pointer-events: none;/);
+  assert.match(styles, /\.mhu-cube__top, \.mhu-cube__left, \.mhu-cube__right \{[^}]*pointer-events: fill;/);
+  assert.match(styles, /\.mhu-cube__edge \{[^}]*pointer-events: none;/);
+  assert.match(styles, /@container mhu-cube-host \(max-width: 64rem\)[\s\S]*?\.mhu-cube__item \{[^}]*pointer-events: auto;/);
+  assert.doesNotMatch(styles, /\.mhu-cube__item--current \.mhu-cube__cube \{[^}]*outline/);
+});
+
+test("axis styles name the time, space, and organ axes", () => {
+  assert.match(styles, /\.mhu-cube__axis-title--time \{/);
+  assert.match(styles, /\.mhu-cube__axis-value--time \{/);
+  assert.match(styles, /\.mhu-cube__axis-value--organ \{/);
+  assert.match(styles, /\.mhu-cube__axis-title--space, \.mhu-cube__axis-title--organ,/);
+  assert.doesNotMatch(styles, /mhu-cube__axis-(title|value)--[xyz]\b/);
+  assert.match(styles, /\.mhu-cube__frame-guide \{[\s\S]*?vector-effect: non-scaling-stroke;/);
+  assert.match(styles, /@media \(forced-colors: active\)[\s\S]*?\.mhu-cube__frame-guide \{ stroke: GrayText; \}/);
 });
 
 test("desktop content precedes the visualization and selected details use a card", () => {

@@ -8,15 +8,37 @@ import {
 } from "../../packages/mhu-cube/src";
 
 const axes: MhuCubeAxes = {
-  x: { label: "Spatial scale", values: ["small", "large"] },
-  y: { label: "Age", values: ["young", "old"] },
-  z: { label: "Organ", values: ["heart", "liver"] },
+  time: { label: "Time", unit: "years", min: 0, max: 100 },
+  space: { label: "Space", values: ["small", "large"] },
+  // Deliberately unsorted; the component displays organs alphabetically.
+  organ: { label: "Organ", values: ["Liver", "Heart"] },
 };
+// "two" spans a range and overlaps the single age in "three", so they share their cell in lanes.
 const items: MhuCubeItem[] = [
-  { id: "one", label: "Dataset one", href: "#one", metadata: { Organ: "Heart" }, position: { x: 0, y: 0, z: 0 } },
-  { id: "two", label: "Dataset two", href: "#two", metadata: { Organ: "Liver" }, position: { x: 1, y: 1, z: 1 } },
-  { id: "unplotted", label: "Dataset without coordinates", href: "#unplotted", metadata: { Organ: "Heart" } },
+  {
+    id: "one",
+    label: "Dataset one",
+    href: "#one",
+    metadata: { Organ: "Heart", "Lead author": "Author one" },
+    position: { time: { start: 20, end: 20 }, space: "small", organ: "Heart" },
+  },
+  {
+    id: "two",
+    label: "Dataset two",
+    href: "#two",
+    metadata: { Organ: "Liver", "Lead author": "Author two" },
+    position: { time: { start: 10, end: 60 }, space: "large", organ: "Liver" },
+  },
+  {
+    id: "three",
+    label: "Dataset three",
+    href: "#three",
+    metadata: { Organ: "Liver", "Lead author": "Author three" },
+    position: { time: { start: 30, end: 30 }, space: "large", organ: "Liver" },
+  },
+  { id: "unplotted", label: "Dataset without coordinates", href: "#unplotted", metadata: { Organ: "Heart", "Lead author": "Author four" } },
 ];
+const positionedCount = items.filter((item) => item.position).length;
 
 const results = document.querySelector<HTMLOListElement>("#results");
 const fixture = document.querySelector<HTMLDivElement>("#fixture");
@@ -71,25 +93,26 @@ await test("desktop introduction explains the visualization with semantic dimens
   assert(visualization && getComputedStyle(visualization).display !== "none", "Visualization guidance should be visible on desktop.");
   assert(compactDescription && getComputedStyle(compactDescription).display === "none", "Compact guidance should be hidden on desktop.");
   assert(
-    visualization.querySelector(".mhu-cube__intro-summary")?.textContent === "This visualization compares datasets across three dimensions. Select a cube to view its details.",
+    visualization.querySelector(".mhu-cube__intro-summary")?.textContent === "This visualization compares datasets across time, space, and organ. Select a block to view its details.",
     "Visualization guidance should combine the comparison and selection instructions.",
   );
   const dimensionKey = visualization.querySelector<HTMLDListElement>("dl.mhu-cube__intro-dimensions");
   const dimensionHeadings = [...visualization.querySelectorAll(".mhu-cube__intro-dimensions-header span")].map((heading) => heading.textContent);
   const terms = [...(dimensionKey?.querySelectorAll("dt") ?? [])].map((term) => term.textContent);
   assert(dimensionHeadings.join(",") === "Dimension,What it represents", "The dimension key should expose its visual column headings.");
-  assert(terms.join(",") === "Spatial scale,Age (years),Organ", "Visualization dimensions should use semantic terms.");
+  assert(terms.join(",") === "Time,Space,Organ", "Visualization dimensions should use semantic terms.");
   const attribution = visualization.querySelector<HTMLAnchorElement>(".mhu-cube__intro-attribution a");
   assert(attribution?.getAttribute("href") === "https://github.com/Chair-for-Clinical-Bioinformatics/metacube", "Visualization attribution is missing.");
   assert(
-    attribution?.parentElement?.textContent === "Visualization inspired by Metacube from the Chair for Clinical Bioinformatics.",
+    attribution?.parentElement?.textContent === "Inspired by Metacube from the Chair for Clinical Bioinformatics.",
     "Visualization attribution should credit the Metacube source.",
   );
 });
 
 await test("cube controls have unique names, descriptions, state, and details relationships", () => {
   const buttons = [...shadow.querySelectorAll<HTMLButtonElement>(".mhu-cube__select")];
-  assert(buttons.length === 2, "Only positioned datasets should create cube controls.");
+  assert(buttons.length === positionedCount, "Only positioned datasets should create cube controls.");
+  assert(buttons.map((button) => button.dataset.itemId).join(",") === "one,two,three", "Controls should follow organ, space, then time order.");
   buttons.forEach((button) => {
     const descriptionId = button.getAttribute("aria-describedby");
     const detailsId = button.getAttribute("aria-controls");
@@ -98,6 +121,53 @@ await test("cube controls have unique names, descriptions, state, and details re
     assert(detailsId && shadow.getElementById(detailsId), "Control must reference the details panel.");
     assert(button.hasAttribute("aria-pressed"), "Control must expose selection state.");
   });
+});
+
+await test("axes label time, space, and organ with organs in alphabetical order", () => {
+  const labels = (selector: string) => [...shadow.querySelectorAll(selector)].map((label) => label.textContent).join(",");
+  assert(labels(".mhu-cube__axis-title--time") === "Time (years)", "The time axis title should include its unit.");
+  assert(labels(".mhu-cube__axis-value--time") === "0,20,40,60,80,100", "The time axis should default to five equal steps.");
+  assert(labels(".mhu-cube__axis-value--space") === "small,large", "Space values should keep their supplied order.");
+  assert(labels(".mhu-cube__axis-value--organ") === "Heart,Liver", "Organ values should be alphabetical.");
+  assert(shadow.querySelector(".mhu-cube__frame-guide")?.getAttribute("d")?.split("M").length === 5, "Each interior tick needs a back-wall guide.");
+});
+
+await test("block descriptions state the time, space, and organ position", () => {
+  const button = shadow.querySelector<HTMLButtonElement>('[data-item-id="two"]');
+  const descriptionId = button?.getAttribute("aria-describedby");
+  const description = descriptionId ? shadow.getElementById(descriptionId)?.textContent : undefined;
+  assert(
+    description?.includes("Visualization position: Time: 10–60 years, Space: large, Organ: Liver"),
+    "Descriptions should name each axis with its value.",
+  );
+});
+
+await test("time ranges draw taller blocks and overlapping ranges split their cell into lanes", () => {
+  const block = (id: string) => shadow.querySelector<SVGSVGElement>(`[data-item-id="${id}"] .mhu-cube__cube`)?.getBoundingClientRect();
+  const single = block("one");
+  const range = block("two");
+  const overlapping = block("three");
+  assert(single && range && overlapping, "Fixture blocks are missing.");
+  assert(range.height > overlapping.height, "A longer time range should draw a taller block.");
+  assert(overlapping.width < single.width, "Overlapping datasets should narrow into lanes.");
+});
+
+await test("pointer input follows painted faces rather than block bounding boxes", async () => {
+  const shortTop = shadow.querySelector<SVGPolygonElement>('[data-item-id="three"] .mhu-cube__top');
+  const tallBlock = shadow.querySelector<HTMLButtonElement>('[data-item-id="two"]');
+  assert(shortTop && tallBlock, "Fixture blocks are missing.");
+  shortTop.scrollIntoView({ block: "center" });
+  await nextLayout();
+  const face = shortTop.getBoundingClientRect();
+  const x = face.left + face.width / 2;
+  const y = face.top + face.height / 2;
+  const tallBounds = tallBlock.getBoundingClientRect();
+  assert(
+    x > tallBounds.left && x < tallBounds.right && y > tallBounds.top && y < tallBounds.bottom,
+    "Fixture should place the short block inside the tall block's bounding box.",
+  );
+  const target = shadow.elementFromPoint(x, y)?.closest<HTMLButtonElement>("button");
+  assert(target?.dataset.itemId === "three", "The visible short block should receive the pointer, not its tall neighbor.");
 });
 
 await test("keyboard activation focuses the action and keeps the live region mounted", async () => {
@@ -109,7 +179,7 @@ await test("keyboard activation focuses the action and keeps the live region mou
   const action = shadow.querySelector<HTMLAnchorElement>(".mhu-cube__details-action");
   assert(shadow.querySelector(".mhu-cube__details") === details, "Live region was replaced.");
   assert(shadow.activeElement === action, "Keyboard selection did not move focus to the metadata action.");
-  assert(action?.getAttribute("aria-label") === "View metadata for Dataset one; Organ: Heart", "Action name does not identify its dataset and metadata.");
+  assert(action?.getAttribute("aria-label") === "View metadata for Dataset one; Organ: Heart, Lead author: Author one", "Action name does not identify its dataset and metadata.");
 });
 
 await test("desktop selection swaps the dimension key for a closable dataset card", async () => {
@@ -187,8 +257,11 @@ await test("synchronous Angular-style property updates render and report once", 
   batchedComponent.axes = axes;
   await nextLayout();
   assert(validationEventCount === 1, "Synchronous property updates should emit one final validation result.");
-  assert(!reportedIssueCodes.includes("item.position.out-of-range"), "Validation reported a transient axes-order issue.");
-  assert(batchedComponent.shadowRoot?.querySelectorAll(".mhu-cube__select").length === 2, "Final property values were not rendered.");
+  assert(
+    !reportedIssueCodes.some((code) => code.endsWith(".unknown") || code === "item.position.time.out-of-range"),
+    "Validation reported a transient axes-order issue.",
+  );
+  assert(batchedComponent.shadowRoot?.querySelectorAll(".mhu-cube__select").length === positionedCount, "Final property values were not rendered.");
   batchedComponent.remove();
 });
 
@@ -210,6 +283,13 @@ await test("compact mode exposes direct cards and removes the selection step", a
   assert(cards.every((card) => card.querySelector("dl.mhu-cube__details-metadata")), "Every compact card needs a metadata description list.");
   const linkNames = cards.map((card) => card.querySelector("a")?.getAttribute("aria-label"));
   assert(new Set(linkNames).size === items.length, "Compact links need unique accessible names.");
+  const link = cards[0].querySelector<HTMLAnchorElement>(".mhu-cube__compact-action");
+  assert(link, "Compact card is missing its metadata link.");
+  link.scrollIntoView({ block: "center" });
+  await nextLayout();
+  const linkBounds = link.getBoundingClientRect();
+  const target = shadow.elementFromPoint(linkBounds.left + linkBounds.width / 2, linkBounds.top + linkBounds.height / 2);
+  assert(target?.closest("a") === link, "Compact metadata links must receive pointer input.");
 });
 
 await test("compact cards reflow from two columns to one based on component width", async () => {
@@ -239,7 +319,7 @@ await test("malformed JSON attributes expose validation issues instead of retain
 
 await test("incomplete axes replace the empty frame with a useful fallback", async () => {
   const invalidAxesComponent = document.createElement("mhu-cube") as MhuCube;
-  invalidAxesComponent.setAttribute("axes", JSON.stringify({ ...axes, x: { label: "Spatial scale", values: [] } }));
+  invalidAxesComponent.setAttribute("axes", JSON.stringify({ ...axes, space: { label: "Space", values: [] } }));
   invalidAxesComponent.setAttribute("items", JSON.stringify([items[0]]));
   fixture?.append(invalidAxesComponent);
   await nextLayout();

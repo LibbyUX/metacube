@@ -28,20 +28,20 @@ export const MHU_CUBE_INTRO_COPY: MhuCubeIntroCopy = {
   eyebrow: "Organ imaging datasets",
   heading: "Explore multiscale human data",
   visualization: {
-    description: "This visualization compares datasets across three dimensions. Select a cube to view its details.",
+    description: "This visualization compares datasets across time, space, and organ. Select a block to view its details.",
     dimensionHeadings: ["Dimension", "What it represents"],
     dimensions: [
       {
-        term: "Spatial scale",
-        description: "Physical size represented in the dataset (100 µm or 100 mm)",
+        term: "Time",
+        description: "Donor age in years; taller blocks span an age range",
       },
       {
-        term: "Age (years)",
-        description: "Age of the tissue donor",
+        term: "Space",
+        description: "Physical scale the dataset captures",
       },
       {
         term: "Organ",
-        description: "Tissue source",
+        description: "Tissue source, listed alphabetically",
       },
     ],
     attribution: {
@@ -51,5 +51,5 @@ export const MHU_CUBE_INTRO_COPY: MhuCubeIntroCopy = {
       href: "https://github.com/Chair-for-Clinical-Bioinformatics/metacube",
     },
   },
-  compactDescription: "Browse organ-imaging datasets and compare their spatial scale, donor age, organ, and other available details. Use each card to open its metadata.",
+  compactDescription: "Browse organ-imaging datasets and compare their time (donor age), space (spatial scale), organ, and other available details. Use each card to open its metadata.",
 };

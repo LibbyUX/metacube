@@ -2,7 +2,7 @@
 
 `<mhu-cube>` is an accessible, responsive web component for comparing Multiscale Human Portal organ-imaging datasets and opening their metadata. It is the sole component handoff target from this prototype repository.
 
-When its container is wider than `64rem`, the component keeps its introduction visible beside a cube canvas and reveals the selected dataset card beneath that introduction. At `64rem` and below, it replaces the canvas and selection workflow with direct dataset cards. Cards use two columns above `40rem` and one column at `40rem` and below.
+When its container is wider than `64rem`, the component keeps its introduction visible beside a perspective canvas that plots each dataset by **time** (donor age, vertical), **space** (spatial scale), and **organ** (alphabetical), and reveals the selected dataset card beneath that introduction. At `64rem` and below, it replaces the canvas and selection workflow with direct dataset cards. Cards use two columns above `40rem` and one column at `40rem` and below.
 
 ## Handoff status
 
@@ -11,7 +11,7 @@ When its container is wider than `64rem`, the component keeps its introduction v
 - The package is marked `private` to prevent accidental registry publication. The receiving team can remove that flag if it chooses an internal registry delivery workflow.
 - Vite is used only by the temporary prototype repository to produce the prebuilt ESM file and run preview pages. The Angular team may keep the prebuilt file or rebuild the source with its preferred tooling.
 - No dependencies were installed, removed, or upgraded while preparing this package.
-- Automated Node tests cover validation, projection, package imports, and critical CSS rules.
+- Automated Node tests cover validation, time mapping, lane layout, paint order, package imports, and critical CSS rules.
 - The browser interaction and responsive test harness is compiled in CI, but is not yet executed by a headless browser. Run it manually before release and replace or supplement it with the team's browser test framework.
 - Integration has not yet been verified inside the destination Angular application.
 
@@ -38,9 +38,9 @@ The package intentionally contains no `dependencies` or `devDependencies`. The r
 | `src/index.ts` | Supported package exports. |
 | `src/mhu-cube.ts` | Custom-element lifecycle, state, rendering coordination, and events. |
 | `src/mhu-cube-cards.ts` | Intro, preview-card, selected-card, and compact-card markup. |
-| `src/mhu-cube-visualization.ts` | SVG frame, cubes, axis labels, and accessible visualization descriptions. |
-| `src/projection.ts` | Framework-independent projection calculations. |
-| `src/validation.ts` | Runtime normalization, URL safety, and validation issues. |
+| `src/mhu-cube-visualization.ts` | SVG frame and time guides, blocks, axis labels, and accessible visualization descriptions. |
+| `src/projection.ts` | Framework-independent projection, time mapping, lane layout, and paint order. |
+| `src/validation.ts` | Runtime normalization, alphabetical organ order, URL safety, and validation issues. |
 | `src/mhu-cube-copy.ts` | Editable introduction copy. |
 | `src/mhu-cube.css` | Encapsulated responsive presentation and state styling. |
 | `src/mhu-cube-data.css` | Dimension key and dataset-detail presentation. |
@@ -87,7 +87,49 @@ Bind arrays and objects as DOM properties, not serialized HTML attributes:
 ></mhu-cube>
 ```
 
-Angular commonly assigns bound properties synchronously. The component coalesces those assignments into one render and one final validation event, so setting `items` before `axes` does not expose a transient out-of-range warning.
+Angular commonly assigns bound properties synchronously. The component coalesces those assignments into one render and one final validation event, so setting `items` before `axes` does not expose a transient unknown-value warning.
+
+### Optional Angular wrapper
+
+The custom element works in Angular as-is. If the team prefers typed Angular inputs and outputs over `CUSTOM_ELEMENTS_SCHEMA` in feature templates, a thin wrapper can own the element. This sketch is a starting point, not a shipped file; the package adds no Angular dependency:
+
+```ts
+import { Component, CUSTOM_ELEMENTS_SCHEMA, input, output } from "@angular/core";
+import {
+  defineMhuCube,
+  type MhuCubeAxes,
+  type MhuCubeItem,
+  type MhuCubeSelectionDetail,
+  type MhuCubeValidationDetail,
+} from "@mhu/mhu-cube";
+
+defineMhuCube();
+
+@Component({
+  selector: "app-mhu-cube",
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  template: `
+    <mhu-cube
+      [attr.label]="label()"
+      [axes]="axes()"
+      [items]="items()"
+      [selectedId]="selectedId()"
+      (mhu-cube-selection-change)="selectionChange.emit($event.detail)"
+      (mhu-cube-validation)="validation.emit($event.detail)"
+    ></mhu-cube>
+  `,
+})
+export class MhuCubeComponent {
+  readonly label = input("Organ imaging datasets");
+  readonly axes = input.required<MhuCubeAxes>();
+  readonly items = input.required<MhuCubeItem[]>();
+  readonly selectedId = input<string | null>(null);
+  readonly selectionChange = output<MhuCubeSelectionDetail>();
+  readonly validation = output<MhuCubeValidationDetail>();
+}
+```
+
+Call `defineMhuCube()` only in the browser when the application uses server rendering.
 
 The destination page owns external spacing. This matches the proposed Angular Material page gutters without special component configuration:
 
@@ -117,8 +159,8 @@ The component responds to its available container width rather than the browser 
 
 | Name | Type | Purpose |
 | --- | --- | --- |
-| `axes` | `MhuCubeAxes` | Defines the categorical `x`, `y`, and `z` axes. |
-| `items` | `MhuCubeItem[]` | Supplies dataset labels, metadata, destinations, statuses, plot positions, and optional visual scale adjustments. |
+| `axes` | `MhuCubeAxes` | Defines the `time`, `space`, and `organ` axes. |
+| `items` | `MhuCubeItem[]` | Supplies dataset labels, metadata, destinations, statuses, and plot positions. |
 | `selectedId` | `string \| null` | Selects a valid dataset on the desktop canvas. Property only. |
 | `label` | `string` | Gives the component section its accessible name. |
 
@@ -128,13 +170,24 @@ The component responds to its available container width rather than the browser 
 
 ```ts
 interface MhuCubeAxes {
-  x: { label: string; values: string[] };
-  y: { label: string; values: string[] };
-  z: { label: string; values: string[] };
+  time: { label: string; unit?: string; min: number; max: number; ticks?: number[] };
+  space: { label: string; values: string[] };
+  organ: { label: string; values: string[] };
 }
 ```
 
-Axis values must be nonempty, unique strings. Positions are zero-based indexes into these arrays; the component does not infer or fabricate coordinates.
+```ts
+const axes: MhuCubeAxes = {
+  time: { label: "Time", unit: "years", min: 0, max: 100 },
+  space: { label: "Space", values: ["100 µm", "100 mm"] },
+  organ: { label: "Organ", values: ["Heart", "Kidney", "Liver", "Thymus"] },
+};
+```
+
+- **Time** is the continuous vertical axis, measured as donor age. `min` must be less than `max`. `ticks` are optional; the default is five equal steps (`0, 20, 40, 60, 80, 100` above). The axis title appends the unit, as in “Time (years)”, and faint guide lines on the back walls mark each interior tick.
+- **Space** values are displayed in the order supplied, so list them from smallest to largest.
+- **Organ** values are always displayed alphabetically, regardless of the order supplied. Sorting ignores case and accents, so names that differ only that way are rejected as duplicates.
+- Space and organ values must be nonempty, unique strings. The normalized `element.axes` value reflects the alphabetical organ order and the effective time ticks.
 
 ### Dataset model
 
@@ -144,19 +197,39 @@ interface MhuCubeItem {
   label: string;
   href?: string;
   metadata?: Record<string, string | number | null | undefined>;
-  position?: { x: number; y: number; z: number };
-  cubeScale?: number;
+  position?: {
+    time: { start: number; end: number; label?: string };
+    space: string;
+    organ: string;
+  };
   status?: "available" | "current" | "unavailable";
 }
+```
+
+```ts
+const item: MhuCubeItem = {
+  id: "zandstra-thymus-codex",
+  label: "Thymus, 100 µm, 4–5 months",
+  href: "/metadata/zandstra-thymus-codex",
+  position: { time: { start: 4 / 12, end: 5 / 12, label: "4–5 months" }, space: "100 µm", organ: "Thymus" },
+};
 ```
 
 - `id` must be nonempty and unique.
 - `href` accepts relative, hash, HTTP, and HTTPS destinations. Unsafe or invalid protocols are removed.
 - `metadata` preserves supported values and their source order. `null` and `undefined` values are retained in normalized data but not displayed.
-- `position` must contain in-range, nonnegative integer indexes. A missing or unusable position keeps the dataset available but moves it to the desktop “Not plotted” fallback instead of inventing a cube.
-- `cubeScale` optionally reduces a desktop cube relative to the default size. It is a presentational adjustment—not a quantitative data encoding—and has no effect in compact card layouts. It must be greater than `0` and no larger than `1`; invalid values fall back to the default size and produce a validation warning.
-- Only one dataset can occupy a position. Later duplicates remain available but are not plotted.
+- `position.space` and `position.organ` must exactly match a configured axis value. They are referenced by name, not index, so organ sorting never moves a dataset.
+- `position.time` is inclusive and must lie inside the time axis, with `start` no later than `end`. A single age uses the same `start` and `end`. Use `label` when the numbers alone read poorly, for example months for infant donors; it replaces the formatted range in descriptions.
+- A missing or unusable position keeps the dataset available but moves it to the desktop “Not plotted” fallback instead of inventing a block.
 - A dataset without a valid destination is treated as unavailable.
+
+### How positions are drawn
+
+- A time range draws a block from `start` to `end`, so wider ranges become taller, rectangular blocks.
+- Single ages and ranges shorter than a block's width are drawn as cubes centered on their midpoint. Near either end of the axis, the cube shifts inward rather than being clipped, so its exact time is carried by its label, metadata, and accessible description.
+- Datasets that share a space and organ and whose drawn heights overlap split that cell into side-by-side lanes. Only the overlapping datasets narrow; taller blocks take the farther lanes so they never hide shorter ones.
+- Datasets in the same cell that do not overlap stack vertically at full width.
+- Keyboard order, reading order, and compact-card order follow the plot: organ, then space, then time.
 
 Read `element.items`, `element.axes`, and `element.validationIssues` to inspect normalized values and current issues.
 
@@ -182,6 +255,20 @@ element.addEventListener("mhu-cube-validation", (event) => {
 
 Both custom events bubble through the Shadow DOM boundary and are composed. Included declarations add event-detail types and map the `mhu-cube` tag to `MhuCube`.
 
+Position-related validation codes, all warnings that leave the dataset available but unplotted unless noted:
+
+| Code | Cause |
+| --- | --- |
+| `item.position.missing` | No `position` was supplied. |
+| `item.position.invalid` | `position` is not an object, or uses the retired `{ x, y, z }` index format. |
+| `item.position.time.invalid` | `time` lacks finite `start` and `end`, or `start` is later than `end`. |
+| `item.position.time.out-of-range` | `time` falls outside the time axis. |
+| `item.position.time.label.invalid` | `time.label` is empty; the dataset is still plotted with formatted values. |
+| `item.position.space.unknown` | `space` does not exactly match a configured space value. |
+| `item.position.organ.unknown` | `organ` does not exactly match a configured organ value. |
+
+Axis errors use `axes.invalid`, `axis.invalid`, `axis.label.invalid`, `axis.values.invalid`, `axis.value.invalid`, `axis.values.duplicate`, `axis.time.range.invalid`, `axis.time.ticks.invalid`, and `axis.time.unit.invalid`.
+
 ## Theming
 
 The component first uses its public CSS custom properties, then matching Angular Material system tokens, then built-in fallbacks:
@@ -204,7 +291,7 @@ mhu-cube {
 
 Do not style private Shadow DOM class names from the Angular application. They are implementation details and intentionally encapsulated.
 
-The current handoff intentionally has no quantitative color scale. Cube fill communicates interaction and availability states only; consuming applications should not imply a data value from its intensity.
+The current handoff intentionally has no quantitative color scale. Block height encodes the dataset's time range; block fill communicates interaction and availability states only, so consuming applications should not imply a data value from its intensity.
 
 ### Typography
 
@@ -214,19 +301,20 @@ The host application owns font loading. The Roboto files used by this repository
 
 ### Intro copy
 
-The prototype introduction is managed in `src/mhu-cube-copy.ts`. The eyebrow and heading are shared across layouts. Above `64rem`, a compact, divider-separated dimension key with visual column headings explains the cube and includes selection guidance. Selecting a cube replaces the dimension key and its headings with a closable dataset card in the same left-column position; closing it restores the key and returns focus to the selected cube. The Metacube acknowledgment remains anchored to the bottom of the desktop content column in either state. At `64rem` and below, visualization-specific content is removed from the layout and accessibility tree and replaced by a dataset-focused description above the direct metadata cards.
+The prototype introduction is managed in `src/mhu-cube-copy.ts`. The eyebrow and heading are shared across layouts. Above `64rem`, a compact, divider-separated dimension key with visual column headings explains time, space, and organ and includes selection guidance. Selecting a block replaces the dimension key and its headings with a closable dataset card in the same left-column position; closing it restores the key and returns focus to the selected block. The Metacube acknowledgment remains anchored to the bottom of the desktop content column in either state. At `64rem` and below, visualization-specific content is removed from the layout and accessibility tree and replaced by a dataset-focused description above the direct metadata cards.
 
-The dimension key and dataset cards use semantic definition lists with subtle row separators. Selected desktop cards and direct compact cards use the container surface. The preview titles use a consistent organ and spatial-scale sequence; the component itself continues to display whatever label the host supplies.
+The dimension key and dataset cards use semantic definition lists with subtle row separators. Selected desktop cards and direct compact cards use the container surface. The preview titles use a consistent organ, space, and time sequence so datasets sharing a cell stay distinguishable; the component itself continues to display whatever label the host supplies.
 
 The structured copy includes `visualization` and `compactDescription` variants; `eyebrow` remains optional and disappears without leaving an empty element when omitted. This is an internal handoff configuration, not a public custom-element property. The receiving team can keep it internal or expose host-provided copy if reuse requires that flexibility.
 
 ## Accessibility behavior
 
-- Desktop cubes are native buttons with unique accessible names, descriptions, selected state, and a relationship to the persistent details region.
-- Keyboard activation moves focus directly to the selected dataset's metadata action. Pointer activation keeps focus on the cube.
+- Desktop blocks are native buttons with unique accessible names, descriptions, selected state, and a relationship to the persistent details region. Descriptions state the time, space, and organ position, such as “Time: 7–47 years, Space: 100 µm, Organ: Liver”.
+- Only a block's painted faces receive pointer input, so a tall block's bounding box never intercepts clicks meant for a neighbor. Keyboard and reading order follow organ, space, and time.
+- Keyboard activation moves focus directly to the selected dataset's metadata action. Pointer activation keeps focus on the block.
 - Compact layouts remove the selection step and expose a direct metadata link on every card.
 - Visualization dimensions and card metadata use semantic definition lists.
-- The introduction remains visible after desktop selection. The persistent details region replaces the dimension key with a semantically headed dataset card and announces selection changes politely. Closing the card restores the key and returns focus to the previously selected cube.
+- The introduction remains visible after desktop selection. The persistent details region replaces the dimension key with a semantically headed dataset card and announces selection changes politely. Closing the card restores the key and returns focus to the previously selected block.
 - Current, unavailable, hover, focus, and selected states do not rely on color alone.
 - Reduced-motion and Windows forced-colors preferences are supported.
 - Axis text has an equivalent screen-reader summary; decorative SVG geometry is hidden from assistive technology.
@@ -243,7 +331,7 @@ npm run dev
 
 Open `/mhu-cube/index.html` for the component preview.
 
-The example configuration displays its spatial-scale categories as `100 µm` and `100 mm`. These labels are preview data rather than hard-coded component defaults, and the preview uses them consistently in the axes, dataset headings, metadata, and accessible descriptions.
+The example configuration plots donor age from 0 to 100 years and displays its space categories as `100 µm` and `100 mm`. These are preview data rather than hard-coded component defaults, and the preview uses them consistently in the axes, dataset headings, metadata, and accessible descriptions. Its two Liver · 100 µm datasets (age 45 and ages 7–47) demonstrate lanes, and the infant Thymus dataset demonstrates a time label and the inward shift at the axis floor.
 
 Run the non-installing validation commands:
 
@@ -256,7 +344,7 @@ npm run test:browser:build
 npm run test:package
 ```
 
-For manual browser checks, run `npm run test:browser` and open the local URL it prints. A passing harness changes the document title to `PASS — MHU cube browser tests`. Check keyboard use, zoom, light/dark themes, forced colors, and widths on both sides of `64rem` and `40rem`.
+For manual browser checks, run `npm run test:browser` and open the local URL it prints. A passing harness changes the document title to `PASS — MHU cube browser tests`. Check keyboard use, zoom, light/dark themes, forced colors, and widths on both sides of `64rem` and `40rem`. Because hit testing relies on SVG `pointer-events`, also confirm clicks and hover cards in Firefox and Safari, and that lane blocks just above `64rem` remain comfortable pointer targets.
 
 ## Rebuilding or replacing the toolchain
 

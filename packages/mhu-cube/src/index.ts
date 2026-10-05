@@ -7,11 +7,13 @@ export {
 
 export {
   type MhuCubeAxes,
-  type MhuCubeAxis,
+  type MhuCubeCategoryAxis,
   type MhuCubeItem,
   type MhuCubeItemStatus,
   type MhuCubePosition,
   type MhuCubeSelectionDetail,
+  type MhuCubeTimeAxis,
+  type MhuCubeTimeRange,
   type MhuCubeValidationDetail,
   type MhuCubeValidationIssue,
   type MhuCubeValidationSeverity,

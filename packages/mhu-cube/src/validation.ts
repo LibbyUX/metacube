@@ -1,15 +1,18 @@
 import type {
   MhuCubeAxes,
+  MhuCubeCategoryAxis,
   MhuCubeItem,
   MhuCubeItemStatus,
   MhuCubePosition,
+  MhuCubeTimeAxis,
+  MhuCubeTimeRange,
   MhuCubeValidationIssue,
 } from "./types";
 
 export const EMPTY_AXES: MhuCubeAxes = {
-  x: { label: "X axis", values: [] },
-  y: { label: "Y axis", values: [] },
-  z: { label: "Z axis", values: [] },
+  time: { label: "Time", min: 0, max: 0, ticks: [] },
+  space: { label: "Space", values: [] },
+  organ: { label: "Organ", values: [] },
 };
 
 /** A normalized value and the issues found while producing it. */
@@ -19,10 +22,20 @@ export interface ValidationResult<T> {
 }
 
 const ITEM_STATUSES = new Set<MhuCubeItemStatus>(["available", "current", "unavailable"]);
-const AXIS_KEYS: Array<keyof MhuCubeAxes> = ["x", "y", "z"];
+const DEFAULT_TICK_STEPS = 5;
+// A fixed locale keeps organ order identical for every viewer and test machine.
+const CATEGORY_COLLATOR = new Intl.Collator("en", { sensitivity: "base", numeric: true });
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
+function usesRetiredIndexFormat(input: Record<string, unknown>) {
+  return !("time" in input || "space" in input || "organ" in input) && ("x" in input || "y" in input || "z" in input);
 }
 
 function issue(
@@ -33,6 +46,25 @@ function issue(
   itemId?: string,
 ): MhuCubeValidationIssue {
   return { code, message, path, severity, ...(itemId ? { itemId } : {}) };
+}
+
+/**
+ * Orders organ names alphabetically, ignoring case and accents, with a stable tie-breaker.
+ * @param a - First organ name.
+ * @param b - Second organ name.
+ * @returns A negative, zero, or positive sort result.
+ */
+export function compareOrganNames(a: string, b: string) {
+  return CATEGORY_COLLATOR.compare(a, b) || (a < b ? -1 : a > b ? 1 : 0);
+}
+
+/**
+ * Determines whether validated axes contain enough information to draw the plot.
+ * @param axes - Validated axes.
+ * @returns Whether time has a positive span and both categorical axes have values.
+ */
+export function canPlotAxes(axes: MhuCubeAxes) {
+  return axes.time.max > axes.time.min && axes.space.values.length > 0 && axes.organ.values.length > 0;
 }
 
 /**
@@ -51,53 +83,102 @@ export function isSafeMetadataHref(value: string) {
   }
 }
 
+function validateAxisLabel(input: Record<string, unknown>, fallbackLabel: string, path: string, issues: MhuCubeValidationIssue[]) {
+  const label = typeof input.label === "string" ? input.label.trim() : "";
+  if (!label) issues.push(issue("axis.label.invalid", `${fallbackLabel} axis is using a fallback label.`, `${path}.label`, "warning"));
+  return label || fallbackLabel;
+}
+
+function validateCategoryAxis(
+  input: unknown,
+  key: "space" | "organ",
+  fallbackLabel: string,
+  issues: MhuCubeValidationIssue[],
+): MhuCubeCategoryAxis {
+  const path = `axes.${key}`;
+  if (!isRecord(input)) {
+    issues.push(issue("axis.invalid", `${fallbackLabel} axis must provide a label and values.`, path, "error"));
+    return { label: fallbackLabel, values: [] };
+  }
+
+  const label = validateAxisLabel(input, fallbackLabel, path, issues);
+  const rawValues = input.values;
+  if (!Array.isArray(rawValues) || rawValues.length === 0) {
+    issues.push(issue("axis.values.invalid", `${label} must provide at least one value.`, `${path}.values`, "error"));
+    return { label, values: [] };
+  }
+  if (!rawValues.every((value) => typeof value === "string" && value.trim().length > 0)) {
+    issues.push(issue("axis.value.invalid", `${label} contains an empty or non-text value.`, `${path}.values`, "error"));
+    return { label, values: [] };
+  }
+
+  const values = rawValues.map((value) => (value as string).trim());
+  const hasDuplicate = values.some((value, index) => values.findIndex((other) => CATEGORY_COLLATOR.compare(value, other) === 0) !== index);
+  if (hasDuplicate) {
+    issues.push(issue("axis.values.duplicate", `${label} contains duplicate values and cannot be plotted safely.`, `${path}.values`, "error"));
+    return { label, values: [] };
+  }
+  return { label, values: key === "organ" ? values.sort(compareOrganNames) : values };
+}
+
+function validateTimeAxis(input: unknown, issues: MhuCubeValidationIssue[]): MhuCubeTimeAxis {
+  const path = "axes.time";
+  if (!isRecord(input)) {
+    issues.push(issue("axis.invalid", "Time axis must provide a label, min, and max.", path, "error"));
+    return { ...EMPTY_AXES.time, ticks: [] };
+  }
+
+  const label = validateAxisLabel(input, "Time", path, issues);
+  let unit: string | undefined;
+  if (input.unit !== undefined) {
+    if (typeof input.unit === "string" && input.unit.trim()) unit = input.unit.trim();
+    else issues.push(issue("axis.time.unit.invalid", "Time unit must be nonempty text and was omitted.", `${path}.unit`, "warning"));
+  }
+  const unitProperty = unit ? { unit } : {};
+
+  const { min, max } = input;
+  if (!isFiniteNumber(min) || !isFiniteNumber(max) || min >= max) {
+    issues.push(issue("axis.time.range.invalid", `${label} needs finite min and max values with min less than max.`, path, "error"));
+    return { label, ...unitProperty, min: 0, max: 0, ticks: [] };
+  }
+
+  let ticks = Array.from({ length: DEFAULT_TICK_STEPS + 1 }, (_, step) => min + ((max - min) * step) / DEFAULT_TICK_STEPS);
+  if (input.ticks !== undefined) {
+    const rawTicks = input.ticks;
+    if (Array.isArray(rawTicks) && rawTicks.length > 0 && rawTicks.every((tick) => isFiniteNumber(tick) && tick >= min && tick <= max)) {
+      ticks = [...new Set(rawTicks as number[])].sort((a, b) => a - b);
+    } else {
+      issues.push(issue("axis.time.ticks.invalid", `${label} ticks must be numbers between min and max; default ticks are used.`, `${path}.ticks`, "warning"));
+    }
+  }
+  return { label, ...unitProperty, min, max, ticks };
+}
+
 /**
- * Validates and normalizes the three categorical axes without shifting indexes.
+ * Validates and normalizes the time, space, and organ axes. Organs are always sorted alphabetically.
  * @param input - Unknown value received through a property or JSON attribute.
  * @returns Safe axes and actionable validation issues.
  */
 export function validateAxes(input: unknown): ValidationResult<MhuCubeAxes> {
-  const issues: MhuCubeValidationIssue[] = [];
   if (!isRecord(input)) {
     return {
       value: EMPTY_AXES,
-      issues: [issue("axes.invalid", "Axes must be an object with x, y, and z definitions.", "axes", "error")],
+      issues: [issue("axes.invalid", "Axes must be an object with time, space, and organ definitions.", "axes", "error")],
+    };
+  }
+  if (usesRetiredIndexFormat(input)) {
+    return {
+      value: EMPTY_AXES,
+      issues: [issue("axes.invalid", "Axes use the retired x, y, and z format; provide time, space, and organ definitions.", "axes", "error")],
     };
   }
 
-  const axes = {} as MhuCubeAxes;
-  AXIS_KEYS.forEach((key) => {
-    const rawAxis = input[key];
-    const fallbackLabel = `${key.toUpperCase()} axis`;
-    if (!isRecord(rawAxis)) {
-      axes[key] = { label: fallbackLabel, values: [] };
-      issues.push(issue("axis.invalid", `${fallbackLabel} must provide a label and values.`, `axes.${key}`, "error"));
-      return;
-    }
-
-    const label = typeof rawAxis.label === "string" && rawAxis.label.trim() ? rawAxis.label.trim() : fallbackLabel;
-    if (label === fallbackLabel && rawAxis.label !== fallbackLabel) {
-      issues.push(issue("axis.label.invalid", `${fallbackLabel} is using a fallback label.`, `axes.${key}.label`, "warning"));
-    }
-
-    const rawValues = rawAxis.values;
-    if (!Array.isArray(rawValues) || rawValues.length === 0) {
-      axes[key] = { label, values: [] };
-      issues.push(issue("axis.values.invalid", `${label} must provide at least one value.`, `axes.${key}.values`, "error"));
-      return;
-    }
-
-    const valuesAreValid = rawValues.every((value) => typeof value === "string" && value.trim().length > 0);
-    const values = valuesAreValid ? rawValues.map((value) => (value as string).trim()) : [];
-    if (!valuesAreValid) {
-      issues.push(issue("axis.value.invalid", `${label} contains an empty or non-text value.`, `axes.${key}.values`, "error"));
-    } else if (new Set(values).size !== values.length) {
-      values.length = 0;
-      issues.push(issue("axis.values.duplicate", `${label} contains duplicate values and cannot be plotted safely.`, `axes.${key}.values`, "error"));
-    }
-    axes[key] = { label, values };
-  });
-
+  const issues: MhuCubeValidationIssue[] = [];
+  const axes: MhuCubeAxes = {
+    time: validateTimeAxis(input.time, issues),
+    space: validateCategoryAxis(input.space, "space", "Space", issues),
+    organ: validateCategoryAxis(input.organ, "organ", "Organ", issues),
+  };
   return { value: axes, issues };
 }
 
@@ -128,6 +209,48 @@ function validateMetadata(
   return metadata;
 }
 
+function validateTimeRange(
+  input: unknown,
+  axis: MhuCubeTimeAxis,
+  path: string,
+  itemId: string,
+  issues: MhuCubeValidationIssue[],
+): MhuCubeTimeRange | undefined {
+  if (!isRecord(input) || !isFiniteNumber(input.start) || !isFiniteNumber(input.end) || input.start > input.end) {
+    issues.push(issue("item.position.time.invalid", "Time must provide finite start and end values with start no later than end; the dataset will not be plotted.", path, "warning", itemId));
+    return undefined;
+  }
+
+  let label: string | undefined;
+  if (input.label !== undefined) {
+    if (typeof input.label === "string" && input.label.trim()) label = input.label.trim();
+    else issues.push(issue("item.position.time.label.invalid", "Time label must be nonempty text; formatted values are shown instead.", `${path}.label`, "warning", itemId));
+  }
+
+  if (!(axis.max > axis.min) || input.start < axis.min || input.end > axis.max) {
+    issues.push(issue("item.position.time.out-of-range", "Time falls outside the configured time axis; the dataset will not be plotted.", path, "warning", itemId));
+    return undefined;
+  }
+  return { start: input.start, end: input.end, ...(label ? { label } : {}) };
+}
+
+function validateCategoryReference(
+  input: unknown,
+  axis: MhuCubeCategoryAxis,
+  key: "space" | "organ",
+  path: string,
+  itemId: string,
+  issues: MhuCubeValidationIssue[],
+) {
+  const value = typeof input === "string" ? input.trim() : "";
+  if (axis.values.includes(value)) return value;
+  const message = value
+    ? `${axis.label} “${value}” does not match a configured value; the dataset will not be plotted.`
+    : `Position is missing a ${axis.label.toLowerCase()} value; the dataset will not be plotted.`;
+  issues.push(issue(`item.position.${key}.unknown`, message, path, "warning", itemId));
+  return undefined;
+}
+
 function validatePosition(
   input: unknown,
   axes: MhuCubeAxes,
@@ -140,32 +263,24 @@ function validatePosition(
     return undefined;
   }
   if (!isRecord(input)) {
-    issues.push(issue("item.position.invalid", "Position must provide integer x, y, and z indexes.", path, "warning", itemId));
+    issues.push(issue("item.position.invalid", "Position must provide time, space, and organ.", path, "warning", itemId));
+    return undefined;
+  }
+  if (usesRetiredIndexFormat(input)) {
+    issues.push(issue("item.position.invalid", "Position uses the retired x, y, and z index format; provide time, space, and organ instead.", path, "warning", itemId));
     return undefined;
   }
 
-  const position = { x: input.x, y: input.y, z: input.z };
-  const indexes = [position.x, position.y, position.z];
-  if (!indexes.every((value) => typeof value === "number" && Number.isInteger(value) && value >= 0)) {
-    issues.push(issue("item.position.invalid", "Position must provide non-negative integer x, y, and z indexes.", path, "warning", itemId));
-    return undefined;
-  }
-
-  const typedPosition = position as MhuCubePosition;
-  const inRange = typedPosition.x < axes.x.values.length
-    && typedPosition.y < axes.y.values.length
-    && typedPosition.z < axes.z.values.length;
-  if (!inRange) {
-    issues.push(issue("item.position.out-of-range", "Position falls outside the configured axes and will not be plotted.", path, "warning", itemId));
-    return undefined;
-  }
-  return typedPosition;
+  const time = validateTimeRange(input.time, axes.time, `${path}.time`, itemId, issues);
+  const space = validateCategoryReference(input.space, axes.space, "space", `${path}.space`, itemId, issues);
+  const organ = validateCategoryReference(input.organ, axes.organ, "organ", `${path}.organ`, itemId, issues);
+  return time && space && organ ? { time, space, organ } : undefined;
 }
 
 /**
  * Validates dataset identity, display metadata, destination, status, and position.
  * @param input - Unknown value received through a property or JSON attribute.
- * @param axes - Already validated axes used for position bounds.
+ * @param axes - Already validated axes that positions must reference.
  * @returns Safe datasets and actionable validation issues.
  */
 export function validateItems(input: unknown, axes: MhuCubeAxes): ValidationResult<MhuCubeItem[]> {
@@ -178,7 +293,6 @@ export function validateItems(input: unknown, axes: MhuCubeAxes): ValidationResu
   }
 
   const ids = new Set<string>();
-  const positions = new Set<string>();
   const items: MhuCubeItem[] = [];
   input.forEach((candidate, index) => {
     const path = `items[${index}]`;
@@ -225,30 +339,13 @@ export function validateItems(input: unknown, axes: MhuCubeAxes): ValidationResu
     }
 
     const metadata = validateMetadata(candidate.metadata, `${path}.metadata`, id, issues);
-    let cubeScale: number | undefined;
-    if (candidate.cubeScale !== undefined) {
-      if (typeof candidate.cubeScale === "number" && Number.isFinite(candidate.cubeScale)
-        && candidate.cubeScale > 0 && candidate.cubeScale <= 1) {
-        cubeScale = candidate.cubeScale;
-      } else {
-        issues.push(issue("item.cube-scale.invalid", "Cube scale must be greater than zero and no larger than one; the default size is used.", `${path}.cubeScale`, "warning", id));
-      }
-    }
-    let position = validatePosition(candidate.position, axes, `${path}.position`, id, issues);
-    if (position) {
-      const positionKey = `${position.x}:${position.y}:${position.z}`;
-      if (positions.has(positionKey)) {
-        issues.push(issue("item.position.duplicate", "Position is already occupied; this dataset remains available but is not plotted.", `${path}.position`, "warning", id));
-        position = undefined;
-      } else positions.add(positionKey);
-    }
+    const position = validatePosition(candidate.position, axes, `${path}.position`, id, issues);
     items.push({
       id,
       label,
       ...(href ? { href } : {}),
       ...(metadata ? { metadata } : {}),
       ...(position ? { position } : {}),
-      ...(cubeScale !== undefined ? { cubeScale } : {}),
       status,
     });
   });

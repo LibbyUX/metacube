@@ -1,5 +1,5 @@
 import type { MhuCubeAxes, MhuCubeItem, MhuCubeSelectionDetail, MhuCubeValidationDetail, MhuCubeValidationIssue } from "./types";
-export type { MhuCubeAxes, MhuCubeAxis, MhuCubeItem, MhuCubeItemStatus, MhuCubePosition, MhuCubeSelectionDetail, MhuCubeValidationDetail, MhuCubeValidationIssue, MhuCubeValidationSeverity, } from "./types";
+export type { MhuCubeAxes, MhuCubeCategoryAxis, MhuCubeItem, MhuCubeItemStatus, MhuCubePosition, MhuCubeSelectionDetail, MhuCubeTimeAxis, MhuCubeTimeRange, MhuCubeValidationDetail, MhuCubeValidationIssue, MhuCubeValidationSeverity, } from "./types";
 export declare const MHU_CUBE_SELECTION_EVENT = "mhu-cube-selection-change";
 export declare const MHU_CUBE_VALIDATION_EVENT = "mhu-cube-validation";
 declare global {
@@ -19,7 +19,7 @@ export declare class MhuCube extends HTMLElementBase {
     /** Normalized datasets currently available to the component. */
     get items(): MhuCubeItem[];
     set items(value: MhuCubeItem[]);
-    /** Normalized categorical axes used by the desktop visualization. */
+    /** Normalized time, space, and organ axes used by the desktop visualization. */
     get axes(): MhuCubeAxes;
     set axes(value: MhuCubeAxes);
     /** Current configuration errors and warnings. */

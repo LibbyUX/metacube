@@ -1,28 +1,53 @@
 /** A dataset's availability in the metadata experience. */
 export type MhuCubeItemStatus = "available" | "current" | "unavailable";
-/** Zero-based indexes into the configured x, y, and z axis values. */
-export interface MhuCubePosition {
-    /** Spatial-scale index. */
-    x: number;
-    /** Age index. */
-    y: number;
-    /** Organ index. */
-    z: number;
+/** A donor-age span in time-axis units. A single age uses the same start and end. */
+export interface MhuCubeTimeRange {
+    /** Earliest value, inclusive. */
+    start: number;
+    /** Latest value, inclusive; equal to start for a single age. */
+    end: number;
+    /** Optional display text, such as "4–5 months", used instead of the formatted numbers. */
+    label?: string;
 }
-/** One categorical axis displayed by the desktop visualization. */
-export interface MhuCubeAxis {
+/** Where a dataset is plotted, referencing axis values by name rather than index. */
+export interface MhuCubePosition {
+    /** Donor-age span drawn as the block's vertical extent. */
+    time: MhuCubeTimeRange;
+    /** One of `axes.space.values`. */
+    space: string;
+    /** One of `axes.organ.values`. */
+    organ: string;
+}
+/** A categorical axis displayed by the desktop visualization. */
+export interface MhuCubeCategoryAxis {
     /** Human-readable axis name. */
     label: string;
-    /** Ordered, unique category labels. */
+    /** Unique category labels. */
     values: string[];
 }
-/** The three categorical axes required by the desktop visualization. */
-export interface MhuCubeAxes {
-    x: MhuCubeAxis;
-    y: MhuCubeAxis;
-    z: MhuCubeAxis;
+/** The continuous vertical axis measuring donor age. */
+export interface MhuCubeTimeAxis {
+    /** Human-readable axis name. */
+    label: string;
+    /** Optional unit shown with the axis title and formatted ranges, such as "years". */
+    unit?: string;
+    /** Lowest plotted value. */
+    min: number;
+    /** Highest plotted value; must be greater than `min`. */
+    max: number;
+    /** Optional labeled values; defaults to five equal steps from `min` to `max`. */
+    ticks?: number[];
 }
-/** A dataset displayed as a cube or compact card. */
+/** The time, space, and organ axes required by the desktop visualization. */
+export interface MhuCubeAxes {
+    /** Vertical axis; blocks span their dataset's time range. */
+    time: MhuCubeTimeAxis;
+    /** Categorical spatial scale, displayed in the order provided. */
+    space: MhuCubeCategoryAxis;
+    /** Categorical tissue source, always displayed alphabetically. */
+    organ: MhuCubeCategoryAxis;
+}
+/** A dataset displayed as a block or compact card. */
 export interface MhuCubeItem {
     /** Stable, unique dataset identity. */
     id: string;
@@ -32,10 +57,8 @@ export interface MhuCubeItem {
     href?: string;
     /** Ordered label-value pairs displayed as dataset details. */
     metadata?: Record<string, string | number | null | undefined>;
-    /** Optional categorical indexes; omitted datasets remain available but unplotted. */
+    /** Optional plot position; omitted datasets remain available but unplotted. */
     position?: MhuCubePosition;
-    /** Optional relative cube size greater than zero and no larger than one. */
-    cubeScale?: number;
     /** Availability state; defaults to available when a valid destination exists. */
     status?: MhuCubeItemStatus;
 }

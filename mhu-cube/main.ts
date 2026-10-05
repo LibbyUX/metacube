@@ -3,82 +3,86 @@ import {
   defineMhuCube,
   type MhuCubeAxes,
   type MhuCubeItem,
+  type MhuCubePosition,
 } from "../packages/mhu-cube/src";
 
-const SPATIAL_SCALES = {
-  hundredMicrons: { label: "100 µm" },
-  tenCentimeters: { label: "100 mm" },
+const SPACE = {
+  hundredMicrons: "100 µm",
+  hundredMillimeters: "100 mm",
 } as const;
 
+const ORGAN_DATASET_AXES: MhuCubeAxes = {
+  time: { label: "Time", unit: "years", min: 0, max: 100 },
+  space: { label: "Space", values: [SPACE.hundredMicrons, SPACE.hundredMillimeters] },
+  // The component always displays organs alphabetically.
+  organ: { label: "Organ", values: ["Heart", "Kidney", "Liver", "Thymus"] },
+};
+
 /**
- * Formats preview dataset titles in a consistent identifying sequence.
- * @param organ - Tissue source represented by the dataset.
- * @param spatialScale - Display scale assigned to the dataset.
- * @returns A title ordered by organ and scale.
+ * Formats preview time ranges the same way the component does when no label is supplied.
+ * @param time - Dataset time range in years.
+ * @returns Display text such as "45 years" or "7–47 years".
  */
-function createDatasetLabel(organ: string, spatialScale: { label: string }) {
-  return `${organ}, ${spatialScale.label}`;
+function formatTime(time: MhuCubePosition["time"]) {
+  return time.label ?? (time.start === time.end ? `${time.start} years` : `${time.start}–${time.end} years`);
 }
 
-const ORGAN_DATASET_AXES: MhuCubeAxes = {
-  x: { label: "Spatial scale", values: [SPATIAL_SCALES.hundredMicrons.label, SPATIAL_SCALES.tenCentimeters.label] },
-  y: { label: "Age (years)", values: ["45", "63", "85", "~40–70", "4–5 months", "7–47"] },
-  z: { label: "Organ", values: ["Thymus", "Heart", "Kidney", "Liver"] },
-};
+/**
+ * Builds a preview dataset whose title and metadata agree with its plotted position.
+ * @param id - Stable dataset identity used for the metadata destination.
+ * @param position - Time, space, and organ placement.
+ * @param details - Remaining metadata shown after the plotted dimensions.
+ * @returns A dataset with a consistent organ, space, and time title.
+ */
+function createDataset(id: string, position: MhuCubePosition, details: { Sex: string; "Lead author": string }) {
+  const time = formatTime(position.time);
+  return {
+    id,
+    label: `${position.organ}, ${position.space}, ${time}`,
+    href: `#metadata-${id}`,
+    metadata: { Time: time, Space: position.space, Organ: position.organ, ...details },
+    position,
+  };
+}
 
 type PreviewDataset = MhuCubeItem & { href: string };
 
 const datasets: PreviewDataset[] = [
-  {
-    id: "bader-liver-sbf-sem",
-    label: createDatasetLabel("Liver", SPATIAL_SCALES.hundredMicrons),
-    href: "#metadata-bader-liver-sbf-sem",
-    metadata: { Organ: "Liver", "Spatial scale": SPATIAL_SCALES.hundredMicrons.label, Age: "45", Sex: "Male", "Lead author": "Gary Bader" },
-    position: { x: 0, y: 0, z: 3 },
-    cubeScale: 0.82,
-  },
-  {
-    id: "lee-kidney-hipct-63",
-    label: createDatasetLabel("Kidney", SPATIAL_SCALES.tenCentimeters),
-    href: "#metadata-lee-kidney-hipct-63",
-    metadata: { Organ: "Kidney", "Spatial scale": SPATIAL_SCALES.tenCentimeters.label, Age: "63", Sex: "Male", "Lead author": "Peter D. Lee" },
-    position: { x: 1, y: 1, z: 2 },
-  },
-  {
-    id: "lee-kidney-hipct-85",
-    label: createDatasetLabel("Kidney", SPATIAL_SCALES.tenCentimeters),
-    href: "#metadata-lee-kidney-hipct-85",
-    metadata: { Organ: "Kidney", "Spatial scale": SPATIAL_SCALES.tenCentimeters.label, Age: "85", Sex: "Male", "Lead author": "Peter D. Lee" },
-    position: { x: 1, y: 2, z: 2 },
-  },
-  {
-    id: "lee-heart-hipct",
-    label: createDatasetLabel("Heart", SPATIAL_SCALES.tenCentimeters),
-    href: "#metadata-lee-heart-hipct",
-    metadata: { Organ: "Heart", "Spatial scale": SPATIAL_SCALES.tenCentimeters.label, Age: "63", Sex: "Male", "Lead author": "Peter D. Lee" },
-    position: { x: 1, y: 1, z: 1 },
-  },
-  {
-    id: "teichmann-heart-hra-pop",
-    label: createDatasetLabel("Heart", SPATIAL_SCALES.hundredMicrons),
-    href: "#metadata-teichmann-heart-hra-pop",
-    metadata: { Organ: "Heart", "Spatial scale": SPATIAL_SCALES.hundredMicrons.label, Age: "~40–70", Sex: "Multiple", "Lead author": "Sarah Teichmann" },
-    position: { x: 0, y: 3, z: 1 },
-  },
-  {
-    id: "zandstra-thymus-codex",
-    label: createDatasetLabel("Thymus", SPATIAL_SCALES.hundredMicrons),
-    href: "#metadata-zandstra-thymus-codex",
-    metadata: { Organ: "Thymus", "Spatial scale": SPATIAL_SCALES.hundredMicrons.label, Age: "4–5 months", Sex: "Multiple", "Lead author": "Peter W. Zandstra" },
-    position: { x: 0, y: 4, z: 0 },
-  },
-  {
-    id: "bader-liver-xenium",
-    label: createDatasetLabel("Liver", SPATIAL_SCALES.hundredMicrons),
-    href: "#metadata-bader-liver-xenium",
-    metadata: { Organ: "Liver", "Spatial scale": SPATIAL_SCALES.hundredMicrons.label, Age: "7–47", Sex: "Multiple", "Lead author": "Gary Bader" },
-    position: { x: 0, y: 5, z: 3 },
-  },
+  createDataset(
+    "bader-liver-sbf-sem",
+    { time: { start: 45, end: 45 }, space: SPACE.hundredMicrons, organ: "Liver" },
+    { Sex: "Male", "Lead author": "Gary Bader" },
+  ),
+  createDataset(
+    "lee-kidney-hipct-63",
+    { time: { start: 63, end: 63 }, space: SPACE.hundredMillimeters, organ: "Kidney" },
+    { Sex: "Male", "Lead author": "Peter D. Lee" },
+  ),
+  createDataset(
+    "lee-kidney-hipct-85",
+    { time: { start: 85, end: 85 }, space: SPACE.hundredMillimeters, organ: "Kidney" },
+    { Sex: "Male", "Lead author": "Peter D. Lee" },
+  ),
+  createDataset(
+    "lee-heart-hipct",
+    { time: { start: 63, end: 63 }, space: SPACE.hundredMillimeters, organ: "Heart" },
+    { Sex: "Male", "Lead author": "Peter D. Lee" },
+  ),
+  createDataset(
+    "teichmann-heart-hra-pop",
+    { time: { start: 40, end: 70, label: "~40–70 years" }, space: SPACE.hundredMicrons, organ: "Heart" },
+    { Sex: "Multiple", "Lead author": "Sarah Teichmann" },
+  ),
+  createDataset(
+    "zandstra-thymus-codex",
+    { time: { start: 4 / 12, end: 5 / 12, label: "4–5 months" }, space: SPACE.hundredMicrons, organ: "Thymus" },
+    { Sex: "Multiple", "Lead author": "Peter W. Zandstra" },
+  ),
+  createDataset(
+    "bader-liver-xenium",
+    { time: { start: 7, end: 47 }, space: SPACE.hundredMicrons, organ: "Liver" },
+    { Sex: "Multiple", "Lead author": "Gary Bader" },
+  ),
 ];
 
 defineMhuCube();

@@ -9,7 +9,7 @@ import {
   getAccessibleItemDescription,
 } from "./mhu-cube-visualization";
 import { DetailsTransition } from "./details-transition";
-import { getScenePosition } from "./projection";
+import { layoutPlot, sortItemsForDisplay, type PlotLayout } from "./projection";
 import type {
   MhuCubeAxes,
   MhuCubeItem,
@@ -17,15 +17,17 @@ import type {
   MhuCubeValidationDetail,
   MhuCubeValidationIssue,
 } from "./types";
-import { EMPTY_AXES, validateAxes, validateItems } from "./validation";
+import { EMPTY_AXES, canPlotAxes, validateAxes, validateItems } from "./validation";
 
 export type {
   MhuCubeAxes,
-  MhuCubeAxis,
+  MhuCubeCategoryAxis,
   MhuCubeItem,
   MhuCubeItemStatus,
   MhuCubePosition,
   MhuCubeSelectionDetail,
+  MhuCubeTimeAxis,
+  MhuCubeTimeRange,
   MhuCubeValidationDetail,
   MhuCubeValidationIssue,
   MhuCubeValidationSeverity,
@@ -79,7 +81,7 @@ export class MhuCube extends HTMLElementBase {
     this.#applyItems();
     this.#scheduleUpdate(true);
   }
-  /** Normalized categorical axes used by the desktop visualization. */
+  /** Normalized time, space, and organ axes used by the desktop visualization. */
   get axes() { return this.#axes; }
   set axes(value: MhuCubeAxes) {
     this.#applyAxes(value);
@@ -330,9 +332,9 @@ export class MhuCube extends HTMLElementBase {
 
     this.#section.setAttribute("aria-label", this.getAttribute("label") ?? "Metadata datasets");
     this.#stage.querySelector(".mhu-cube__unpositioned")?.remove();
-    const axesCanBePlotted = this.#axes.x.values.length > 0 && this.#axes.y.values.length > 0 && this.#axes.z.values.length > 0;
+    const axesCanBePlotted = canPlotAxes(this.#axes);
     if (axesCanBePlotted) {
-      this.#plot.replaceChildren(createCoordinateFrame(), createAxisLabels(this.#axes), createAccessibleAxisSummary(this.#axes));
+      this.#plot.replaceChildren(createCoordinateFrame(this.#axes), createAxisLabels(this.#axes), createAccessibleAxisSummary(this.#axes));
     } else {
       const unavailable = document.createElement("p");
       unavailable.className = "mhu-cube__plot-unavailable";
@@ -356,27 +358,31 @@ export class MhuCube extends HTMLElementBase {
     const list = document.createElement("ul");
     list.className = "mhu-cube__list";
     const itemIndexes = new Map(this.#items.map((item, index) => [item.id, index]));
-    this.#items.forEach((item, index) => {
+    const layout = axesCanBePlotted ? layoutPlot(this.#items, this.#axes) : new Map<string, PlotLayout>();
+    // Source order keeps description IDs stable; display order follows the plot for reading and keyboard use.
+    sortItemsForDisplay(this.#items, this.#axes).forEach((item) => {
+      const index = itemIndexes.get(item.id) ?? 0;
       const status = item.status ?? "available";
       const selected = item.id === this.#selectedId;
       const listItem = document.createElement("li");
       listItem.className = `mhu-cube__item mhu-cube__item--${status}`;
       if (selected) listItem.classList.add("mhu-cube__item--selected");
-      if (!item.position) {
+      const block = layout.get(item.id);
+      if (!block) {
         listItem.classList.add("mhu-cube__item--unpositioned");
         listItem.append(createCompactCard(item));
         list.append(listItem);
         return;
       }
 
-      const position = getScenePosition(item.position, this.#axes);
-      const cube = createProjectedCube(item.position, this.#axes, item.cubeScale);
-      listItem.classList.add(`mhu-cube__item--card-${position.cardSide}`);
-      listItem.style.setProperty("--cube-left", `${cube.bounds.left}%`);
-      listItem.style.setProperty("--cube-top", `${cube.bounds.top}%`);
-      listItem.style.setProperty("--cube-width", `${cube.bounds.width}%`);
-      listItem.style.setProperty("--cube-height", `${cube.bounds.height}%`);
-      listItem.style.setProperty("--cube-layer", position.layer);
+      const { bounds } = block.geometry;
+      listItem.classList.add(`mhu-cube__item--card-${block.cardSide}`);
+      listItem.style.setProperty("--cube-left", `${bounds.left}%`);
+      listItem.style.setProperty("--cube-top", `${bounds.top}%`);
+      listItem.style.setProperty("--cube-width", `${bounds.width}%`);
+      listItem.style.setProperty("--cube-height", `${bounds.height}%`);
+      listItem.style.setProperty("--cube-layer", String(block.layer));
+      listItem.style.setProperty("--card-top", `${block.cardTop}%`);
       const button = document.createElement("button");
       button.className = "mhu-cube__select";
       const description = document.createElement("span");
@@ -384,12 +390,12 @@ export class MhuCube extends HTMLElementBase {
       description.id = `${this.#instanceId}-item-${index}-description`;
       description.textContent = getAccessibleItemDescription(item, this.#axes);
       this.#configureSelectionButton(button, item, description.id);
-      button.append(cube.svg, createPreviewCard(item));
+      button.append(createProjectedCube(block.geometry), createPreviewCard(item));
       listItem.append(description, button, createCompactCard(item));
       list.append(listItem);
     });
     this.#plot.append(list);
-    const unpositionedItems = this.#items.filter((item) => !item.position);
+    const unpositionedItems = this.#items.filter((item) => !layout.has(item.id));
     if (unpositionedItems.length > 0) this.#stage.append(this.#createUnpositionedList(unpositionedItems, itemIndexes));
   }
 }
