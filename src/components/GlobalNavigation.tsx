@@ -2,13 +2,13 @@ import "./global-navigation.css";
 import { useTheme } from "../data/themeContext";
 
 const BASE = import.meta.env.BASE_URL;
-const FULL_IMPLEMENTATION_URL = `${BASE}playground/index.html?dataset=cifar_organs&view=implementation`;
+const FULL_IMPLEMENTATION_URL = `${BASE}playground/index.html?dataset=mhu_organs&view=implementation`;
 
 export type GlobalNavigationPage = "implementation" | "configuration" | "preview";
 
 const destinations: Array<{ page: GlobalNavigationPage; label: string; href: string }> = [
-  { page: "preview", label: "Preview component", href: `${BASE}cifar-cube/index.html` },
-  { page: "implementation", label: "CIFAR metacube demo", href: FULL_IMPLEMENTATION_URL },
+  { page: "preview", label: "Preview component", href: `${BASE}mhu-cube/index.html` },
+  { page: "implementation", label: "MHU metacube demo", href: FULL_IMPLEMENTATION_URL },
   { page: "configuration", label: "Build a metacube", href: `${BASE}playground/index.html` },
 ];
 
@@ -24,7 +24,7 @@ export function GlobalNavigation({ activePage }: { activePage: GlobalNavigationP
 
   return (
     <header className="global-navigation">
-      <a className="global-navigation__brand" href={`${BASE}cifar-cube/index.html`}>Preview Component</a>
+      <a className="global-navigation__brand" href={`${BASE}mhu-cube/index.html`}>Preview Component</a>
       <div className="global-navigation__utilities">
         <nav aria-label="Metacube views">
           <ul className="global-navigation__list">

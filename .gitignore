@@ -8,8 +8,8 @@ node_modules/
 .npm-cache/
 dist/
 dist*/
-!packages/cifar-cube/dist/
-!packages/cifar-cube/dist/**
+!packages/mhu-cube/dist/
+!packages/mhu-cube/dist/**
 
 # OS
 .DS_Store

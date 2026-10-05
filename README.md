@@ -1,12 +1,12 @@
-# CIFAR cube component prototype
+# MHU cube component prototype
 
-This temporary repository contains the design prototype and developer handoff for `<cifar-cube>`, an accessible, responsive web component for exploring organ-imaging datasets and opening their metadata.
+This temporary repository contains the design prototype and developer handoff for `<mhu-cube>`, an accessible, responsive web component for exploring Multiscale Human Portal organ-imaging datasets and opening their metadata.
 
 The component package is the sole handoff target. The inherited React, Python, R, and playground code remains available as reference material but is not intended for continued product development here.
 
 ## Component handoff
 
-Start with [`packages/cifar-cube/README.md`](packages/cifar-cube/README.md). It documents:
+Start with [`packages/mhu-cube/README.md`](packages/mhu-cube/README.md). It documents:
 
 - Angular integration
 - properties, events, and validated data contracts
@@ -30,7 +30,7 @@ Start the preview site:
 npm run dev
 ```
 
-Open `http://localhost:5173/metacube/cifar-cube/index.html`. The port may change when another local server is already running.
+Open `http://localhost:5173/metacube/mhu-cube/index.html`. The port may change when another local server is already running.
 
 ## Validation
 
@@ -48,12 +48,12 @@ npm run test:package
 
 | Path | Purpose |
 | --- | --- |
-| [`packages/cifar-cube`](packages/cifar-cube) | Canonical component source, distribution, license, and handoff guide |
-| [`cifar-cube`](cifar-cube) | Preview page and example dataset configuration |
+| [`packages/mhu-cube`](packages/mhu-cube) | Canonical component source, distribution, license, and handoff guide |
+| [`mhu-cube`](mhu-cube) | Preview page and example dataset configuration |
 | [`tests`](tests) | Component data, projection, style, package, and browser-harness checks |
 | [`playground`](playground) and [`src`](src) | Inherited metacube demo and supporting application |
 | [`docs`](docs) | Documentation index and legacy configuration reference |
 
 ## Licensing
 
-The inherited repository remains available under its original MIT license in [`LICENSE`](LICENSE). The independently implemented `cifar-cube` package is copyright Cyberinfrastructure for Network Science Center and is distributed under its own [MIT license](packages/cifar-cube/LICENSE).
+The inherited repository remains available under its original MIT license in [`LICENSE`](LICENSE). The independently implemented `mhu-cube` package is copyright Cyberinfrastructure for Network Science Center and is distributed under its own [MIT license](packages/mhu-cube/LICENSE).
