@@ -14,11 +14,13 @@ const axes: MhuCubeAxes = {
   organ: { label: "Organ", values: ["Liver", "Heart"] },
 };
 // "two" spans a range and overlaps the single age in "three", so they share their cell in lanes.
+// "one" points at a missing image to exercise the fallback; "three" lists two authors.
 const items: MhuCubeItem[] = [
   {
     id: "one",
     label: "Dataset one",
     href: "#one",
+    image: "./missing-image.png",
     metadata: { Organ: "Heart", "Lead author": "Author one" },
     position: { time: { start: 20, end: 20 }, space: "small", organ: "Heart" },
   },
@@ -26,6 +28,7 @@ const items: MhuCubeItem[] = [
     id: "two",
     label: "Dataset two",
     href: "#two",
+    image: new URL("../../mhu-cube/images/thymus-zandstra.png", import.meta.url).href,
     metadata: { Organ: "Liver", "Lead author": "Author two" },
     position: { time: { start: 10, end: 60 }, space: "large", organ: "Liver" },
   },
@@ -33,7 +36,7 @@ const items: MhuCubeItem[] = [
     id: "three",
     label: "Dataset three",
     href: "#three",
-    metadata: { Organ: "Liver", "Lead author": "Author three" },
+    metadata: { Organ: "Liver", "Lead author": ["Author three", "Co-author three"] },
     position: { time: { start: 30, end: 30 }, space: "large", organ: "Liver" },
   },
   { id: "unplotted", label: "Dataset without coordinates", href: "#unplotted", metadata: { Organ: "Heart", "Lead author": "Author four" } },
@@ -89,11 +92,13 @@ await test("desktop introduction explains the visualization with semantic dimens
   assert(intro.length === 1, "The component should render one shared introduction.");
   assert(Boolean(intro[0].querySelector(".mhu-cube__intro-heading")), "The introduction heading is missing.");
   const visualization = intro[0].querySelector<HTMLElement>(".mhu-cube__intro-visualization");
-  const compactDescription = intro[0].querySelector<HTMLElement>(".mhu-cube__intro-compact");
+  const wideHeading = intro[0].querySelector<HTMLElement>(".mhu-cube__intro-heading-wide");
+  const compactHeading = intro[0].querySelector<HTMLElement>(".mhu-cube__intro-heading-compact");
   assert(visualization && getComputedStyle(visualization).display !== "none", "Visualization guidance should be visible on desktop.");
-  assert(compactDescription && getComputedStyle(compactDescription).display === "none", "Compact guidance should be hidden on desktop.");
+  assert(wideHeading?.textContent === "Explore multicube data" && getComputedStyle(wideHeading).display !== "none", "The desktop heading should be visible on desktop.");
+  assert(compactHeading && getComputedStyle(compactHeading).display === "none", "The compact heading should be hidden on desktop.");
   assert(
-    visualization.querySelector(".mhu-cube__intro-summary")?.textContent === "This visualization compares datasets across time, space, and organ. Select a block to view its details.",
+    visualization.querySelector(".mhu-cube__intro-summary")?.textContent === "This interactive visualization compares datasets across time, space, and organ. Select a block to view its details.",
     "Visualization guidance should combine the comparison and selection instructions.",
   );
   const dimensionKey = visualization.querySelector<HTMLDListElement>("dl.mhu-cube__intro-dimensions");
@@ -381,32 +386,73 @@ await test("compact mode exposes direct cards and removes the selection step", a
   const details = shadow.querySelector<HTMLElement>(".mhu-cube__details");
   const cards = [...shadow.querySelectorAll<HTMLElement>(".mhu-cube__compact-card")];
   const visualization = shadow.querySelector<HTMLElement>(".mhu-cube__intro-visualization");
-  const compactDescription = shadow.querySelector<HTMLElement>(".mhu-cube__intro-compact");
+  const heading = shadow.querySelector<HTMLElement>(".mhu-cube__intro-heading");
   assert(select && getComputedStyle(select).display === "none", "Cube selection remains exposed in compact mode.");
   assert(details && getComputedStyle(details).display === "none", "Desktop details remain exposed in compact mode.");
   assert(visualization && getComputedStyle(visualization).display === "none", "Visualization guidance remains exposed in compact mode.");
-  assert(compactDescription && getComputedStyle(compactDescription).display === "block", "Dataset guidance should be visible in compact mode.");
-  assert(!compactDescription.textContent?.toLowerCase().includes("cube"), "Compact guidance should describe the datasets rather than the visualization.");
+  assert(heading?.innerText.trim() === "Explore datasets across time, space, and organ", "Compact layouts should show only the compact heading.");
+  assert([...shadow.querySelectorAll<HTMLElement>(".mhu-cube__intro p")].every((paragraph) => paragraph.offsetParent === null), "Compact layouts should have no introduction body text.");
   assert(cards.length === items.length && cards.every((card) => getComputedStyle(card).display === "flex"), "Every dataset needs a compact card.");
-  assert(cards.every((card) => card.querySelector("dl.mhu-cube__details-metadata")), "Every compact card needs a metadata description list.");
-  const linkNames = cards.map((card) => card.querySelector("a")?.getAttribute("aria-label"));
-  assert(new Set(linkNames).size === items.length, "Compact links need unique accessible names.");
-  const link = cards[0].querySelector<HTMLAnchorElement>(".mhu-cube__compact-action");
-  assert(link, "Compact card is missing its metadata link.");
-  link.scrollIntoView({ block: "center" });
-  await nextLayout();
-  const linkBounds = link.getBoundingClientRect();
-  const target = shadow.elementFromPoint(linkBounds.left + linkBounds.width / 2, linkBounds.top + linkBounds.height / 2);
-  assert(target?.closest("a") === link, "Compact metadata links must receive pointer input.");
 });
 
-await test("compact cards reflow from two columns to one based on component width", async () => {
+await test("compact cards show the image, time and space, the organ title, and the remaining metadata", async () => {
+  const cards = [...shadow.querySelectorAll<HTMLElement>(".mhu-cube__compact-card")];
+  const card = (id: string) => cards.find((candidate) => candidate.querySelector<HTMLAnchorElement>(".mhu-cube__compact-link")?.getAttribute("href") === `#${id}`);
+  const terms = (element: Element | undefined, selector: string) => [...(element?.querySelectorAll(selector) ?? [])].map((term) => term.textContent).join(",");
+  cards.forEach((candidate) => {
+    const media = candidate.querySelector<HTMLAnchorElement>("a.mhu-cube__compact-media");
+    const link = candidate.querySelector<HTMLAnchorElement>("h3 > a.mhu-cube__compact-link");
+    assert(candidate.firstElementChild === media, "The image should lead the card.");
+    assert(link && media?.getAttribute("href") === link.getAttribute("href"), "The image and title should open the same metadata page.");
+    assert(media.tabIndex === -1 && media.getAttribute("aria-hidden") === "true", "The image link repeats the title link and should stay out of the tab order.");
+  });
+  const linkNames = cards.map((candidate) => candidate.querySelector(".mhu-cube__compact-link")?.textContent);
+  assert(new Set(linkNames).size === items.length, "Title links need unique accessible names, even when organs repeat.");
+  assert(card("two")?.querySelector(".mhu-cube__compact-link")?.textContent === "Liver, 10–60 years, large", "Titles show the organ, with time and space completing the link name.");
+  assert(terms(card("two"), ".mhu-cube__compact-facts dt") === "Time,Space" && terms(card("two"), ".mhu-cube__compact-facts dd") === "10–60 years,large", "Facts should list time, then space.");
+  assert(terms(card("two"), ".mhu-cube__compact-details dt") === "Lead author", "Metadata already shown as facts or the title should not repeat.");
+  assert(terms(card("three"), ".mhu-cube__compact-details dd") === "Author three,Co-author three", "List values should show one entry per line.");
+  assert(card("unplotted")?.querySelector(".mhu-cube__compact-link")?.textContent === "Dataset without coordinates" && !card("unplotted")?.querySelector(".mhu-cube__compact-facts"), "Unplotted datasets fall back to their label and full metadata.");
+
+  const image = card("two")?.querySelector<HTMLImageElement>(".mhu-cube__compact-image");
+  assert(image?.getAttribute("alt") === "", "The image is decorative inside a hidden link.");
+  await waitFor(() => image.complete && !card("one")?.querySelector(".mhu-cube__compact-image"), 3000);
+  assert(image.naturalWidth > 0, "The dataset image should load.");
+  const media = card("two")?.querySelector<HTMLElement>(".mhu-cube__compact-media");
+  assert(media && getComputedStyle(media).aspectRatio === "1 / 1", "The image container should be square.");
+});
+
+await test("touch screens open the dataset from anywhere on the card; mice use the image and title", async () => {
+  const card = shadow.querySelector<HTMLElement>(".mhu-cube__compact-card");
+  const link = card?.querySelector<HTMLAnchorElement>(".mhu-cube__compact-link");
+  const media = card?.querySelector<HTMLAnchorElement>(".mhu-cube__compact-media");
+  const details = card?.querySelector<HTMLElement>(".mhu-cube__compact-details");
+  assert(card && link && media && details, "The first card is incomplete.");
+  card.scrollIntoView({ block: "center" });
+  await nextLayout();
+  const at = (element: Element, x = 0.5) => {
+    const bounds = element.getBoundingClientRect();
+    return shadow.elementFromPoint(bounds.left + Math.max(2, bounds.width * x), bounds.top + bounds.height / 2)?.closest("a");
+  };
+  assert(at(link, 0.1) === link, "The title should open the metadata page.");
+  if (matchMedia("(hover: hover) and (pointer: fine)").matches) {
+    assert(at(media) === media, "With a mouse, the image should open the metadata page.");
+    assert(!at(details, 0.02), "With a mouse, the rest of the card should not be a link.");
+  } else {
+    assert(at(media) === link && at(details, 0.02) === link, "On touch screens, the whole card should open the metadata page.");
+  }
+});
+
+await test("compact cards fit as many designed-width columns as the component allows", async () => {
   if (!fixture) throw new Error("Fixture container is missing.");
   const list = shadow.querySelector<HTMLElement>(".mhu-cube__list");
-  assert(list && getComputedStyle(list).gridTemplateColumns.split(" ").length === 2, "Medium layout should use two columns.");
+  const columns = () => (list ? getComputedStyle(list).gridTemplateColumns.split(" ").length : 0);
+  fixture.style.width = "64rem";
+  await nextLayout();
+  assert(columns() === 3, "A 64rem component should fit three cards per row.");
   fixture.style.width = "30rem";
   await nextLayout();
-  assert(getComputedStyle(list).gridTemplateColumns.split(" ").length === 1, "Small layout should use one column.");
+  assert(columns() === 1, "A 30rem component should use one column.");
 });
 
 await test("malformed JSON attributes expose validation issues instead of retaining stale data", async () => {

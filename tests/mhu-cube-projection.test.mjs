@@ -5,6 +5,7 @@ import {
   getAxisEdges,
   getAxisLayout,
   getCategoryCenter,
+  getDrawingAreaRatio,
   getFootprintHalfSize,
   getFrameEdges,
   getProjectedBoxGeometry,
@@ -80,7 +81,19 @@ test("the low camera keeps floor depth well short of the time axis height on scr
   const floorDepth = projectPoint(0, 0, 0).y - projectPoint(1, 0, 1).y;
 
   assert.ok(floorDepth < timeHeight * 0.4, "Depth must move blocks up the screen far less than time does.");
-  assert.ok(projectPoint(0, 0, 0).y <= 92, "The bottom of the plot stays free for floor labels.");
+});
+
+test("each camera's frame touches all four sides of a drawing area shaped like it", () => {
+  ["corner", "front"].forEach((view) => {
+    const corners = [0, 1].flatMap((x) => [0, 1].flatMap((y) => [0, 1].map((z) => projectPoint(x, y, z, view))));
+    const xs = corners.map((point) => point.x);
+    const ys = corners.map((point) => point.y);
+    [Math.min(...xs), Math.min(...ys)].forEach((value) => assert.ok(Math.abs(value) < 1e-9, `${view} frame reaches the left and top.`));
+    [Math.max(...xs), Math.max(...ys)].forEach((value) => assert.ok(Math.abs(value - 100) < 1e-9, `${view} frame reaches the right and bottom.`));
+  });
+  // The camera shapes: the corner view is a little wider than tall, the front view almost square.
+  assert.ok(Math.abs(getDrawingAreaRatio("corner") - 0.913) < 0.001);
+  assert.ok(Math.abs(getDrawingAreaRatio("front") - 1) < 0.001);
 });
 
 test("getAxisEdges points every label direction away from the cube", () => {

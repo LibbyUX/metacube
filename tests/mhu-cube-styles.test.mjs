@@ -4,6 +4,7 @@ import test from "node:test";
 
 const styles = await readFile(new URL("../packages/mhu-cube/src/mhu-cube.css", import.meta.url), "utf8");
 const dataStyles = await readFile(new URL("../packages/mhu-cube/src/mhu-cube-data.css", import.meta.url), "utf8");
+const cardStyles = await readFile(new URL("../packages/mhu-cube/src/mhu-cube-cards.css", import.meta.url), "utf8");
 const previewStyles = await readFile(new URL("../mhu-cube/styles.css", import.meta.url), "utf8");
 const navigationStyles = await readFile(new URL("../src/components/global-navigation.css", import.meta.url), "utf8");
 const previewMarkup = await readFile(new URL("../mhu-cube/index.html", import.meta.url), "utf8");
@@ -18,7 +19,7 @@ test("component styles preserve non-color states and forced-colors support", () 
 });
 
 test("public typography follows Material 3 roles with limited semibold overrides", () => {
-  [styles, dataStyles, previewStyles, navigationStyles].forEach((stylesheet) => {
+  [styles, dataStyles, cardStyles, previewStyles, navigationStyles].forEach((stylesheet) => {
     assert.doesNotMatch(stylesheet, /font-weight:\s*700/);
   });
   assert.match(styles, /mhu-cube__intro-heading[\s\S]*?--mat-sys-headline-large-size, 2rem[\s\S]*?--mat-sys-headline-large-weight, 600[\s\S]*?white-space: nowrap/);
@@ -28,9 +29,9 @@ test("public typography follows Material 3 roles with limited semibold overrides
   assert.match(styles, /mhu-cube__details-heading[\s\S]*?--mat-sys-title-large-size, 1\.375rem[\s\S]*?font-weight: 500/);
   assert.match(dataStyles, /mhu-cube__details-metadata \{[\s\S]*?--mat-sys-body-medium-size, 0\.875rem/);
   assert.match(styles, /mhu-cube__intro-visualization \{[\s\S]*?--mat-sys-body-medium-size, 0\.875rem/);
-  assert.match(styles, /mhu-cube__intro-compact,[\s\S]*?--mat-sys-body-large-size, 1rem/);
+  assert.match(styles, /mhu-cube__details-unavailable \{[\s\S]*?--mat-sys-body-large-size, 1rem/);
   assert.match(dataStyles, /mhu-cube__details-metadata dt \{ color: var\(--_on-surface\); font-weight: 500; \}/);
-  assert.match(dataStyles, /mhu-cube__details-metadata dd \{ color: var\(--_on-surface-variant\); \}/);
+  assert.match(dataStyles, /mhu-cube__details-metadata dd \{ grid-column: 2; color: var\(--_on-surface-variant\); \}/);
   assert.match(dataStyles, /mhu-cube__intro-dimensions dt \{ color: var\(--_on-surface\); font-weight: 500; white-space: nowrap; \}/);
   assert.match(previewStyles, /\.metadata-preview h2[\s\S]*?--mat-sys-headline-medium-weight, 400/);
   assert.match(navigationStyles, /\.global-navigation__link[\s\S]*?--mat-sys-label-large-weight, 500/);
@@ -89,9 +90,11 @@ test("axis labels are pushed off the frame along each edge's outward normal", as
   assert.match(styles, /transform: translate\(\s*calc\(var\(--_align-x\) \+ var\(--axis-normal-x, 0\) \* var\(--_offset\)\),\s*calc\(var\(--_align-y\) \+ var\(--axis-normal-y, 0\) \* var\(--_offset\)\)\s*\);/);
   // Value alignment and floor-title offsets are set inline from each edge's normal, so CSS only supplies defaults.
   assert.match(styles, /--_align-x: -50%;\s*--_align-y: -50%;\s*--_offset: 0\.5rem;/);
-  // Normals are computed for this exact plot shape, so the CSS aspect ratio and projection constant must agree.
-  assert.match(styles, /\.mhu-cube__plot \{[^}]*aspect-ratio: 1000 \/ 868;/);
-  assert.match(projection, /const PLOT_HEIGHT_RATIO = 0\.868;/);
+  // Normals are computed for each camera's drawing-area shape, so CSS must size the plot from the same ratio.
+  const element = await readFile(new URL("../packages/mhu-cube/src/mhu-cube.ts", import.meta.url), "utf8");
+  assert.match(styles, /\.mhu-cube__plot \{[^}]*\/ var\(--_area-ratio, 0\.868\) \+ var\(--_gutter-x\)[^}]*\* var\(--_area-ratio, 0\.868\) \+ var\(--_gutter-y\)/);
+  assert.match(element, /style\.setProperty\("--_area-ratio", String\(getDrawingAreaRatio\(this\.#view\)\)\)/);
+  assert.match(projection, /heightRatio: \(height \* DESIGN_HEIGHT_RATIO\) \/ width/);
 });
 
 test("minimal guides drop the floor lines but keep time guides and the age marker", () => {
@@ -115,13 +118,21 @@ test("desktop content precedes the visualization and selected details use a card
   assert.doesNotMatch(styles, /\.mhu-cube__content \{[^}]*overflow: auto/);
   assert.match(previewStyles, /:root \{[\s\S]*?--mat-sys-surface-container: #eceff1;/);
   assert.match(previewStyles, /:root\[data-theme="dark"\] \{[\s\S]*?--mat-sys-surface-container: #222a30;/);
-  assert.match(styles, /\.mhu-cube__details-card,[\s\S]*?\.mhu-cube__compact-card \{[\s\S]*?border: 1px solid[\s\S]*?background: var\(--_surface-container\)[\s\S]*?box-shadow:/);
+  assert.match(styles, /--_surface-container-low: var\(--mhu-cube-surface-container-low, var\(--mat-sys-surface-container-low, #f4f4f4\)\);/);
+  assert.match(styles, /\.mhu-cube__details-card \{[\s\S]*?border: 1px solid[\s\S]*?background: var\(--_surface-container-low\)[\s\S]*?box-shadow:/);
 });
 
-test("responsive introductions separate visualization guidance from dataset guidance", () => {
-  assert.match(styles, /\.mhu-cube__intro-compact \{ display: none; \}/);
-  assert.match(styles, /@container mhu-cube-host \(max-width: 64rem\)[\s\S]*?\.mhu-cube__intro-visualization \{ display: none; \}/);
-  assert.match(styles, /@container mhu-cube-host \(max-width: 64rem\)[\s\S]*?\.mhu-cube__intro-compact \{ display: block;/);
+test("responsive introductions swap the heading text and drop visualization guidance on compact layouts", () => {
+  assert.match(styles, /\.mhu-cube__intro-heading-compact \{ display: none; \}/);
+  assert.match(styles, /@container mhu-cube-host \(max-width: 64rem\)[\s\S]*?\.mhu-cube__intro-heading-wide, \.mhu-cube__intro-visualization \{ display: none; \}/);
+  assert.match(styles, /@container mhu-cube-host \(max-width: 64rem\)[\s\S]*?\.mhu-cube__intro-heading-compact \{ display: inline; \}/);
+  assert.doesNotMatch(styles, /mhu-cube__intro-compact/);
+});
+
+test("component spacing follows the host width rather than the browser window", () => {
+  assert.match(styles, /\.mhu-cube \{[\s\S]*?gap: clamp\(1\.5rem, 3cqw, 4rem\);[\s\S]*?padding: clamp\(1\.5rem, 3cqw, 3rem\);/);
+  assert.match(styles, /@container mhu-cube-host \(max-width: 64rem\)[\s\S]*?padding: clamp\(1\.5rem, 4cqw, 2\.5rem\) 0 0;/);
+  assert.doesNotMatch(styles, /\dvw/);
 });
 
 test("desktop guidance uses a compact dimension key and tighter details spacing", () => {
@@ -150,4 +161,32 @@ test("dimension key and dataset details use scannable separation", () => {
   assert.match(dataStyles, /\.mhu-cube__details-metadata-row \{[\s\S]*?grid-template-columns: minmax\(5\.5rem, 38%\) minmax\(0, 1fr\);[\s\S]*?border-bottom: 1px solid var\(--_outline-variant\);/);
   assert.match(dataStyles, /\.mhu-cube__details-metadata-row:last-child \{ border-bottom: 0; \}/);
   assert.match(dataStyles, /@media \(forced-colors: active\)[\s\S]*?border-color: CanvasText;/);
+});
+
+test("compact cards stay hidden until the compact layout and keep their styles in one file", () => {
+  assert.match(cardStyles, /^[\s\S]*?\.mhu-cube__compact-card \{ display: none; \}[\s\S]*?@container mhu-cube-host \(max-width: 64rem\)/);
+  assert.doesNotMatch(styles, /\.mhu-cube__compact-card[\s,{]/);
+  assert.doesNotMatch(dataStyles, /mhu-cube__compact-card/);
+});
+
+test("compact cards follow the Figma card: a square image on the primary container, facts, title, and details", () => {
+  assert.match(cardStyles, /\.mhu-cube__compact-card \{[\s\S]*?align-items: center;[\s\S]*?padding: 1rem;[\s\S]*?border: 1px solid var\(--_outline-variant\);[\s\S]*?background: var\(--_surface-container\);/);
+  assert.match(cardStyles, /\.mhu-cube__compact-media \{[\s\S]*?width: min\(100%, 14rem\);[\s\S]*?aspect-ratio: 1;[\s\S]*?overflow: hidden;[\s\S]*?background: var\(--_primary-container\);/);
+  assert.match(cardStyles, /\.mhu-cube__compact-image \{[\s\S]*?object-fit: contain;[\s\S]*?object-position: bottom;/);
+  assert.match(cardStyles, /\.mhu-cube__compact-fact::before \{[\s\S]*?width: 0\.25rem;[\s\S]*?height: 0\.25rem;[\s\S]*?background: var\(--_primary\);/);
+  assert.match(cardStyles, /\.mhu-cube__compact-heading \{[\s\S]*?--mat-sys-title-medium-size, 1rem[\s\S]*?font-weight: 600;/);
+  assert.match(cardStyles, /\.mhu-cube__compact-details \{[\s\S]*?padding-top: 0\.75rem;[\s\S]*?border-top: 1px solid var\(--_outline-variant\);/);
+  assert.match(styles, /@container mhu-cube-host \(max-width: 64rem\)[\s\S]*?grid-template-columns: repeat\(auto-fill, minmax\(min\(100%, 16\.125rem\), 1fr\)\);/);
+});
+
+test("touch screens open the dataset from the whole card; mice use the image and title with hover feedback", () => {
+  assert.match(cardStyles, /@container mhu-cube-host \(max-width: 64rem\)[\s\S]*?\.mhu-cube__compact-link::after \{ content: ""; position: absolute; inset: 0; \}/);
+  assert.match(cardStyles, /\.mhu-cube__compact-link:focus-visible::after \{ outline: 3px solid var\(--_focus\);/);
+  assert.match(cardStyles, /@media \(hover: hover\) and \(pointer: fine\) \{[\s\S]*?\.mhu-cube__compact-link::after \{ content: none; \}[\s\S]*?\.mhu-cube__compact-link:hover \{ text-decoration: underline;[\s\S]*?\.mhu-cube__compact-media:hover \.mhu-cube__compact-image \{ transform: scale\(1\.08\); \}/);
+  assert.match(cardStyles, /@media \(prefers-reduced-motion: reduce\) \{\s*\.mhu-cube__compact-image \{ transition: none; \}/);
+  assert.match(cardStyles, /@media \(forced-colors: active\)[\s\S]*?\.mhu-cube__compact-fact::before \{ forced-color-adjust: none; background: CanvasText; \}/);
+});
+
+test("desktop details show each entry of a list value on its own line", () => {
+  assert.match(dataStyles, /\.mhu-cube__details-metadata dd \{ grid-column: 2;/);
 });

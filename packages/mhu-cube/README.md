@@ -2,7 +2,7 @@
 
 `<mhu-cube>` is an accessible, responsive web component for comparing Multiscale Human Portal organ-imaging datasets and opening their metadata. It is the sole component handoff target from this prototype repository.
 
-When its container is wider than `64rem`, the component keeps its introduction visible beside a perspective canvas that plots each dataset by **time** (donor age, vertical), **space** (spatial scale), and **organ** (alphabetical), and reveals the selected dataset card beneath that introduction. At `64rem` and below, it replaces the canvas and selection workflow with direct dataset cards. Cards use two columns above `40rem` and one column at `40rem` and below.
+When its container is wider than `64rem`, the component keeps its introduction visible beside a perspective canvas that plots each dataset by **time** (donor age, vertical), **space** (spatial scale), and **organ** (alphabetical), and reveals the selected dataset card beneath that introduction. At `64rem` and below, it replaces the canvas and selection workflow with direct [dataset cards](#dataset-cards), as many per row as fit at the designed card width (about `16rem`).
 
 ## Handoff status
 
@@ -44,6 +44,7 @@ The package intentionally contains no `dependencies` or `devDependencies`. The r
 | `src/mhu-cube-copy.ts` | Editable introduction copy. |
 | `src/mhu-cube.css` | Encapsulated responsive presentation and state styling. |
 | `src/mhu-cube-data.css` | Dimension key and dataset-detail presentation. |
+| `src/mhu-cube-cards.css` | Compact dataset cards, including their touch and mouse interactions. |
 
 ## Acknowledgment
 
@@ -224,7 +225,8 @@ interface MhuCubeItem {
   id: string;
   label: string;
   href?: string;
-  metadata?: Record<string, string | number | null | undefined>;
+  image?: string;
+  metadata?: Record<string, string | number | string[] | null | undefined>;
   position?: {
     time: { start: number; end: number; label?: string };
     space: string;
@@ -239,13 +241,16 @@ const item: MhuCubeItem = {
   id: "zandstra-thymus-codex",
   label: "Thymus, 100 µm, 4–5 months",
   href: "/metadata/zandstra-thymus-codex",
+  image: "/images/zandstra-thymus-codex.png",
+  metadata: { "Corresponding authors": ["Peter W. Zandstra", "Fabio M.V. Rossi"] },
   position: { time: { start: 4 / 12, end: 5 / 12, label: "4–5 months" }, space: "100 µm", organ: "Thymus" },
 };
 ```
 
 - `id` must be nonempty and unique.
 - `href` accepts relative, hash, HTTP, and HTTPS destinations. Unsafe or invalid protocols are removed.
-- `metadata` preserves supported values and their source order. `null` and `undefined` values are retained in normalized data but not displayed.
+- `image` is a square picture of the dataset with a transparent background, shown on compact cards over the primary container fill. It accepts relative, HTTP, and HTTPS URLs; unsafe ones are removed with an `item.image.unsafe` warning. A missing image, or one that fails to load, leaves the empty fill.
+- `metadata` preserves supported values and their source order. A list of strings, such as several authors, shows one entry per line on compact cards and the desktop details card, and is joined with commas elsewhere. `null`, `undefined`, and empty lists are retained in normalized data but not displayed.
 - `position.space` and `position.organ` must exactly match a configured axis value. They are referenced by name, not index, so organ sorting never moves a dataset.
 - `position.time` is inclusive and must lie inside the time axis, with `start` no later than `end`. A single age uses the same `start` and `end`. Use `label` when the numbers alone read poorly, for example months for infant donors; it replaces the formatted range in descriptions.
 - A missing or unusable position keeps the dataset available but moves it to the desktop “Not plotted” fallback instead of inventing a block.
@@ -261,8 +266,23 @@ const item: MhuCubeItem = {
 - Faint floor guides run from every space and organ label across the floor. Each block casts its footprint onto the floor where its two guides cross, with dashed drop lines from its bottom corners, so a floating block can be traced back to its labels.
 - Both cameras keep the floor shallow, so depth moves a block up the screen far less than time does and heights read close to the time labels across the whole plot.
 - Even so, a block's depth shifts it slightly against the time ticks. Hovering, keyboard focus, or selection reveals a bracket on the time axis for the dataset's exact start and end, plus level lines tracing those heights from the block to the axis. Single ages show a single level line and a dot.
+- The plot is as large as its column allows. Each camera's frame fills a drawing area with the frame's own proportions, and labels hang into fixed `rem` gutters around that area, so they keep their room at any size. Whichever of the column's height or width runs out first sets the size; the other dimension keeps the leftover space, centered.
 - Axis labels are placed from the frame itself. Each value label hangs from its axis position, offset straight out from the frame, and the space and organ titles sit in a second row beyond them. Labels stay clear of the frame and each other for values up to about `4rem` wide; longer space or organ names may need shorter display labels.
 - Keyboard order, reading order, and compact-card order follow the plot: organ, then space, then time.
+
+### Dataset cards
+
+At `64rem` and below, each dataset is a card built from the [Figma design](https://www.figma.com/design/bSpc6bQC5nGwDaWJfx7Cen/CNS-Projects-2026?node-id=3169-242638&m=dev):
+
+- The dataset's `image`, about `14rem` square, on the primary container fill. Non-square images are contained and sit on the bottom edge.
+- Time and space, each after a small primary square.
+- The organ as the card title.
+- Below a divider, the remaining metadata. Entries whose key matches an axis label (ignoring case) are skipped because the card already shows them.
+- Interaction depends on the input device, not the width:
+  - **Mouse or trackpad** (`(hover: hover) and (pointer: fine)`): the image and the organ name both open the metadata page. Hovering the image grows it within its square; hovering the name underlines it. The rest of the card is not a link.
+  - **Touch:** the title link stretches over the whole card, so pressing anywhere opens the metadata page.
+- Unavailable datasets have no links and say that metadata is not available. The current dataset shows a “Current page” label.
+- Datasets without a usable position fall back to their label as the title and all of their metadata.
 
 Read `element.items`, `element.axes`, and `element.validationIssues` to inspect normalized values and current issues.
 
@@ -288,10 +308,11 @@ element.addEventListener("mhu-cube-validation", (event) => {
 
 Both custom events bubble through the Shadow DOM boundary and are composed. Included declarations add event-detail types and map the `mhu-cube` tag to `MhuCube`.
 
-Position-related validation codes, all warnings that leave the dataset available but unplotted unless noted:
+Image and position validation codes, all warnings that leave the dataset available but unplotted unless noted:
 
 | Code | Cause |
 | --- | --- |
+| `item.image.unsafe` | `image` is not a relative, HTTP, or HTTPS URL; the dataset is shown without it. |
 | `item.position.missing` | No `position` was supplied. |
 | `item.position.invalid` | `position` is not an object, or uses the retired `{ x, y, z }` index format. |
 | `item.position.time.invalid` | `time` lacks finite `start` and `end`, or `start` is later than `end`. |
@@ -310,6 +331,7 @@ The component first uses its public CSS custom properties, then matching Angular
 mhu-cube {
   --mhu-cube-surface: var(--mat-sys-surface);
   --mhu-cube-surface-container: var(--mat-sys-surface-container);
+  --mhu-cube-surface-container-low: var(--mat-sys-surface-container-low);
   --mhu-cube-on-surface: var(--mat-sys-on-surface);
   --mhu-cube-on-surface-variant: var(--mat-sys-on-surface-variant);
   --mhu-cube-primary: var(--mat-sys-primary);
@@ -328,24 +350,24 @@ The current handoff intentionally has no quantitative color scale. Block height 
 
 ### Typography
 
-The component consumes Angular Material system typography properties when the host defines them and uses matching Material 3 fallbacks otherwise. The desktop introduction uses `headline-large`; the compact introduction uses `headline-medium`. Introduction headings use their role-specific weight tokens with an approved 600-weight fallback, while dimension-key headers, eyebrows, and axis titles use the approved 600-weight treatment. Other roles defer to their M3 weight tokens, while dataset-card headings and stat terms retain their approved 500-weight treatment. The desktop intro and selected-card column does not create an independent scroll region.
+The component consumes Angular Material system typography properties when the host defines them and uses matching Material 3 fallbacks otherwise. The desktop introduction uses `headline-large`; the compact introduction uses `headline-medium`. Introduction headings use their role-specific weight tokens with an approved 600-weight fallback, while dimension-key headers, eyebrows, and axis titles use the approved 600-weight treatment. Other roles defer to their M3 weight tokens, while the selected-dataset heading and stat terms retain their approved 500-weight treatment. Compact card titles, facts, and metadata labels use the card design's 600 weight. The desktop intro and selected-card column does not create an independent scroll region.
 
 The host application owns font loading. The Roboto files used by this repository belong to the preview page and are not runtime dependencies of the web component.
 
 ### Intro copy
 
-The prototype introduction is managed in `src/mhu-cube-copy.ts`. The eyebrow and heading are shared across layouts. Above `64rem`, a compact, divider-separated dimension key with visual column headings explains time, space, and organ and includes selection guidance. Selecting a block replaces the dimension key and its headings with a closable dataset card in the same left-column position; closing it restores the key and returns focus to the selected block. The Metacube acknowledgment remains anchored to the bottom of the desktop content column in either state. At `64rem` and below, visualization-specific content is removed from the layout and accessibility tree and replaced by a dataset-focused description above the direct metadata cards.
+The prototype introduction is managed in `src/mhu-cube-copy.ts`. `heading` appears beside the desktop canvas and stays on one line, so keep it to about 28 characters at the default type size. `compactHeading` replaces it at `64rem` and below and may wrap. Above `64rem`, a compact, divider-separated dimension key with visual column headings explains time, space, and organ and includes selection guidance. Selecting a block replaces the dimension key and its headings with a closable dataset card in the same left-column position; closing it restores the key and returns focus to the selected block. The Metacube acknowledgment remains anchored to the bottom of the desktop content column in either state. At `64rem` and below, visualization-specific content is removed from the layout and accessibility tree, leaving the compact heading alone above the dataset cards; there is no compact body text.
 
-The dimension key and dataset cards use semantic definition lists with subtle row separators. Selected desktop cards and direct compact cards use the container surface. The preview titles use a consistent organ, space, and time sequence so datasets sharing a cell stay distinguishable; the component itself continues to display whatever label the host supplies.
+The dimension key and dataset cards use semantic definition lists with subtle row separators. The selected desktop card uses the low container surface; compact cards are described under [Dataset cards](#dataset-cards). The preview titles use a consistent organ, space, and time sequence so datasets sharing a cell stay distinguishable; the component itself continues to display whatever label the host supplies.
 
-The structured copy includes `visualization` and `compactDescription` variants; `eyebrow` remains optional and disappears without leaving an empty element when omitted. This is an internal handoff configuration, not a public custom-element property. The receiving team can keep it internal or expose host-provided copy if reuse requires that flexibility.
+The structured copy includes the desktop `heading` and `visualization` copy and a `compactHeading`; `eyebrow` is optional and currently omitted; when absent it leaves no empty element. This is an internal handoff configuration, not a public custom-element property. The receiving team can keep it internal or expose host-provided copy if reuse requires that flexibility.
 
 ## Accessibility behavior
 
 - Desktop blocks are native buttons with unique accessible names, descriptions, selected state, and a relationship to the persistent details region. Descriptions state the time, space, and organ position, such as “Time: 7–47 years, Space: 100 µm, Organ: Liver”.
 - Only a block's painted faces receive pointer input, so a tall block's bounding box never intercepts clicks meant for a neighbor. Keyboard and reading order follow organ, space, and time.
 - Keyboard activation moves focus directly to the selected dataset's metadata action. Pointer activation keeps focus on the block.
-- Compact layouts remove the selection step and expose a direct metadata link on every card.
+- Compact layouts remove the selection step. Each card's organ title is its one keyboard-reachable link; hidden text adds the time and space, such as “Liver, 7–47 years, 100 µm”, so cards that share an organ still have unique link names. The image link repeats it for pointer users and is removed from the tab order and accessibility tree, and its image has empty alternative text. The current dataset's link carries `aria-current="page"`.
 - Visualization dimensions and card metadata use semantic definition lists.
 - The introduction remains visible after desktop selection. The persistent details region replaces the dimension key with a semantically headed dataset card and announces selection changes politely. Closing the card restores the key and returns focus to the previously selected block.
 - Current, unavailable, hover, focus, and selected states do not rely on color alone.
@@ -362,9 +384,9 @@ From the repository root, using the already-present dependencies:
 npm run dev
 ```
 
-Open `/mhu-cube/index.html` for the component preview. The switcher above it moves between the [prototype options](#prototype-options); add `?option=b` or `?option=c` to link straight to one.
+Open `/mhu-cube/index.html` for the component preview. The switcher above it moves between the [prototype options](#prototype-options); add `?option=b` or `?option=c` to link straight to one. Narrow the window below `64rem` to see the dataset cards, and use the browser's device emulation to try the touch interaction.
 
-The example configuration plots donor age from 0 to 100 years and displays its space categories as `100 µm` and `100 mm`. These are preview data rather than hard-coded component defaults, and the preview uses them consistently in the axes, dataset headings, metadata, and accessible descriptions. Its two Liver · 100 µm datasets (age 45 and ages 7–47) demonstrate lanes, and the infant Thymus dataset demonstrates a time label and the inward shift at the axis floor.
+The example configuration plots donor age from 0 to 100 years and displays its space categories as `100 µm` and `100 mm`. These are preview data rather than hard-coded component defaults, and the preview uses them consistently in the axes, dataset headings, metadata, and accessible descriptions. Its two Liver · 100 µm datasets (age 45 and ages 7–47) demonstrate lanes, and the infant Thymus dataset demonstrates a time label, the inward shift at the axis floor, a card image, and two corresponding authors. Every preview dataset has a square image in `mhu-cube/images/`, mapped to its dataset ID in `mhu-cube/main.ts`.
 
 Run the non-installing validation commands:
 
@@ -377,7 +399,7 @@ npm run test:browser:build
 npm run test:package
 ```
 
-For manual browser checks, run `npm run test:browser` and open the local URL it prints. A passing harness changes the document title to `PASS — MHU cube browser tests`. Check keyboard use, zoom, light/dark themes, forced colors, and widths on both sides of `64rem` and `40rem`. Because hit testing relies on SVG `pointer-events`, also confirm clicks and hover cards in Firefox and Safari, and that lane blocks just above `64rem` remain comfortable pointer targets.
+For manual browser checks, run `npm run test:browser` and open the local URL it prints. A passing harness changes the document title to `PASS — MHU cube browser tests`. Check keyboard use, zoom, light/dark themes, forced colors, widths on both sides of `64rem`, and the compact cards with both a mouse and a touch screen. Because hit testing relies on SVG `pointer-events`, also confirm clicks and hover cards in Firefox and Safari, and that lane blocks just above `64rem` remain comfortable pointer targets.
 
 ## Rebuilding or replacing the toolchain
 

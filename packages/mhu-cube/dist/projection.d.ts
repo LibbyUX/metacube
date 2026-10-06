@@ -57,6 +57,12 @@ export interface PlotLayout {
     /** Vertical hover-card anchor as a percentage of the block's bounds. */
     cardTop: number;
 }
+/**
+ * Gives a camera's drawing-area shape, which the element passes to CSS so the plot keeps the frame's proportions.
+ * @param view - Camera view.
+ * @returns The drawing area's height as a share of its width.
+ */
+export declare function getDrawingAreaRatio(view: MhuCubeView): number;
 /** Where each category sits on the floor and how much room its blocks have. */
 export interface AxisLayout {
     /** Half of a full-width block's normalized footprint. */

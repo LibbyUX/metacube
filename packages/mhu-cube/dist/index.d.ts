@@ -1,4 +1,4 @@
 export { MHU_CUBE_SELECTION_EVENT, MHU_CUBE_VALIDATION_EVENT, MhuCube, defineMhuCube, } from "./mhu-cube";
-export { type MhuCubeAxes, type MhuCubeCategoryAxis, type MhuCubeGuides, type MhuCubeItem, type MhuCubeItemStatus, type MhuCubePosition, type MhuCubeSelectionDetail, type MhuCubeTimeAxis, type MhuCubeTimeRange, type MhuCubeValidationDetail, type MhuCubeValidationIssue, type MhuCubeValidationSeverity, type MhuCubeView, } from "./types";
+export { type MhuCubeAxes, type MhuCubeCategoryAxis, type MhuCubeGuides, type MhuCubeItem, type MhuCubeItemStatus, type MhuCubeMetadataValue, type MhuCubePosition, type MhuCubeSelectionDetail, type MhuCubeTimeAxis, type MhuCubeTimeRange, type MhuCubeValidationDetail, type MhuCubeValidationIssue, type MhuCubeValidationSeverity, type MhuCubeView, } from "./types";
 export { isSafeMetadataHref, validateAxes, validateGuides, validateItems, validateView, type ValidationResult } from "./validation";
 //# sourceMappingURL=index.d.ts.map

@@ -1,5 +1,5 @@
 import type { MhuCubeAxes, MhuCubeGuides, MhuCubeItem, MhuCubeSelectionDetail, MhuCubeValidationDetail, MhuCubeValidationIssue, MhuCubeView } from "./types";
-export type { MhuCubeAxes, MhuCubeCategoryAxis, MhuCubeGuides, MhuCubeItem, MhuCubeItemStatus, MhuCubePosition, MhuCubeSelectionDetail, MhuCubeTimeAxis, MhuCubeTimeRange, MhuCubeValidationDetail, MhuCubeValidationIssue, MhuCubeValidationSeverity, MhuCubeView, } from "./types";
+export type { MhuCubeAxes, MhuCubeCategoryAxis, MhuCubeGuides, MhuCubeItem, MhuCubeItemStatus, MhuCubeMetadataValue, MhuCubePosition, MhuCubeSelectionDetail, MhuCubeTimeAxis, MhuCubeTimeRange, MhuCubeValidationDetail, MhuCubeValidationIssue, MhuCubeValidationSeverity, MhuCubeView, } from "./types";
 export declare const MHU_CUBE_SELECTION_EVENT = "mhu-cube-selection-change";
 export declare const MHU_CUBE_VALIDATION_EVENT = "mhu-cube-validation";
 declare global {

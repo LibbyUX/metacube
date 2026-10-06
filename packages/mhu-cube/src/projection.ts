@@ -66,8 +66,10 @@ interface FramePlane {
 }
 
 interface ViewDefinition {
-  /** The bounding cube's bottom and top faces. */
+  /** The bounding cube's bottom and top faces, in drawing-area percentages. */
   planes: { bottom: FramePlane; top: FramePlane };
+  /** Drawing-area height as a share of its width, matching the frame's on-screen shape. */
+  heightRatio: number;
   /** Floor corner nearest the camera; the block faces that meet there are the visible ones. */
   near: FloorCorner;
   /** Floor corner whose vertical edge carries the time ticks, the leftmost on screen. */
@@ -76,14 +78,41 @@ interface ViewDefinition {
   laneAxis: "x" | "z";
 }
 
+// Each camera's frame is drawn in a 1000 × 868 space, then fitted to its own drawing area.
+const DESIGN_HEIGHT_RATIO = 0.868;
+
+/**
+ * Fits a camera's frame to a drawing area of the same shape, so the frame touches all four sides. Labels hang
+ * outside the area in rem gutters set by CSS.
+ * @param planes - The frame's top and bottom faces in percentages of the 1000 × 868 design space.
+ * @returns The faces in drawing-area percentages, and the area's height as a share of its width.
+ */
+function fitFrame(planes: ViewDefinition["planes"]): Pick<ViewDefinition, "planes" | "heightRatio"> {
+  const points = [...Object.values(planes.top), ...Object.values(planes.bottom)];
+  const xs = points.map((point) => point.x);
+  const ys = points.map((point) => point.y);
+  const left = Math.min(...xs);
+  const top = Math.min(...ys);
+  const width = Math.max(...xs) - left;
+  const height = Math.max(...ys) - top;
+  const fit = (point: Point) => ({ x: ((point.x - left) / width) * 100, y: ((point.y - top) / height) * 100 });
+  const fitPlane = (plane: FramePlane): FramePlane => ({
+    x0z0: fit(plane.x0z0),
+    x1z0: fit(plane.x1z0),
+    x1z1: fit(plane.x1z1),
+    x0z1: fit(plane.x0z1),
+  });
+  return { planes: { top: fitPlane(planes.top), bottom: fitPlane(planes.bottom) }, heightRatio: (height * DESIGN_HEIGHT_RATIO) / width };
+}
+
 const VIEWS: Record<MhuCubeView, ViewDefinition> = {
   // Looks across the front corner from low above. The shallow floor keeps depth from moving blocks up the screen
   // nearly as much as time does, and the bottom of the plot stays free for the space and organ labels.
   corner: {
-    planes: {
+    ...fitFrame({
       top: { x0z0: { x: 57.31, y: 19.2 }, x1z0: { x: 15.15, y: 9.6 }, x1z1: { x: 57.31, y: 1.8 }, x0z1: { x: 99.47, y: 9.6 } },
       bottom: { x0z0: { x: 57.31, y: 90.5 }, x1z0: { x: 19.5, y: 77.2 }, x1z1: { x: 57.31, y: 65.8 }, x0z1: { x: 95.1, y: 77.2 } },
-    },
+    }),
     near: [0, 0],
     ticks: [1, 0],
     laneAxis: "x",
@@ -93,17 +122,24 @@ const VIEWS: Record<MhuCubeView, ViewDefinition> = {
   // column; front-row heights read against the ticks and back-row heights against the back-wall time lines.
   // Overlapping datasets sit side by side within their organ.
   front: {
-    planes: {
+    ...fitFrame({
       top: { x0z0: { x: 16, y: 18 }, x1z0: { x: 20, y: 10 }, x1z1: { x: 82, y: 10 }, x0z1: { x: 78, y: 18 } },
       bottom: { x0z0: { x: 16, y: 86 }, x1z0: { x: 20, y: 78 }, x1z1: { x: 82, y: 78 }, x0z1: { x: 78, y: 86 } },
-    },
+    }),
     near: [0, 1],
     ticks: [0, 0],
     laneAxis: "z",
   },
 };
-// Plot height as a share of its width; must match the plot's CSS aspect-ratio (1000 / 868).
-const PLOT_HEIGHT_RATIO = 0.868;
+
+/**
+ * Gives a camera's drawing-area shape, which the element passes to CSS so the plot keeps the frame's proportions.
+ * @param view - Camera view.
+ * @returns The drawing area's height as a share of its width.
+ */
+export function getDrawingAreaRatio(view: MhuCubeView) {
+  return VIEWS[view].heightRatio;
+}
 
 /** Where each category sits on the floor and how much room its blocks have. */
 export interface AxisLayout {
@@ -267,11 +303,12 @@ export function getTimeGuide(y: number, view: MhuCubeView = "corner"): Point[] {
  */
 export function getOutwardNormal(start: Point, end: Point, view: MhuCubeView = "corner"): Point {
   const dx = end.x - start.x;
-  const dy = (end.y - start.y) * PLOT_HEIGHT_RATIO;
+  const { heightRatio } = VIEWS[view];
+  const dy = (end.y - start.y) * heightRatio;
   const length = Math.hypot(dx, dy) || 1;
   const normal = { x: dy / length, y: -dx / length };
   const center = projectPoint(0.5, 0.5, 0.5, view);
-  const outward = { x: (start.x + end.x) / 2 - center.x, y: ((start.y + end.y) / 2 - center.y) * PLOT_HEIGHT_RATIO };
+  const outward = { x: (start.x + end.x) / 2 - center.x, y: ((start.y + end.y) / 2 - center.y) * heightRatio };
   return normal.x * outward.x + normal.y * outward.y < 0 ? { x: -normal.x, y: -normal.y } : normal;
 }
 

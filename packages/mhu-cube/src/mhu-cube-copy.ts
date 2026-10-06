@@ -19,16 +19,18 @@ export interface MhuCubeVisualizationCopy {
 
 export interface MhuCubeIntroCopy {
   eyebrow?: string;
+  /** Desktop heading, beside the visualization; it stays on one line. */
   heading: string;
+  /** Compact heading, above the dataset cards; compact layouts have no body text. */
+  compactHeading: string;
   visualization: MhuCubeVisualizationCopy;
-  compactDescription: string;
 }
 
 export const MHU_CUBE_INTRO_COPY: MhuCubeIntroCopy = {
-  eyebrow: "Organ imaging datasets",
-  heading: "Explore multiscale human data",
+  heading: "Explore multicube data",
+  compactHeading: "Explore datasets across time, space, and organ",
   visualization: {
-    description: "This visualization compares datasets across time, space, and organ. Select a block to view its details.",
+    description: "This interactive visualization compares datasets across time, space, and organ. Select a block to view its details.",
     dimensionHeadings: ["Dimension", "What it represents"],
     dimensions: [
       {
@@ -51,5 +53,4 @@ export const MHU_CUBE_INTRO_COPY: MhuCubeIntroCopy = {
       href: "https://github.com/Chair-for-Clinical-Bioinformatics/metacube",
     },
   },
-  compactDescription: "Browse organ-imaging datasets and compare their time (donor age), space (spatial scale), organ, and other available details. Use each card to open its metadata.",
 };

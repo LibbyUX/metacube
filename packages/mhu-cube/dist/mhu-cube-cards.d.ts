@@ -1,4 +1,4 @@
-import type { MhuCubeItem } from "./types";
+import type { MhuCubeAxes, MhuCubeItem } from "./types";
 /**
  * Creates the component introduction shared by desktop and compact layouts.
  * @param details - Persistent desktop details region displayed in place of the dimension key.
@@ -33,9 +33,12 @@ export declare function createDetails(detailsId: string): HTMLDivElement;
  */
 export declare function updateDetails(details: HTMLElement, item: MhuCubeItem | null, headingId: string, closeDetails: () => void): HTMLElement;
 /**
- * Creates a self-contained dataset card for layouts without the cube canvas.
+ * Creates a self-contained dataset card for layouts without the cube canvas: a square image, time and space,
+ * the organ as the title, and the remaining metadata. The image and title both open the metadata page; with a
+ * touch screen, the title link stretches over the whole card.
  * @param item - Dataset represented by the card.
- * @returns A card with metadata and a direct destination action.
+ * @param axes - Validated axes used for dimension labels and the time unit.
+ * @returns A card whose links share the dataset's metadata destination.
  */
-export declare function createCompactCard(item: MhuCubeItem): HTMLElement;
+export declare function createCompactCard(item: MhuCubeItem, axes: MhuCubeAxes): HTMLElement;
 //# sourceMappingURL=mhu-cube-cards.d.ts.map

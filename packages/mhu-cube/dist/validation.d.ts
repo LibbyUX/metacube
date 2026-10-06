@@ -31,9 +31,9 @@ export declare function validateView(input: unknown): ValidationResult<MhuCubeVi
  */
 export declare function validateGuides(input: unknown): ValidationResult<MhuCubeGuides>;
 /**
- * Determines whether a metadata destination uses an allowed web URL form.
- * @param value - Candidate destination supplied by component data.
- * @returns Whether the destination is relative, same-page, HTTP, or HTTPS.
+ * Determines whether a metadata destination or image uses an allowed web URL form.
+ * @param value - Candidate URL supplied by component data.
+ * @returns Whether the URL is relative, same-page, HTTP, or HTTPS.
  */
 export declare function isSafeMetadataHref(value: string): boolean;
 /**

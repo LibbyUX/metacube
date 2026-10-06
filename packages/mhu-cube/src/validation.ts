@@ -99,9 +99,9 @@ export function validateGuides(input: unknown): ValidationResult<MhuCubeGuides> 
 }
 
 /**
- * Determines whether a metadata destination uses an allowed web URL form.
- * @param value - Candidate destination supplied by component data.
- * @returns Whether the destination is relative, same-page, HTTP, or HTTPS.
+ * Determines whether a metadata destination or image uses an allowed web URL form.
+ * @param value - Candidate URL supplied by component data.
+ * @returns Whether the URL is relative, same-page, HTTP, or HTTPS.
  */
 export function isSafeMetadataHref(value: string) {
   const href = value.trim();
@@ -233,6 +233,8 @@ function validateMetadata(
     }
     if (typeof value === "string" || (typeof value === "number" && Number.isFinite(value)) || value === null || value === undefined) {
       metadata[key] = value;
+    } else if (Array.isArray(value) && value.every((entry) => typeof entry === "string")) {
+      metadata[key] = value.map((entry) => entry.trim()).filter(Boolean);
     } else {
       issues.push(issue("item.metadata.value.invalid", `Metadata field “${key}” was omitted because its value is unsupported.`, `${path}.${key}`, "warning", itemId));
     }
@@ -369,12 +371,19 @@ export function validateItems(input: unknown, axes: MhuCubeAxes): ValidationResu
       issues.push(issue("item.href.missing", "Dataset has no metadata destination and is treated as unavailable.", `${path}.href`, "warning", id));
     }
 
+    let image: string | undefined;
+    if (candidate.image !== undefined) {
+      if (typeof candidate.image === "string" && isSafeMetadataHref(candidate.image)) image = candidate.image.trim();
+      else issues.push(issue("item.image.unsafe", "Image was removed because its URL is invalid or uses an unsafe protocol.", `${path}.image`, "warning", id));
+    }
+
     const metadata = validateMetadata(candidate.metadata, `${path}.metadata`, id, issues);
     const position = validatePosition(candidate.position, axes, `${path}.position`, id, issues);
     items.push({
       id,
       label,
       ...(href ? { href } : {}),
+      ...(image ? { image } : {}),
       ...(metadata ? { metadata } : {}),
       ...(position ? { position } : {}),
       status,

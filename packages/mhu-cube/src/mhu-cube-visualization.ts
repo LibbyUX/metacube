@@ -9,7 +9,7 @@ import {
   type Point,
   type ProjectedBoxGeometry,
 } from "./projection";
-import type { MhuCubeAxes, MhuCubeItem, MhuCubeTimeAxis, MhuCubeTimeRange, MhuCubeView } from "./types";
+import type { MhuCubeAxes, MhuCubeItem, MhuCubeMetadataValue, MhuCubeTimeAxis, MhuCubeTimeRange, MhuCubeView } from "./types";
 
 const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 const NUMBER_FORMAT = new Intl.NumberFormat("en", { maximumFractionDigits: 2 });
@@ -32,6 +32,27 @@ function createSvgElement<K extends keyof SVGElementTagNameMap>(tagName: K, attr
   const element = document.createElementNS(SVG_NAMESPACE, tagName);
   Object.entries(attributes).forEach(([name, value]) => element.setAttribute(name, value));
   return element;
+}
+
+/**
+ * Lists a dataset's displayable metadata, skipping absent values and empty lists.
+ * @param item - Dataset whose metadata should be displayed.
+ * @returns Label-value entries in their provided order.
+ */
+export function getMetadataEntries(item: MhuCubeItem) {
+  return Object.entries(item.metadata ?? {}).filter(
+    (entry): entry is [string, Exclude<MhuCubeMetadataValue, null | undefined>] =>
+      entry[1] !== null && entry[1] !== undefined && !(Array.isArray(entry[1]) && entry[1].length === 0),
+  );
+}
+
+/**
+ * Formats a metadata value as one line of text, joining list entries with commas.
+ * @param value - Displayable metadata value.
+ * @returns Text such as "Male" or "Peter W. Zandstra, Fabio M.V. Rossi".
+ */
+export function formatMetadataValue(value: Exclude<MhuCubeMetadataValue, null | undefined>) {
+  return Array.isArray(value) ? value.join(", ") : String(value);
 }
 
 /**
@@ -234,9 +255,7 @@ export function createAccessibleAxisSummary(axes: MhuCubeAxes) {
  * @returns A concise accessible description for the dataset control.
  */
 export function getAccessibleItemDescription(item: MhuCubeItem, axes: MhuCubeAxes) {
-  const metadata = Object.entries(item.metadata ?? {})
-    .filter((entry): entry is [string, string | number] => entry[1] !== null && entry[1] !== undefined)
-    .map(([key, value]) => `${key}: ${value}`);
+  const metadata = getMetadataEntries(item).map(([key, value]) => `${key}: ${formatMetadataValue(value)}`);
   const position = item.position;
   const axisPosition = position ? [
     `${axes.time.label}: ${formatTimeRange(position.time, axes.time)}`,

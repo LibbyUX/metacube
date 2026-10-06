@@ -51,6 +51,8 @@ export interface MhuCubeAxes {
     /** Categorical tissue source, always displayed alphabetically. */
     organ: MhuCubeCategoryAxis;
 }
+/** A metadata value: text, a number, or a list such as several author names. */
+export type MhuCubeMetadataValue = string | number | string[] | null | undefined;
 /** A dataset displayed as a block or compact card. */
 export interface MhuCubeItem {
     /** Stable, unique dataset identity. */
@@ -59,8 +61,10 @@ export interface MhuCubeItem {
     label: string;
     /** Relative, hash, HTTP, or HTTPS metadata destination. */
     href?: string;
-    /** Ordered label-value pairs displayed as dataset details. */
-    metadata?: Record<string, string | number | null | undefined>;
+    /** Ordered label-value pairs displayed as dataset details; list values show one entry per line on compact cards. */
+    metadata?: Record<string, MhuCubeMetadataValue>;
+    /** Relative, HTTP, or HTTPS URL of a square preview image with a transparent background, shown on compact cards. */
+    image?: string;
     /** Optional plot position; omitted datasets remain available but unplotted. */
     position?: MhuCubePosition;
     /** Availability state; defaults to available when a valid destination exists. */

@@ -1,7 +1,9 @@
-import type { MhuCubeItem } from "./types";
+import type { MhuCubeAxes, MhuCubeItem } from "./types";
 import { MHU_CUBE_INTRO_COPY } from "./mhu-cube-copy";
+import { formatMetadataValue, formatTimeRange, getMetadataEntries } from "./mhu-cube-visualization";
+import { canPlotAxes } from "./validation";
 
-type MetadataEntry = [string, string | number];
+type MetadataEntry = ReturnType<typeof getMetadataEntries>[number];
 
 /**
  * Creates the Material close glyph used by the desktop details button.
@@ -36,9 +38,16 @@ export function createIntro(details: HTMLElement) {
     eyebrow.textContent = MHU_CUBE_INTRO_COPY.eyebrow;
     intro.append(eyebrow);
   }
+  // One heading whose text suits each layout; the hidden variant leaves the accessibility tree with display: none.
   const heading = document.createElement("h2");
   heading.className = "mhu-cube__intro-heading";
-  heading.textContent = MHU_CUBE_INTRO_COPY.heading;
+  const wideHeading = document.createElement("span");
+  wideHeading.className = "mhu-cube__intro-heading-wide";
+  wideHeading.textContent = MHU_CUBE_INTRO_COPY.heading;
+  const compactHeading = document.createElement("span");
+  compactHeading.className = "mhu-cube__intro-heading-compact";
+  compactHeading.textContent = MHU_CUBE_INTRO_COPY.compactHeading;
+  heading.append(wideHeading, compactHeading);
 
   const visualization = document.createElement("div");
   visualization.className = "mhu-cube__intro-visualization";
@@ -76,23 +85,8 @@ export function createIntro(details: HTMLElement) {
     MHU_CUBE_INTRO_COPY.visualization.attribution.afterLink,
   );
   visualization.append(visualizationDescription, dimensionHeadings, dimensions, details, attribution);
-
-  const compactDescription = document.createElement("p");
-  compactDescription.className = "mhu-cube__intro-compact";
-  compactDescription.textContent = MHU_CUBE_INTRO_COPY.compactDescription;
-  intro.append(heading, visualization, compactDescription);
+  intro.append(heading, visualization);
   return intro;
-}
-
-/**
- * Preserves present metadata while excluding explicitly absent values.
- * @param item - Dataset whose metadata should be displayed.
- * @returns Displayable metadata entries in their provided order.
- */
-function getMetadataEntries(item: MhuCubeItem): MetadataEntry[] {
-  return Object.entries(item.metadata ?? {}).filter(
-    (entry): entry is MetadataEntry => entry[1] !== null && entry[1] !== undefined,
-  );
 }
 
 /**
@@ -101,32 +95,46 @@ function getMetadataEntries(item: MhuCubeItem): MetadataEntry[] {
  * @returns A descriptive dataset name suitable for controls and links.
  */
 export function getAccessibleDatasetName(item: MhuCubeItem) {
-  const metadata = getMetadataEntries(item).map(([key, value]) => `${key}: ${value}`).join(", ");
+  const metadata = getMetadataEntries(item).map(([key, value]) => `${key}: ${formatMetadataValue(value)}`).join(", ");
   return metadata ? `${item.label}; ${metadata}` : item.label;
 }
 
 /**
- * Builds the semantic metadata definition list shared by dataset cards.
- * @param item - Dataset whose metadata should be displayed.
- * @returns A grouped definition list, or null when the dataset has no present metadata.
+ * Builds the semantic metadata definition list shared by dataset cards. List values get one description per entry.
+ * @param entries - Metadata entries to display, in order.
+ * @param className - Class for the list; each row gets the same class with a `-row` suffix.
+ * @returns A grouped definition list, or null when there is nothing to display.
  */
-function createMetadataList(item: MhuCubeItem) {
-  const entries = getMetadataEntries(item);
+function createMetadataList(entries: MetadataEntry[], className = "mhu-cube__details-metadata") {
   if (entries.length === 0) return null;
 
   const metadata = document.createElement("dl");
-  metadata.className = "mhu-cube__details-metadata";
+  metadata.className = className;
   entries.forEach(([key, value]) => {
     const row = document.createElement("div");
-    row.className = "mhu-cube__details-metadata-row";
+    row.className = `${className}-row`;
     const term = document.createElement("dt");
-    const description = document.createElement("dd");
     term.textContent = key;
-    description.textContent = String(value);
-    row.append(term, description);
+    row.append(term);
+    (Array.isArray(value) ? value : [String(value)]).forEach((entry) => {
+      const description = document.createElement("dd");
+      description.textContent = entry;
+      row.append(description);
+    });
     metadata.append(row);
   });
   return metadata;
+}
+
+/**
+ * Explains that a dataset has no metadata destination.
+ * @returns A noninteractive availability message.
+ */
+function createUnavailableMessage() {
+  const unavailable = document.createElement("p");
+  unavailable.className = "mhu-cube__details-unavailable";
+  unavailable.textContent = "Metadata is not currently available for this dataset.";
+  return unavailable;
 }
 
 /**
@@ -137,12 +145,7 @@ function createMetadataList(item: MhuCubeItem) {
  */
 function createDestination(item: MhuCubeItem, actionClassName: string) {
   const status = item.status ?? "available";
-  if (status === "unavailable" || !item.href) {
-    const unavailable = document.createElement("p");
-    unavailable.className = "mhu-cube__details-unavailable";
-    unavailable.textContent = "Metadata is not currently available for this dataset.";
-    return unavailable;
-  }
+  if (status === "unavailable" || !item.href) return createUnavailableMessage();
 
   const action = document.createElement("a");
   action.className = actionClassName;
@@ -176,7 +179,7 @@ export function createPreviewCard(item: MhuCubeItem) {
       term.className = "mhu-cube__metadata-key";
       description.className = "mhu-cube__metadata-value";
       term.textContent = key;
-      description.textContent = String(value);
+      description.textContent = formatMetadataValue(value);
       metadata.append(term, description);
     });
     card.append(metadata);
@@ -240,7 +243,7 @@ export function updateDetails(details: HTMLElement, item: MhuCubeItem | null, he
   header.append(title, close);
   card.append(header);
 
-  const metadata = createMetadataList(item);
+  const metadata = createMetadataList(getMetadataEntries(item));
   if (metadata) card.append(metadata);
   card.append(createDestination(item, "mhu-cube__details-action"));
   details.append(card);
@@ -248,20 +251,102 @@ export function updateDetails(details: HTMLElement, item: MhuCubeItem | null, he
 }
 
 /**
- * Creates a self-contained dataset card for layouts without the cube canvas.
- * @param item - Dataset represented by the card.
- * @returns A card with metadata and a direct destination action.
+ * Drops metadata that repeats a dimension the card already shows, matched by axis label.
+ * @param item - Dataset whose metadata should be displayed.
+ * @param axes - Validated axes whose labels identify repeated entries.
+ * @returns The remaining metadata entries in their provided order.
  */
-export function createCompactCard(item: MhuCubeItem) {
+function getRemainingMetadataEntries(item: MhuCubeItem, axes: MhuCubeAxes) {
+  const dimensionLabels = new Set([axes.time.label, axes.space.label, axes.organ.label].map((label) => label.trim().toLowerCase()));
+  return getMetadataEntries(item).filter(([key]) => !dimensionLabels.has(key.trim().toLowerCase()));
+}
+
+/**
+ * Creates a self-contained dataset card for layouts without the cube canvas: a square image, time and space,
+ * the organ as the title, and the remaining metadata. The image and title both open the metadata page; with a
+ * touch screen, the title link stretches over the whole card.
+ * @param item - Dataset represented by the card.
+ * @param axes - Validated axes used for dimension labels and the time unit.
+ * @returns A card whose links share the dataset's metadata destination.
+ */
+export function createCompactCard(item: MhuCubeItem, axes: MhuCubeAxes) {
   const card = document.createElement("article");
   card.className = "mhu-cube__compact-card";
+  const status = item.status ?? "available";
+  const href = status === "unavailable" ? undefined : item.href;
+  const position = canPlotAxes(axes) ? item.position : undefined;
+
+  // The image repeats the title link for pointer users, so it stays out of the tab order and accessibility tree.
+  const media = document.createElement(href ? "a" : "div");
+  media.className = "mhu-cube__compact-media";
+  if (media instanceof HTMLAnchorElement && href) {
+    media.href = href;
+    media.tabIndex = -1;
+    media.setAttribute("aria-hidden", "true");
+  }
+  if (item.image) {
+    const image = document.createElement("img");
+    image.className = "mhu-cube__compact-image";
+    image.src = item.image;
+    image.alt = "";
+    image.loading = "lazy";
+    image.decoding = "async";
+    image.addEventListener("error", () => image.remove(), { once: true });
+    media.append(image);
+  }
+
+  const body = document.createElement("div");
+  body.className = "mhu-cube__compact-body";
+  if (position) {
+    const facts = document.createElement("dl");
+    facts.className = "mhu-cube__compact-facts";
+    [
+      [axes.time.label, formatTimeRange(position.time, axes.time)],
+      [axes.space.label, position.space],
+    ].forEach(([label, value]) => {
+      const fact = document.createElement("div");
+      fact.className = "mhu-cube__compact-fact";
+      const term = document.createElement("dt");
+      term.className = "mhu-cube__sr-only";
+      term.textContent = label;
+      const description = document.createElement("dd");
+      description.textContent = value;
+      fact.append(term, description);
+      facts.append(fact);
+    });
+    body.append(facts);
+  }
+
   const heading = document.createElement("h3");
   heading.className = "mhu-cube__compact-heading";
-  heading.textContent = item.label;
-  card.append(heading);
+  const title = position?.organ ?? item.label;
+  if (href) {
+    const link = document.createElement("a");
+    link.className = "mhu-cube__compact-link";
+    link.href = href;
+    link.textContent = title;
+    if (status === "current") link.setAttribute("aria-current", "page");
+    // Several datasets share an organ, so hidden time and space text completes each link's name.
+    if (position) {
+      const context = document.createElement("span");
+      context.className = "mhu-cube__sr-only";
+      context.textContent = `, ${formatTimeRange(position.time, axes.time)}, ${position.space}`;
+      link.append(context);
+    }
+    heading.append(link);
+  } else heading.textContent = title;
+  body.append(heading);
 
-  const metadata = createMetadataList(item);
-  if (metadata) card.append(metadata);
-  card.append(createDestination(item, "mhu-cube__compact-action"));
+  if (status === "current") {
+    const badge = document.createElement("p");
+    badge.className = "mhu-cube__compact-badge";
+    badge.textContent = "Current page";
+    body.append(badge);
+  }
+  const details = createMetadataList(position ? getRemainingMetadataEntries(item, axes) : getMetadataEntries(item), "mhu-cube__compact-details");
+  if (details) body.append(details);
+  if (!href) body.append(createUnavailableMessage());
+
+  card.append(media, body);
   return card;
 }

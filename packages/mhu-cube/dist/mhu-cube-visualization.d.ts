@@ -1,5 +1,17 @@
 import { type PlotLayout, type ProjectedBoxGeometry } from "./projection";
-import type { MhuCubeAxes, MhuCubeItem, MhuCubeTimeAxis, MhuCubeTimeRange, MhuCubeView } from "./types";
+import type { MhuCubeAxes, MhuCubeItem, MhuCubeMetadataValue, MhuCubeTimeAxis, MhuCubeTimeRange, MhuCubeView } from "./types";
+/**
+ * Lists a dataset's displayable metadata, skipping absent values and empty lists.
+ * @param item - Dataset whose metadata should be displayed.
+ * @returns Label-value entries in their provided order.
+ */
+export declare function getMetadataEntries(item: MhuCubeItem): [string, string | number | string[]][];
+/**
+ * Formats a metadata value as one line of text, joining list entries with commas.
+ * @param value - Displayable metadata value.
+ * @returns Text such as "Male" or "Peter W. Zandstra, Fabio M.V. Rossi".
+ */
+export declare function formatMetadataValue(value: Exclude<MhuCubeMetadataValue, null | undefined>): string;
 /**
  * Formats a dataset's time range for labels and assistive technology.
  * @param range - Validated time range.

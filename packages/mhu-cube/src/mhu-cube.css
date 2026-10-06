@@ -1,6 +1,7 @@
 :host {
   --_surface: var(--mhu-cube-surface, var(--mat-sys-surface, #fcfcfc));
   --_surface-container: var(--mhu-cube-surface-container, var(--mat-sys-surface-container, #eceff1));
+  --_surface-container-low: var(--mhu-cube-surface-container-low, var(--mat-sys-surface-container-low, #f4f4f4));
   --_on-surface: var(--mhu-cube-on-surface, var(--mat-sys-on-surface, #1d2429));
   --_on-surface-variant: var(--mhu-cube-on-surface-variant, var(--mat-sys-on-surface-variant, #354b57));
   --_primary: var(--mhu-cube-primary, var(--mat-sys-primary, #8b1510));
@@ -25,16 +26,17 @@
 }
 
 * { box-sizing: border-box; }
+/* Spacing scales with the host's width (cqw), like the layout breakpoints, not with the browser window. */
 .mhu-cube {
   display: grid;
   grid-template-columns: minmax(22rem, 28rem) minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
   grid-template-areas: "content stage";
-  gap: clamp(1.5rem, 3vw, 4rem);
+  gap: clamp(1.5rem, 3cqw, 4rem);
   width: 100%;
   height: 100%;
   min-height: 36rem;
-  padding: clamp(1.5rem, 3vw, 3rem);
+  padding: clamp(1.5rem, 3cqw, 3rem);
   overflow: visible;
   background: var(--_surface);
 }
@@ -53,23 +55,37 @@
   grid-area: stage;
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
-  gap: 0.75rem;
   min-width: 0;
   min-height: 0;
   container-type: size;
   place-items: center;
 }
+/* The frame, blocks, and label anchors share a drawing area shaped like the camera's frame (--_area-ratio, set by
+   the element from projection.ts), so the frame touches all four sides. Labels hang into rem gutters around the
+   area, so they keep their room at any size. The plot is as large as the stage allows. */
 .mhu-cube__plot {
+  --_gutter-top: 0.5rem;
+  --_gutter-right: 0.5rem;
+  --_gutter-bottom: 1.25rem;
+  --_gutter-left: 3rem;
+  --_gutter-x: calc(var(--_gutter-left) + var(--_gutter-right));
+  --_gutter-y: calc(var(--_gutter-top) + var(--_gutter-bottom));
+  --_plot-width: min(100cqw, calc((100cqh - var(--_gutter-y)) / var(--_area-ratio, 0.868) + var(--_gutter-x)));
   position: relative;
-  width: min(100cqw, 115.207cqh);
-  aspect-ratio: 1000 / 868;
+  width: var(--_plot-width);
+  height: calc((var(--_plot-width) - var(--_gutter-x)) * var(--_area-ratio, 0.868) + var(--_gutter-y));
+}
+/* The front view's space labels run off the right floor edge and its organ labels sit below the front edge. */
+.mhu-cube--view-front .mhu-cube__plot { --_gutter-right: 6rem; --_gutter-bottom: 3.25rem; }
+.mhu-cube__frame, .mhu-cube__axes, .mhu-cube__list {
+  position: absolute;
+  top: var(--_gutter-top);
+  left: var(--_gutter-left);
+  width: calc(100% - var(--_gutter-x));
+  height: calc(100% - var(--_gutter-y));
 }
 .mhu-cube__frame {
-  position: absolute;
   z-index: 0;
-  inset: 0;
-  width: 100%;
-  height: 100%;
   overflow: visible;
   pointer-events: none;
   shape-rendering: geometricPrecision;
@@ -87,7 +103,7 @@
   vector-effect: non-scaling-stroke;
 }
 .mhu-cube__frame-floor-guide { stroke: color-mix(in srgb, var(--_outline) 45%, transparent); }
-.mhu-cube__axes { position: absolute; z-index: 1; inset: 0; user-select: text; }
+.mhu-cube__axes { z-index: 1; user-select: text; }
 /* Labels sit on their axis point; --_align-* picks the box corner that touches it and --_offset pushes the
    box away from the frame along the edge's outward normal, so labels clear the frame at any camera angle. */
 .mhu-cube__axis-title, .mhu-cube__axis-value {
@@ -128,7 +144,7 @@
     -2px 2px 0 var(--_surface),
     2px 2px 0 var(--_surface);
 }
-.mhu-cube__list { position: absolute; z-index: 2; inset: 0; margin: 0; padding: 0; list-style: none; pointer-events: none; }
+.mhu-cube__list { z-index: 2; margin: 0; padding: 0; list-style: none; pointer-events: none; }
 /* Bounding boxes of tall blocks overlap their neighbors, so only painted faces receive pointer input. */
 .mhu-cube__item {
   position: absolute;
@@ -318,10 +334,11 @@
 .mhu-cube__item--unavailable .mhu-cube__left,
 .mhu-cube__item--unavailable .mhu-cube__right,
 .mhu-cube__item--unavailable .mhu-cube__edge { stroke-dasharray: 3 2; }
-.mhu-cube__compact-card { display: none; }
+/* Spacing lives on the list rather than as a stage gap, so the plot gets the stage's full height when it is absent. */
 .mhu-cube__unpositioned {
   align-self: end;
   width: min(100%, 38rem);
+  margin-top: 0.75rem;
   padding: 0.75rem 1rem;
   border-left: 3px solid var(--_outline);
   background: var(--_surface-container);
@@ -391,8 +408,8 @@
   letter-spacing: var(--mat-sys-headline-large-tracking, 0);
   white-space: nowrap;
 }
-.mhu-cube__details-heading,
-.mhu-cube__compact-heading {
+.mhu-cube__intro-heading-compact { display: none; }
+.mhu-cube__details-heading {
   margin: 0;
   font-family: var(--mat-sys-title-large-font, Roboto, Arial, sans-serif);
   font-size: var(--mat-sys-title-large-size, 1.375rem);
@@ -400,7 +417,6 @@
   line-height: var(--mat-sys-title-large-line-height, 1.75rem);
   letter-spacing: var(--mat-sys-title-large-tracking, 0);
 }
-.mhu-cube__intro-compact,
 .mhu-cube__details-unavailable {
   margin: 1rem 0 0;
   color: var(--_on-surface-variant);
@@ -425,19 +441,17 @@
 }
 .mhu-cube__intro-summary,
 .mhu-cube__intro-attribution { margin: 0; }
-.mhu-cube__intro-compact { display: none; }
 .mhu-cube__details:empty { display: none; }
-.mhu-cube__details-card,
-.mhu-cube__compact-card {
+.mhu-cube__details-card {
   border: 1px solid var(--_outline-variant);
-  background: var(--_surface-container);
+  background: var(--_surface-container-low);
   box-shadow: 0 1rem 2.5rem color-mix(in srgb, var(--_on-surface) 10%, transparent);
 }
 .mhu-cube__details-card {
   width: 100%;
   padding: 1.25rem;
 }
-.mhu-cube__details-action, .mhu-cube__compact-action {
+.mhu-cube__details-action {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -454,8 +468,8 @@
   text-decoration: none;
   white-space: nowrap;
 }
-.mhu-cube__details-action:hover, .mhu-cube__compact-action:hover { filter: brightness(0.92); }
-.mhu-cube__details-action:focus-visible, .mhu-cube__compact-action:focus-visible { outline: 3px solid var(--_focus); outline-offset: 3px; }
+.mhu-cube__details-action:hover { filter: brightness(0.92); }
+.mhu-cube__details-action:focus-visible { outline: 3px solid var(--_focus); outline-offset: 3px; }
 .mhu-cube__empty, .mhu-cube__plot-unavailable {
   position: absolute;
   inset: 0;
@@ -479,7 +493,7 @@
 }
 
 @container mhu-cube-host (max-width: 64rem) {
-  .mhu-cube { display: flex; min-height: 0; height: auto; padding: clamp(1.5rem, 4vw, 2.5rem) 0 0; overflow: visible; flex-direction: column; }
+  .mhu-cube { display: flex; min-height: 0; height: auto; padding: clamp(1.5rem, 4cqw, 2.5rem) 0 0; overflow: visible; flex-direction: column; }
   .mhu-cube__content {
     display: block;
     max-width: 45rem;
@@ -502,38 +516,25 @@
     letter-spacing: var(--mat-sys-headline-medium-tracking, 0);
     white-space: normal;
   }
-  .mhu-cube__intro-visualization { display: none; }
-  .mhu-cube__intro-compact { display: block; margin-top: 0.875rem; }
+  .mhu-cube__intro-heading-wide, .mhu-cube__intro-visualization { display: none; }
+  .mhu-cube__intro-heading-compact { display: inline; }
   .mhu-cube__stage { display: block; container-type: normal; }
-  .mhu-cube__plot { width: 100%; max-height: none; aspect-ratio: auto; }
+  .mhu-cube__plot { width: 100%; height: auto; max-height: none; }
   .mhu-cube__frame, .mhu-cube__axes { display: none; }
+  /* As many card columns as fit, each at least as wide as the designed card (a 14rem image plus padding). */
   .mhu-cube__list {
     position: static;
+    width: auto;
+    height: auto;
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 16.125rem), 1fr));
     gap: 1rem;
   }
   .mhu-cube__item { position: static; display: grid; min-width: 0; width: auto; height: auto; pointer-events: auto; }
   .mhu-cube__select { display: none; }
-  .mhu-cube__compact-card {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    min-width: 0;
-    width: 100%;
-    height: 100%;
-    padding: 1.25rem;
-  }
-  .mhu-cube__compact-heading { overflow-wrap: anywhere; }
-  .mhu-cube__compact-action { align-self: flex-start; margin-top: auto; }
-  .mhu-cube__compact-card .mhu-cube__details-unavailable { margin-top: auto; }
   .mhu-cube__details { display: none; }
   .mhu-cube__unpositioned { display: none; }
   .mhu-cube__empty, .mhu-cube__plot-unavailable { position: static; }
-}
-
-@container mhu-cube-host (max-width: 40rem) {
-  .mhu-cube__list { grid-template-columns: minmax(0, 1fr); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -563,8 +564,8 @@
   .mhu-cube__item--selected .mhu-cube__select .mhu-cube__edge,
   .mhu-cube__select:hover .mhu-cube__edge { stroke: HighlightText; }
   .mhu-cube__item--unavailable .mhu-cube__cube { opacity: 1; filter: none; }
-  .mhu-cube__card, .mhu-cube__details-card, .mhu-cube__compact-card, .mhu-cube__unpositioned { border-color: CanvasText; box-shadow: none; }
-  .mhu-cube__details-action, .mhu-cube__compact-action, .mhu-cube__unpositioned-button { border: 1px solid ButtonText; }
+  .mhu-cube__card, .mhu-cube__details-card, .mhu-cube__unpositioned { border-color: CanvasText; box-shadow: none; }
+  .mhu-cube__details-action, .mhu-cube__unpositioned-button { border: 1px solid ButtonText; }
   .mhu-cube__select:focus-visible, .mhu-cube__details-action:focus-visible,
-  .mhu-cube__compact-action:focus-visible, .mhu-cube__unpositioned-button:focus-visible { outline-color: Highlight; }
+  .mhu-cube__unpositioned-button:focus-visible { outline-color: Highlight; }
 }

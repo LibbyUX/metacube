@@ -204,3 +204,16 @@ test("validateView and validateGuides accept their options and fall back with a 
   assert.equal(view.issues[0].severity, "warning");
   assert.deepEqual(codes(validateGuides(true)), ["guides.invalid"]);
 });
+
+test("validateItems keeps safe images and trims list metadata such as several authors", () => {
+  const result = validateItems([
+    { id: "a", label: "A", href: "#a", image: " images/a.png ", metadata: { Authors: [" Peter W. Zandstra ", "", "Fabio M.V. Rossi"] } },
+    { id: "b", label: "B", href: "#b", image: "javascript:alert(1)", metadata: { Mixed: ["Name", 4] } },
+  ], axes);
+  assert.equal(result.value[0].image, "images/a.png");
+  assert.deepEqual(result.value[0].metadata, { Authors: ["Peter W. Zandstra", "Fabio M.V. Rossi"] });
+  assert.equal(result.value[1].image, undefined);
+  assert.deepEqual(result.value[1].metadata, {});
+  assert.deepEqual(codes(result).filter((code) => code !== "item.position.missing"), ["item.image.unsafe", "item.metadata.value.invalid"]);
+  assert.equal(result.issues.find((issue) => issue.code === "item.image.unsafe")?.severity, "warning");
+});

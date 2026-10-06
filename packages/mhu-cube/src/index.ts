@@ -11,6 +11,7 @@ export {
   type MhuCubeGuides,
   type MhuCubeItem,
   type MhuCubeItemStatus,
+  type MhuCubeMetadataValue,
   type MhuCubePosition,
   type MhuCubeSelectionDetail,
   type MhuCubeTimeAxis,
