@@ -13,16 +13,19 @@ import { DetailsTransition } from "./details-transition";
 import { layoutPlot, sortItemsForDisplay, type PlotLayout } from "./projection";
 import type {
   MhuCubeAxes,
+  MhuCubeGuides,
   MhuCubeItem,
   MhuCubeSelectionDetail,
   MhuCubeValidationDetail,
   MhuCubeValidationIssue,
+  MhuCubeView,
 } from "./types";
-import { EMPTY_AXES, canPlotAxes, validateAxes, validateItems } from "./validation";
+import { EMPTY_AXES, canPlotAxes, validateAxes, validateGuides, validateItems, validateView } from "./validation";
 
 export type {
   MhuCubeAxes,
   MhuCubeCategoryAxis,
+  MhuCubeGuides,
   MhuCubeItem,
   MhuCubeItemStatus,
   MhuCubePosition,
@@ -32,6 +35,7 @@ export type {
   MhuCubeValidationDetail,
   MhuCubeValidationIssue,
   MhuCubeValidationSeverity,
+  MhuCubeView,
 } from "./types";
 
 export const MHU_CUBE_SELECTION_EVENT = "mhu-cube-selection-change";
@@ -55,13 +59,17 @@ let instanceCount = 0;
 
 /** Accessible, responsive dataset preview custom element. */
 export class MhuCube extends HTMLElementBase {
-  static observedAttributes = ["items", "axes", "label"];
+  static observedAttributes = ["items", "axes", "label", "view", "guides"];
   #sourceItems: unknown = [];
   #items: MhuCubeItem[] = [];
   #axes: MhuCubeAxes = EMPTY_AXES;
+  #view: MhuCubeView = "corner";
+  #guides: MhuCubeGuides = "full";
   #axisIssues: MhuCubeValidationIssue[] = [];
   #itemIssues: MhuCubeValidationIssue[] = [];
   #attributeIssues: MhuCubeValidationIssue[] = [];
+  #viewIssues: MhuCubeValidationIssue[] = [];
+  #guidesIssues: MhuCubeValidationIssue[] = [];
   #selectedId: string | null = null;
   #shadow = this.attachShadow({ mode: "open" });
   #instanceId = `mhu-cube-${++instanceCount}`;
@@ -88,8 +96,22 @@ export class MhuCube extends HTMLElementBase {
     this.#applyAxes(value);
     this.#scheduleUpdate(true);
   }
+  /** Desktop camera: across the front corner, or facing the organ axis. */
+  get view() { return this.#view; }
+  set view(value: MhuCubeView) {
+    this.#applyView(value);
+    this.#scheduleUpdate(true);
+  }
+  /** Desktop reference drawing: every guide, or only the time guides. */
+  get guides() { return this.#guides; }
+  set guides(value: MhuCubeGuides) {
+    this.#applyGuides(value);
+    this.#scheduleUpdate(true);
+  }
   /** Current configuration errors and warnings. */
-  get validationIssues() { return [...this.#attributeIssues, ...this.#axisIssues, ...this.#itemIssues]; }
+  get validationIssues() {
+    return [...this.#attributeIssues, ...this.#viewIssues, ...this.#guidesIssues, ...this.#axisIssues, ...this.#itemIssues];
+  }
   /** ID selected in the desktop visualization, or null. */
   get selectedId() { return this.#selectedId; }
   set selectedId(value: string | null) {
@@ -105,8 +127,22 @@ export class MhuCube extends HTMLElementBase {
     this.#detailsTransition.cancel();
   }
   attributeChangedCallback(name: string) {
-    if (name !== "label") this.#readJsonAttribute(name as "axes" | "items", true);
+    if (name === "view") this.#applyView(this.getAttribute(name) ?? undefined);
+    else if (name === "guides") this.#applyGuides(this.getAttribute(name) ?? undefined);
+    else if (name !== "label") this.#readJsonAttribute(name as "axes" | "items", true);
     this.#scheduleUpdate(name !== "label");
+  }
+
+  #applyView(value: unknown) {
+    const result = validateView(value);
+    this.#view = result.value;
+    this.#viewIssues = result.issues;
+  }
+
+  #applyGuides(value: unknown) {
+    const result = validateGuides(value);
+    this.#guides = result.value;
+    this.#guidesIssues = result.issues;
   }
 
   /**
@@ -332,10 +368,12 @@ export class MhuCube extends HTMLElementBase {
     if (!this.#section || !this.#details || !this.#stage || !this.#plot) return;
 
     this.#section.setAttribute("aria-label", this.getAttribute("label") ?? "Metadata datasets");
+    this.#section.classList.remove("mhu-cube--view-corner", "mhu-cube--view-front", "mhu-cube--guides-full", "mhu-cube--guides-minimal");
+    this.#section.classList.add(`mhu-cube--view-${this.#view}`, `mhu-cube--guides-${this.#guides}`);
     this.#stage.querySelector(".mhu-cube__unpositioned")?.remove();
     const axesCanBePlotted = canPlotAxes(this.#axes);
     if (axesCanBePlotted) {
-      this.#plot.replaceChildren(createCoordinateFrame(this.#axes), createAxisLabels(this.#axes), createAccessibleAxisSummary(this.#axes));
+      this.#plot.replaceChildren(createCoordinateFrame(this.#axes, this.#view), createAxisLabels(this.#axes, this.#view), createAccessibleAxisSummary(this.#axes));
     } else {
       const unavailable = document.createElement("p");
       unavailable.className = "mhu-cube__plot-unavailable";
@@ -359,7 +397,7 @@ export class MhuCube extends HTMLElementBase {
     const list = document.createElement("ul");
     list.className = "mhu-cube__list";
     const itemIndexes = new Map(this.#items.map((item, index) => [item.id, index]));
-    const layout = axesCanBePlotted ? layoutPlot(this.#items, this.#axes) : new Map<string, PlotLayout>();
+    const layout = axesCanBePlotted ? layoutPlot(this.#items, this.#axes, this.#view) : new Map<string, PlotLayout>();
     // Source order keeps description IDs stable; display order follows the plot for reading and keyboard use.
     sortItemsForDisplay(this.#items, this.#axes).forEach((item) => {
       const index = itemIndexes.get(item.id) ?? 0;

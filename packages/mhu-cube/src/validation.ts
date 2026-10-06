@@ -1,12 +1,14 @@
 import type {
   MhuCubeAxes,
   MhuCubeCategoryAxis,
+  MhuCubeGuides,
   MhuCubeItem,
   MhuCubeItemStatus,
   MhuCubePosition,
   MhuCubeTimeAxis,
   MhuCubeTimeRange,
   MhuCubeValidationIssue,
+  MhuCubeView,
 } from "./types";
 
 export const EMPTY_AXES: MhuCubeAxes = {
@@ -65,6 +67,35 @@ export function compareOrganNames(a: string, b: string) {
  */
 export function canPlotAxes(axes: MhuCubeAxes) {
   return axes.time.max > axes.time.min && axes.space.values.length > 0 && axes.organ.values.length > 0;
+}
+
+function validateChoice<T extends string>(input: unknown, choices: readonly T[], fallback: T, name: string): ValidationResult<T> {
+  if (input === undefined || input === null) return { value: fallback, issues: [] };
+  const value = typeof input === "string" ? input.trim() : "";
+  if ((choices as readonly string[]).includes(value)) return { value: value as T, issues: [] };
+  const allowed = choices.map((choice) => `“${choice}”`).join(" or ");
+  return {
+    value: fallback,
+    issues: [issue(`${name}.invalid`, `${name[0].toUpperCase()}${name.slice(1)} must be ${allowed}; “${fallback}” is used.`, name, "warning")],
+  };
+}
+
+/**
+ * Normalizes the desktop camera view.
+ * @param input - Unknown value received through the `view` property or attribute.
+ * @returns The view, falling back to the corner view with a warning.
+ */
+export function validateView(input: unknown): ValidationResult<MhuCubeView> {
+  return validateChoice<MhuCubeView>(input, ["corner", "front"], "corner", "view");
+}
+
+/**
+ * Normalizes how much reference drawing the desktop visualization adds.
+ * @param input - Unknown value received through the `guides` property or attribute.
+ * @returns The guide level, falling back to full guides with a warning.
+ */
+export function validateGuides(input: unknown): ValidationResult<MhuCubeGuides> {
+  return validateChoice<MhuCubeGuides>(input, ["full", "minimal"], "full", "guides");
 }
 
 /**

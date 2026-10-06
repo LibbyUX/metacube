@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { canPlotAxes, isSafeMetadataHref, validateAxes, validateItems } from "../packages/mhu-cube/src/validation.ts";
+import { canPlotAxes, isSafeMetadataHref, validateAxes, validateGuides, validateItems, validateView } from "../packages/mhu-cube/src/validation.ts";
 
 const validAxes = {
   time: { label: "Time", unit: "years", min: 0, max: 100 },
@@ -190,4 +190,17 @@ test("isSafeMetadataHref allows web destinations and rejects executable schemes"
   assert.equal(isSafeMetadataHref("https://example.org/metadata"), true);
   assert.equal(isSafeMetadataHref("javascript:alert(1)"), false);
   assert.equal(isSafeMetadataHref("data:text/html,test"), false);
+});
+
+test("validateView and validateGuides accept their options and fall back with a warning", () => {
+  assert.deepEqual(validateView("front"), { value: "front", issues: [] });
+  assert.deepEqual(validateView(undefined), { value: "corner", issues: [] });
+  assert.deepEqual(validateGuides(" minimal "), { value: "minimal", issues: [] });
+  assert.deepEqual(validateGuides(null), { value: "full", issues: [] });
+
+  const view = validateView("side");
+  assert.equal(view.value, "corner");
+  assert.deepEqual(codes(view), ["view.invalid"]);
+  assert.equal(view.issues[0].severity, "warning");
+  assert.deepEqual(codes(validateGuides(true)), ["guides.invalid"]);
 });

@@ -1,4 +1,4 @@
-import type { MhuCubeAxes, MhuCubeItem, MhuCubeTimeAxis, MhuCubeTimeRange } from "./types";
+import type { MhuCubeAxes, MhuCubeItem, MhuCubeTimeAxis, MhuCubeTimeRange, MhuCubeView } from "./types";
 
 export interface Point {
   x: number;
@@ -15,6 +15,10 @@ export interface Box {
   z1: number;
 }
 
+/**
+ * Projected block corners, named for the corner view: `front` is the corner nearest the camera, `left` sits
+ * across the space axis from it, and `right` across the organ axis. The faces meeting at `front` are visible.
+ */
 export interface ProjectedBoxGeometry {
   corners: {
     topFront: Point;
@@ -28,12 +32,20 @@ export interface ProjectedBoxGeometry {
   bounds: { left: number; top: number; width: number; height: number };
 }
 
-/** Placement, paint order, and hover-card anchoring for one plotted dataset. */
+/** Placement, paint order, reference lines, and hover-card anchoring for one plotted dataset. */
 export interface PlotLayout {
   box: Box;
   /** The dataset's exact normalized time span, which single ages and short ranges draw larger than. */
   time: { start: number; end: number };
   geometry: ProjectedBoxGeometry;
+  /** The block's footprint on the floor. */
+  floor: Point[];
+  /** Lines from the block's visible bottom corners down to the floor; empty when it rests on the floor. */
+  drops: Array<[Point, Point]>;
+  /** Level lines tracing the exact start and end heights from the block to the time axis. */
+  leaders: Point[][];
+  /** The exact time span marked on the time axis. */
+  bracket: [Point, Point];
   /** Paint order starting at one; higher values render in front. */
   layer: number;
   /** Side of the block where its hover card opens. */
@@ -42,25 +54,54 @@ export interface PlotLayout {
   cardTop: number;
 }
 
-// Percentage coordinates of the bounding cube's top and bottom faces. The low
-// camera keeps the floor shallow, so depth moves a block up the screen far less
-// than time does and heights stay comparable across the plot. The bottom of the
-// plot is left free for the space and organ labels. Each plane is ordered front,
-// left, back, right so points can be projected bilinearly.
-const FRAME_PLANES = {
-  top: {
-    front: { x: 57.31, y: 19.2 },
-    left: { x: 15.15, y: 9.6 },
-    back: { x: 57.31, y: 1.8 },
-    right: { x: 99.47, y: 9.6 },
+/** A floor corner as [x, z], each zero or one. */
+type FloorCorner = [0 | 1, 0 | 1];
+
+/** A horizontal face of the bounding cube in plot percentages, keyed by floor corner. */
+interface FramePlane {
+  x0z0: Point;
+  x1z0: Point;
+  x1z1: Point;
+  x0z1: Point;
+}
+
+interface ViewDefinition {
+  /** The bounding cube's bottom and top faces. */
+  planes: { bottom: FramePlane; top: FramePlane };
+  /** Floor corner nearest the camera; the block faces that meet there are the visible ones. */
+  near: FloorCorner;
+  /** Floor corner whose vertical edge carries the time ticks, the leftmost on screen. */
+  ticks: FloorCorner;
+  /** Floor axis along which overlapping datasets split into side-by-side lanes. */
+  laneAxis: "x" | "z";
+}
+
+const VIEWS: Record<MhuCubeView, ViewDefinition> = {
+  // Looks across the front corner from low above. The shallow floor keeps depth from moving blocks up the screen
+  // nearly as much as time does, and the bottom of the plot stays free for the space and organ labels.
+  corner: {
+    planes: {
+      top: { x0z0: { x: 57.31, y: 19.2 }, x1z0: { x: 15.15, y: 9.6 }, x1z1: { x: 57.31, y: 1.8 }, x0z1: { x: 99.47, y: 9.6 } },
+      bottom: { x0z0: { x: 57.31, y: 90.5 }, x1z0: { x: 19.5, y: 77.2 }, x1z1: { x: 57.31, y: 65.8 }, x0z1: { x: 95.1, y: 77.2 } },
+    },
+    near: [0, 0],
+    ticks: [1, 0],
+    laneAxis: "x",
   },
-  bottom: {
-    front: { x: 57.31, y: 90.5 },
-    left: { x: 19.5, y: 77.2 },
-    back: { x: 57.31, y: 65.8 },
-    right: { x: 95.1, y: 77.2 },
+  // Faces the organ axis from above and slightly right of it: organs run left to right along the front, time runs
+  // straight up, and space recedes mostly upward. The small sideways shift keeps each organ's rows in its own
+  // column; front-row heights read against the ticks and back-row heights against the back-wall time lines.
+  // Overlapping datasets sit side by side within their organ.
+  front: {
+    planes: {
+      top: { x0z0: { x: 16, y: 18 }, x1z0: { x: 20, y: 10 }, x1z1: { x: 82, y: 10 }, x0z1: { x: 78, y: 18 } },
+      bottom: { x0z0: { x: 16, y: 86 }, x1z0: { x: 20, y: 78 }, x1z1: { x: 82, y: 78 }, x0z1: { x: 78, y: 86 } },
+    },
+    near: [0, 1],
+    ticks: [0, 0],
+    laneAxis: "z",
   },
-} as const;
+};
 // Plot height as a share of its width; must match the plot's CSS aspect-ratio (1000 / 868).
 const PLOT_HEIGHT_RATIO = 0.868;
 
@@ -74,13 +115,15 @@ export interface AxisLayout {
   spaceBands: Array<[number, number]>;
   /** Normalized z center for each organ value, in axis order. */
   organ: number[];
+  /** Normalized z range each organ value's lanes may occupy, in axis order. */
+  organBands: Array<[number, number]>;
 }
 
 // Share of a categorical cell covered by a block's footprint.
 const FOOTPRINT_FILL = 0.7;
 // Gap kept between the outermost space blocks and the frame.
 const SPACE_EDGE_MARGIN = 0.07;
-// Share of a space band that lane groups may fill.
+// Share of a band that lane groups may fill.
 const LANE_BAND_FILL = 0.9;
 // Normalized space between side-by-side lanes.
 const LANE_GAP = 0.02;
@@ -119,29 +162,31 @@ export function getSpreadCenter(value: number, count: number, halfSize: number) 
   return inset + (value * (1 - 2 * inset)) / (count - 1);
 }
 
-function interpolatePlane(plane: typeof FRAME_PLANES.top | typeof FRAME_PLANES.bottom, x: number, z: number): Point {
+function interpolatePlane(plane: FramePlane, x: number, z: number): Point {
   const weights = {
-    front: (1 - x) * (1 - z),
-    left: x * (1 - z),
-    back: x * z,
-    right: (1 - x) * z,
+    x0z0: (1 - x) * (1 - z),
+    x1z0: x * (1 - z),
+    x1z1: x * z,
+    x0z1: (1 - x) * z,
   };
   return {
-    x: plane.front.x * weights.front + plane.left.x * weights.left + plane.back.x * weights.back + plane.right.x * weights.right,
-    y: plane.front.y * weights.front + plane.left.y * weights.left + plane.back.y * weights.back + plane.right.y * weights.right,
+    x: plane.x0z0.x * weights.x0z0 + plane.x1z0.x * weights.x1z0 + plane.x1z1.x * weights.x1z1 + plane.x0z1.x * weights.x0z1,
+    y: plane.x0z0.y * weights.x0z0 + plane.x1z0.y * weights.x1z0 + plane.x1z1.y * weights.x1z1 + plane.x0z1.y * weights.x0z1,
   };
 }
 
 /**
- * Projects normalized coordinates onto the reference perspective.
+ * Projects normalized coordinates onto the plot for a camera view.
  * @param x - Normalized space position.
  * @param y - Normalized time position.
  * @param z - Normalized organ position.
+ * @param view - Camera view; defaults to the corner view.
  * @returns A percentage coordinate inside the visualization frame.
  */
-export function projectPoint(x: number, y: number, z: number): Point {
-  const top = interpolatePlane(FRAME_PLANES.top, x, z);
-  const bottom = interpolatePlane(FRAME_PLANES.bottom, x, z);
+export function projectPoint(x: number, y: number, z: number, view: MhuCubeView = "corner"): Point {
+  const { planes } = VIEWS[view];
+  const top = interpolatePlane(planes.top, x, z);
+  const bottom = interpolatePlane(planes.bottom, x, z);
   return {
     x: bottom.x + (top.x - bottom.x) * y,
     y: bottom.y + (top.y - bottom.y) * y,
@@ -171,13 +216,13 @@ export function getFootprintHalfSize(spaceCount: number, organCount: number) {
 /**
  * Positions every space and organ category on the floor; labels, guides, and blocks all share these centers.
  * @param axes - Validated, plottable axes.
- * @returns Footprint size, spread space centers with their lane bands, and organ centers.
+ * @returns Footprint size, spread space centers, organ centers, and the bands their lanes may use.
  */
 export function getAxisLayout(axes: MhuCubeAxes): AxisLayout {
   const spaceCount = axes.space.values.length;
   const organCount = axes.organ.values.length;
   const halfSize = getFootprintHalfSize(spaceCount, organCount);
-  // Space runs from the front corner (x = 0) to the left corner (x = 1); the first value sits nearest the left.
+  // Space runs from x = 0 to x = 1 with the first value nearest x = 1: the left corner, or the back row.
   const along = axes.space.values.map((_, index) => getSpreadCenter(index, spaceCount, halfSize));
   const space = along.map((center) => 1 - center);
   const spaceBands = along.map((center, index): [number, number] => {
@@ -186,48 +231,68 @@ export function getAxisLayout(axes: MhuCubeAxes): AxisLayout {
     return [1 - upper, 1 - lower];
   });
   const organ = axes.organ.values.map((_, index) => getCategoryCenter(index, organCount));
-  return { halfSize, space, spaceBands, organ };
+  const organBands = organ.map((center): [number, number] => [center - 0.5 / organCount, center + 0.5 / organCount]);
+  return { halfSize, space, spaceBands, organ, organBands };
 }
 
 /**
  * Projects the twelve edges of the bounding cube so the frame and its contents share one projection.
+ * @param view - Camera view; defaults to the corner view.
  * @returns Start and end points of each frame edge in plot percentages.
  */
-export function getFrameEdges(): Array<[Point, Point]> {
-  return CUBE_EDGES.map(([start, end]) => [projectPoint(...start), projectPoint(...end)]);
+export function getFrameEdges(view: MhuCubeView = "corner"): Array<[Point, Point]> {
+  return CUBE_EDGES.map(([start, end]) => [projectPoint(...start, view), projectPoint(...end, view)]);
+}
+
+/**
+ * Traces one time level across the two walls farthest from the camera, starting at the time ticks.
+ * @param y - Normalized time height.
+ * @param view - Camera view; defaults to the corner view.
+ * @returns The guide's three projected points: the tick edge, the far corner, and the wall's other end.
+ */
+export function getTimeGuide(y: number, view: MhuCubeView = "corner"): Point[] {
+  const { near, ticks } = VIEWS[view];
+  const far: FloorCorner = [near[0] === 0 ? 1 : 0, near[1] === 0 ? 1 : 0];
+  // The fourth floor corner closes the far walls: it is neither the near, tick, nor far corner.
+  const remaining: FloorCorner = [far[0] === ticks[0] ? near[0] : far[0], far[1] === ticks[1] ? near[1] : far[1]];
+  return [ticks, far, remaining].map(([x, z]) => projectPoint(x, y, z, view));
 }
 
 /**
  * Finds the on-screen direction pointing straight away from a frame edge, away from the cube.
  * @param start - One end of the edge in plot percentages.
  * @param end - The other end of the edge in plot percentages.
+ * @param view - Camera view whose cube the normal points away from; defaults to the corner view.
  * @returns A unit vector in screen space, correcting for the plot's non-square percentages.
  */
-export function getOutwardNormal(start: Point, end: Point): Point {
+export function getOutwardNormal(start: Point, end: Point, view: MhuCubeView = "corner"): Point {
   const dx = end.x - start.x;
   const dy = (end.y - start.y) * PLOT_HEIGHT_RATIO;
   const length = Math.hypot(dx, dy) || 1;
   const normal = { x: dy / length, y: -dx / length };
-  const center = projectPoint(0.5, 0.5, 0.5);
+  const center = projectPoint(0.5, 0.5, 0.5, view);
   const outward = { x: (start.x + end.x) / 2 - center.x, y: ((start.y + end.y) / 2 - center.y) * PLOT_HEIGHT_RATIO };
   return normal.x * outward.x + normal.y * outward.y < 0 ? { x: -normal.x, y: -normal.y } : normal;
 }
 
 /**
  * Locates the three labeled frame edges and the direction their labels sit away from the cube.
+ * Points along each edge are linear in that axis's normalized coordinate.
+ * @param view - Camera view; defaults to the corner view.
  * @returns For each axis, its edge's start and end points in plot percentages and its outward unit normal.
  */
-export function getAxisEdges() {
+export function getAxisEdges(view: MhuCubeView = "corner") {
+  const { near, ticks } = VIEWS[view];
   const edge = (start: [number, number, number], end: [number, number, number]) => {
-    const from = projectPoint(...start);
-    const to = projectPoint(...end);
-    return { start: from, end: to, normal: getOutwardNormal(from, to) };
+    const from = projectPoint(...start, view);
+    const to = projectPoint(...end, view);
+    return { start: from, end: to, normal: getOutwardNormal(from, to, view) };
   };
   return {
-    // The left vertical edge carries the time ticks; the two front floor edges carry space and organ.
-    time: edge([1, 0, 0], [1, 1, 0]),
-    space: edge([0, 0, 0], [1, 0, 0]),
-    organ: edge([0, 0, 0], [0, 0, 1]),
+    // Time ticks run up the leftmost vertical edge; space and organ labels run along the floor edges nearest the camera.
+    time: edge([ticks[0], 0, ticks[1]], [ticks[0], 1, ticks[1]]),
+    space: edge([0, 0, near[1]], [1, 0, near[1]]),
+    organ: edge([near[0], 0, 0], [near[0], 0, 1]),
   };
 }
 
@@ -248,27 +313,44 @@ export function getRenderedTimeExtent(range: MhuCubeTimeRange, axis: MhuCubeTime
 }
 
 /**
+ * Finds a block's floor corners relative to the camera.
+ * @param box - Normalized block extents.
+ * @param view - Camera view.
+ * @returns The nearest corner, the corner across the space axis, the corner across the organ axis, and the far corner.
+ */
+function getNearCorners(box: Box, view: MhuCubeView) {
+  const [nearX, nearZ] = VIEWS[view].near;
+  const xNear = nearX === 0 ? box.x0 : box.x1;
+  const xFar = nearX === 0 ? box.x1 : box.x0;
+  const zNear = nearZ === 0 ? box.z0 : box.z1;
+  const zFar = nearZ === 0 ? box.z1 : box.z0;
+  return { front: [xNear, zNear], left: [xFar, zNear], right: [xNear, zFar], back: [xFar, zFar] } as const;
+}
+
+/**
  * Computes projected corners and bounds for a block.
  * @param box - Normalized block extents.
+ * @param view - Camera view; defaults to the corner view.
  * @returns Projected corners and percentage bounds.
  */
-export function getProjectedBoxGeometry(box: Box): ProjectedBoxGeometry {
+export function getProjectedBoxGeometry(box: Box, view: MhuCubeView = "corner"): ProjectedBoxGeometry {
+  const { front, left, right, back } = getNearCorners(box, view);
   const corners = {
-    topFront: projectPoint(box.x0, box.y1, box.z0),
-    topLeft: projectPoint(box.x1, box.y1, box.z0),
-    topBack: projectPoint(box.x1, box.y1, box.z1),
-    topRight: projectPoint(box.x0, box.y1, box.z1),
-    bottomFront: projectPoint(box.x0, box.y0, box.z0),
-    bottomLeft: projectPoint(box.x1, box.y0, box.z0),
-    bottomRight: projectPoint(box.x0, box.y0, box.z1),
+    topFront: projectPoint(front[0], box.y1, front[1], view),
+    topLeft: projectPoint(left[0], box.y1, left[1], view),
+    topBack: projectPoint(back[0], box.y1, back[1], view),
+    topRight: projectPoint(right[0], box.y1, right[1], view),
+    bottomFront: projectPoint(front[0], box.y0, front[1], view),
+    bottomLeft: projectPoint(left[0], box.y0, left[1], view),
+    bottomRight: projectPoint(right[0], box.y0, right[1], view),
   };
   const points = Object.values(corners);
   const padding = 0.3;
-  const left = Math.min(...points.map((point) => point.x)) - padding;
-  const top = Math.min(...points.map((point) => point.y)) - padding;
-  const right = Math.max(...points.map((point) => point.x)) + padding;
-  const bottom = Math.max(...points.map((point) => point.y)) + padding;
-  return { corners, bounds: { left, top, width: right - left, height: bottom - top } };
+  const minX = Math.min(...points.map((point) => point.x)) - padding;
+  const minY = Math.min(...points.map((point) => point.y)) - padding;
+  const maxX = Math.max(...points.map((point) => point.x)) + padding;
+  const maxY = Math.max(...points.map((point) => point.y)) + padding;
+  return { corners, bounds: { left: minX, top: minY, width: maxX - minX, height: maxY - minY } };
 }
 
 function compareText(a: string, b: string) {
@@ -369,32 +451,76 @@ function assignLanes(placements: Placement[]) {
 }
 
 /**
- * Finds a block's extent along the space axis, narrowing it only when it shares a cluster.
- * @param center - Normalized center of the block's space value.
+ * Finds a block's extent along its view's lane axis, narrowing it only when it shares a cluster.
+ * @param center - Normalized center of the block's category on the lane axis.
  * @param halfSize - Half of a full-width footprint.
- * @param band - Normalized x range the space value's lanes may occupy.
+ * @param band - Normalized range the category's lanes may occupy.
  * @param slot - The block's lane assignment.
- * @returns Normalized start and end along the space axis.
+ * @param farEnd - Which end of the lane axis is farther from the camera; lane zero sits there.
+ * @returns Normalized start and end along the lane axis.
  */
-function getLaneExtent(center: number, halfSize: number, band: [number, number], slot: LaneSlot): [number, number] {
+function getLaneExtent(center: number, halfSize: number, band: [number, number], slot: LaneSlot, farEnd: 0 | 1): [number, number] {
   if (slot.laneCount === 1) return [center - halfSize, center + halfSize];
   // Lanes may spread a little into the band's spare width so each stays a usable target, but never past it.
   const room = 2 * Math.min(center - band[0], band[1] - center) * LANE_BAND_FILL;
   const span = Math.min(2 * halfSize * (1 + 0.5 * (slot.laneCount - 1)), room);
   const width = (span - LANE_GAP * (slot.laneCount - 1)) / slot.laneCount;
-  const end = center + span / 2 - slot.lane * (width + LANE_GAP);
-  return [end - width, end];
+  const offset = span / 2 - slot.lane * (width + LANE_GAP);
+  return farEnd === 1 ? [center + offset - width, center + offset] : [center - offset, center - offset + width];
 }
 
 /**
- * Computes every plotted block's geometry, lane, paint order, and hover-card anchor.
+ * Measures how far a floor position is from the camera's nearest corner.
+ * @param x - Normalized space position.
+ * @param z - Normalized organ position.
+ * @param view - Camera view.
+ * @returns A depth that grows away from the camera.
+ */
+function getDepth(x: number, z: number, view: MhuCubeView) {
+  const [nearX, nearZ] = VIEWS[view].near;
+  return Math.abs(x - nearX) + Math.abs(z - nearZ);
+}
+
+/**
+ * Builds the reference lines that tie one block to the floor and to the time axis.
+ * @param box - Normalized block extents.
+ * @param time - The dataset's exact normalized time span.
+ * @param view - Camera view.
+ * @returns Footprint, drop lines, level lines, and time-axis bracket in plot percentages.
+ */
+function getBlockGuides(box: Box, time: { start: number; end: number }, view: MhuCubeView) {
+  const { front, left, right, back } = getNearCorners(box, view);
+  const floor = [front, left, back, right].map(([x, z]) => projectPoint(x, 0, z, view));
+  // The three visible bottom corners drop to the floor, outlining where the block would rest.
+  const drops = box.y0 > 0
+    ? [front, left, right].map(([x, z]): [Point, Point] => [projectPoint(x, box.y0, z, view), projectPoint(x, 0, z, view)])
+    : [];
+  // Each level line stays at one height: from the block's corner nearest the time ticks, across to the tick
+  // edge's wall, then along that wall to the ticks.
+  const [tickX, tickZ] = VIEWS[view].ticks;
+  const cornerX = tickX === 1 ? box.x1 : box.x0;
+  const cornerZ = tickZ === 1 ? box.z1 : box.z0;
+  const levels = time.start === time.end ? [time.start] : [time.start, time.end];
+  const leaders = levels.map((y) => [
+    projectPoint(cornerX, y, cornerZ, view),
+    projectPoint(tickX, y, cornerZ, view),
+    projectPoint(tickX, y, tickZ, view),
+  ]);
+  const bracket: [Point, Point] = [projectPoint(tickX, time.start, tickZ, view), projectPoint(tickX, time.end, tickZ, view)];
+  return { floor, drops, leaders, bracket };
+}
+
+/**
+ * Computes every plotted block's geometry, lane, paint order, reference lines, and hover-card anchor.
  * @param items - Validated datasets; those without a position are skipped.
  * @param axes - Validated, plottable axes.
+ * @param view - Camera view; defaults to the corner view.
  * @returns Layout keyed by dataset ID.
  */
-export function layoutPlot(items: readonly MhuCubeItem[], axes: MhuCubeAxes) {
+export function layoutPlot(items: readonly MhuCubeItem[], axes: MhuCubeAxes, view: MhuCubeView = "corner") {
   const axisLayout = getAxisLayout(axes);
   const { halfSize } = axisLayout;
+  const { laneAxis, near } = VIEWS[view];
   const placements: Placement[] = [];
   items.forEach((item) => {
     if (!item.position) return;
@@ -418,27 +544,39 @@ export function layoutPlot(items: readonly MhuCubeItem[], axes: MhuCubeAxes) {
     const centerX = axisLayout.space[placement.spaceIndex];
     const centerZ = axisLayout.organ[placement.organIndex];
     const slot = slots.get(placement.id) ?? { lane: 0, laneCount: 1 };
-    const [x0, x1] = getLaneExtent(centerX, halfSize, axisLayout.spaceBands[placement.spaceIndex], slot);
-    const box: Box = { x0, x1, y0: placement.y0, y1: placement.y1, z0: centerZ - halfSize, z1: centerZ + halfSize };
-    return { id: placement.id, box, time: placement.time, cellDepth: centerX + centerZ };
+    const [x0, x1] = laneAxis === "x"
+      ? getLaneExtent(centerX, halfSize, axisLayout.spaceBands[placement.spaceIndex], slot, near[0] === 0 ? 1 : 0)
+      : [centerX - halfSize, centerX + halfSize];
+    const [z0, z1] = laneAxis === "z"
+      ? getLaneExtent(centerZ, halfSize, axisLayout.organBands[placement.organIndex], slot, near[1] === 0 ? 1 : 0)
+      : [centerZ - halfSize, centerZ + halfSize];
+    const box: Box = { x0, x1, y0: placement.y0, y1: placement.y1, z0, z1 };
+    return {
+      id: placement.id,
+      box,
+      time: placement.time,
+      cellDepth: getDepth(centerX, centerZ, view),
+      laneDepth: getDepth((x0 + x1) / 2, (z0 + z1) / 2, view),
+    };
   });
 
   // Paint farther cells, then farther lanes, then lower blocks first so nearer faces and upper blocks stay visible.
   blocks.sort((a, b) => b.cellDepth - a.cellDepth
-    || (b.box.x0 + b.box.x1) - (a.box.x0 + a.box.x1)
+    || b.laneDepth - a.laneDepth
     || a.box.y0 - b.box.y0
     || compareText(a.id, b.id));
 
   const layout = new Map<string, PlotLayout>();
   blocks.forEach(({ id, box, time }, rank) => {
-    const geometry = getProjectedBoxGeometry(box);
+    const geometry = getProjectedBoxGeometry(box, view);
     const { bounds } = geometry;
-    const topCenter = projectPoint((box.x0 + box.x1) / 2, box.y1, (box.z0 + box.z1) / 2);
+    const topCenter = projectPoint((box.x0 + box.x1) / 2, box.y1, (box.z0 + box.z1) / 2, view);
     const anchor = Math.min(Math.max(topCenter.y, CARD_ANCHOR_MIN), CARD_ANCHOR_MAX);
     layout.set(id, {
       box,
       time,
       geometry,
+      ...getBlockGuides(box, time, view),
       layer: rank + 1,
       cardSide: bounds.left + bounds.width / 2 > 66 ? "left" : "right",
       cardTop: ((anchor - bounds.top) / bounds.height) * 100,

@@ -109,10 +109,8 @@
   line-height: var(--mat-sys-label-large-line-height, 1.25rem);
   letter-spacing: var(--mat-sys-label-large-tracking, 0.00625rem);
 }
-/* Space and organ titles sit centered in a second row beyond their value labels. Floor edges slope, so value
-   labels reach farther from the edge than their height alone; the offset clears labels up to about 4rem wide. */
-.mhu-cube__axis-title--space, .mhu-cube__axis-title--organ { --_offset: 3.75rem; }
-/* The time title caps the tick column, right-aligned with the ticks just above the top value. */
+/* Value labels and the space and organ titles receive their alignment and offset inline from the frame's edges.
+   The time title caps the tick column, right-aligned with the ticks just above the top value. */
 .mhu-cube__axis-title--time { --_align-x: -100%; --_align-y: calc(-100% - 0.75rem); }
 .mhu-cube__axis-value {
   color: var(--_on-surface-variant);
@@ -122,10 +120,6 @@
   line-height: var(--mat-sys-body-small-line-height, 1rem);
   letter-spacing: var(--mat-sys-body-small-tracking, 0.025rem);
 }
-.mhu-cube__axis-value--time { --_align-x: -100%; }
-/* Floor labels hang from their guide's end: below-left of the space edge and below-right of the organ edge. */
-.mhu-cube__axis-value--space { --_align-x: -100%; --_align-y: 0%; }
-.mhu-cube__axis-value--organ { --_align-x: 0%; --_align-y: 0%; }
 .mhu-cube__axis-title--space, .mhu-cube__axis-title--organ,
 .mhu-cube__axis-value--space, .mhu-cube__axis-value--organ {
   text-shadow:
@@ -204,6 +198,10 @@
 .mhu-cube__select:focus-visible .mhu-cube__shadow-floor,
 .mhu-cube__item--selected .mhu-cube__shadow-floor { fill-opacity: 0.28; }
 .mhu-cube--has-selection .mhu-cube__item:not(.mhu-cube__item--selected) .mhu-cube__shadow { opacity: 0.35; }
+/* Minimal guides keep the back-wall time lines and the age marker but drop everything drawn on the floor. */
+.mhu-cube--guides-minimal .mhu-cube__frame-floor-guide,
+.mhu-cube--guides-minimal .mhu-cube__shadow-floor,
+.mhu-cube--guides-minimal .mhu-cube__shadow-drop { display: none; }
 /* Paint order lives on the block itself so hover cards can rise above every block without reordering the scene. */
 .mhu-cube__cube {
   position: relative;

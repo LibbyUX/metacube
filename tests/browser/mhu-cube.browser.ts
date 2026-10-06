@@ -132,10 +132,15 @@ await test("axes label time, space, and organ with organs in alphabetical order"
   assert(shadow.querySelector(".mhu-cube__frame-guide")?.getAttribute("d")?.split("M").length === 5, "Each interior tick needs a back-wall guide.");
 });
 
-await test("axis labels never overlap each other or the frame and stay inside the component", () => {
-  const labels = [...shadow.querySelectorAll<HTMLElement>(".mhu-cube__axis-title, .mhu-cube__axis-value")]
+/**
+ * Fails when any axis label overlaps another label or a frame edge, or spills outside the component.
+ * @param root - The component's shadow root.
+ * @returns Nothing.
+ */
+function assertAxisLabelsClear(root: ShadowRoot) {
+  const labels = [...root.querySelectorAll<HTMLElement>(".mhu-cube__axis-title, .mhu-cube__axis-value")]
     .map((label) => ({ text: label.textContent, rect: label.getBoundingClientRect() }));
-  const frame = shadow.querySelector<SVGSVGElement>(".mhu-cube__frame");
+  const frame = root.querySelector<SVGSVGElement>(".mhu-cube__frame");
   const numbers = frame?.querySelector(".mhu-cube__frame-line")?.getAttribute("d")?.match(/-?[\d.]+/g)?.map(Number) ?? [];
   assert(frame && numbers.length === 48, "The frame should draw twelve edges.");
   const bounds = frame.getBoundingClientRect();
@@ -158,6 +163,56 @@ await test("axis labels never overlap each other or the frame and stay inside th
       assert(!overlaps, `Axis labels “${text}” and “${other.text}” overlap.`);
     });
   });
+}
+
+await test("axis labels never overlap each other or the frame and stay inside the component", () => {
+  assertAxisLabelsClear(shadow);
+});
+
+await test("the front view faces the organs and keeps its labels clear", async () => {
+  component.view = "front";
+  await nextLayout();
+  try {
+    assert(shadow.querySelector(".mhu-cube")?.classList.contains("mhu-cube--view-front"), "The front view class is missing.");
+    assertAxisLabelsClear(shadow);
+    const organLabels = [...shadow.querySelectorAll<HTMLElement>(".mhu-cube__axis-value--organ")].map((label) => label.getBoundingClientRect());
+    assert(organLabels.length === 2 && Math.abs(organLabels[0].top - organLabels[1].top) < 1, "Organ labels should share one level row below the front edge.");
+    assert(organLabels[0].left < organLabels[1].left, "Organs should run left to right in alphabetical order.");
+  } finally {
+    component.view = "corner";
+    await nextLayout();
+  }
+});
+
+await test("minimal guides drop the floor lines but keep the time guides and age marker", async () => {
+  component.guides = "minimal";
+  await nextLayout();
+  try {
+    const hidden = (selector: string) => [...shadow.querySelectorAll(selector)].every((element) => getComputedStyle(element).display === "none");
+    assert(hidden(".mhu-cube__frame-floor-guide") && hidden(".mhu-cube__shadow-floor") && hidden(".mhu-cube__shadow-drop"), "Floor lines should be hidden.");
+    const timeGuide = shadow.querySelector(".mhu-cube__frame-guide");
+    assert(timeGuide && getComputedStyle(timeGuide).display !== "none", "Back-wall time guides should remain.");
+    assert(shadow.querySelector(".mhu-cube__time-marker"), "Age markers should remain.");
+  } finally {
+    component.guides = "full";
+    await nextLayout();
+  }
+});
+
+await test("unknown view and guide values fall back to the defaults with warnings", async () => {
+  component.setAttribute("view", "side");
+  component.setAttribute("guides", "none");
+  await nextLayout();
+  try {
+    assert(component.view === "corner" && component.guides === "full", "Unknown values should fall back to the defaults.");
+    const codes = component.validationIssues.map((issue) => issue.code);
+    assert(codes.includes("view.invalid") && codes.includes("guides.invalid"), "Unknown values should be reported.");
+  } finally {
+    component.removeAttribute("view");
+    component.removeAttribute("guides");
+    await nextLayout();
+  }
+  assert(!component.validationIssues.some((issue) => issue.code.endsWith(".invalid") && issue.path !== "items"), "Removing the attributes should clear their warnings.");
 });
 
 await test("block descriptions state the time, space, and organ position", () => {

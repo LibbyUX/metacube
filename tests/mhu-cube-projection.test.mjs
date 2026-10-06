@@ -11,6 +11,7 @@ import {
   getRenderedTimeExtent,
   getSpreadCenter,
   getTimeCoordinate,
+  getTimeGuide,
   layoutPlot,
   projectPoint,
   sortItemsForDisplay,
@@ -90,6 +91,75 @@ test("getAxisEdges points every label direction away from the cube", () => {
   assert.ok(space.normal.x < 0 && space.normal.y > 0, "Space labels hang below-left of the space edge.");
   assert.ok(organ.normal.x > 0 && organ.normal.y > 0, "Organ labels hang below-right of the organ edge.");
   assert.deepEqual(time.end, projectPoint(1, 1, 0));
+});
+
+test("the front view faces the organ axis with a level front edge and labels hanging straight below it", () => {
+  const { organ, time } = getAxisEdges("front");
+
+  assert.equal(projectPoint(0, 0, 0, "front").y, projectPoint(0, 0, 1, "front").y);
+  assert.ok(Math.abs(organ.normal.x) < 1e-9 && organ.normal.y > 0.99, "Organ labels hang straight below the front edge.");
+  const frameX = getFrameEdges("front").flat().map((point) => point.x);
+  assert.equal(time.start.x, Math.min(...frameX), "Time ticks run up the leftmost edge.");
+});
+
+test("the front view keeps each organ's space rows in its own column", () => {
+  const layout = getAxisLayout(axes);
+  const rowShift = Math.abs(projectPoint(layout.space[0], 0, 0.5, "front").x - projectPoint(layout.space[1], 0, 0.5, "front").x);
+  const organSpacing = projectPoint(0, 0, layout.organ[1], "front").x - projectPoint(0, 0, layout.organ[0], "front").x;
+
+  assert.ok(rowShift < organSpacing / 3, "The back row must not drift into the next organ's column.");
+});
+
+test("time guides and level lines start and end on the time tick edge in every view", () => {
+  ["corner", "front"].forEach((view) => {
+    const { time } = getAxisEdges(view);
+    const tickAt = (y) => ({ x: time.start.x + (time.end.x - time.start.x) * y, y: time.start.y + (time.end.y - time.start.y) * y });
+    const guide = getTimeGuide(0.4, view);
+    assert.ok(Math.abs(guide[0].x - tickAt(0.4).x) < 1e-9 && Math.abs(guide[0].y - tickAt(0.4).y) < 1e-9, `${view} guide starts at the ticks`);
+
+    const block = layoutPlot([dataset("range", 20, 60, "100 µm", "Heart")], axes, view).get("range");
+    block.leaders.forEach((leader, index) => {
+      const end = leader.at(-1);
+      const level = index === 0 ? 0.2 : 0.6;
+      assert.ok(Math.abs(end.x - tickAt(level).x) < 1e-9 && Math.abs(end.y - tickAt(level).y) < 1e-9, `${view} level line ends at its tick`);
+    });
+    assert.ok(Math.abs(block.bracket[1].y - tickAt(0.6).y) < 1e-9, `${view} bracket ends at the range's end`);
+  });
+});
+
+test("the front view splits overlapping datasets side by side within their organ", () => {
+  const layout = layoutPlot([
+    dataset("liver-45", 45, 45, "100 µm", "Liver"),
+    dataset("liver-7-47", 7, 47, "100 µm", "Liver"),
+  ], axes, "front");
+  const single = layout.get("liver-45").box;
+  const range = layout.get("liver-7-47").box;
+  const [bandStart, bandEnd] = getAxisLayout(axes).organBands[2];
+
+  assert.equal(single.x0, range.x0, "Lanes share the space row.");
+  assert.ok(single.z1 < range.z0 || range.z1 < single.z0, "Lanes sit side by side along the organ axis.");
+  [single, range].forEach((box) => assert.ok(box.z0 >= bandStart && box.z1 <= bandEnd, "Lanes stay inside their organ."));
+  assert.ok(range.z0 < single.z0, "The taller range takes the lane farther from the camera.");
+});
+
+test("the front view paints the front row and right-hand neighbors over what sits behind them", () => {
+  const layout = layoutPlot([
+    dataset("back", 50, 50, "100 µm", "Heart"),
+    dataset("front", 50, 50, "100 mm", "Heart"),
+    dataset("right", 50, 50, "100 mm", "Kidney"),
+  ], axes, "front");
+
+  assert.ok(layout.get("front").layer > layout.get("back").layer);
+  assert.ok(layout.get("right").layer > layout.get("front").layer);
+  assert.deepEqual(layout.get("front").geometry.corners.topFront, projectPoint(layout.get("front").box.x0, layout.get("front").box.y1, layout.get("front").box.z1, "front"));
+});
+
+test("blocks resting on the floor have no drop lines", () => {
+  const layout = layoutPlot([dataset("infant", 4 / 12, 5 / 12, "100 µm", "Thymus"), dataset("raised", 60, 60, "100 µm", "Heart")], axes);
+
+  assert.deepEqual(layout.get("infant").drops, []);
+  assert.equal(layout.get("raised").drops.length, 3);
+  assert.equal(layout.get("raised").floor.length, 4);
 });
 
 test("getTimeCoordinate maps the time domain onto the vertical axis", () => {

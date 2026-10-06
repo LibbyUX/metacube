@@ -38,6 +38,7 @@
   --mat-sys-outline: #6c7f8a;
   --mat-sys-outline-variant: #c0cbd1;
   --preview-page-padding: 40px;
+  --prototype-options-height: 3.75rem;
 }
 
 :root[data-theme="dark"] {
@@ -87,10 +88,87 @@ main {
   margin-inline: auto;
 }
 
+/* Stakeholder review switcher, styled like the header's theme control. */
+.prototype-options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1.25rem;
+  min-height: var(--prototype-options-height);
+  margin: 0;
+  padding: 0.75rem var(--preview-page-padding) 0;
+}
+
+.prototype-options__group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0.25rem;
+  border: 1px solid var(--mat-sys-outline-variant);
+}
+
+.prototype-options__legend {
+  float: left;
+  padding: 0 0.5rem;
+  color: var(--mat-sys-on-surface-variant);
+  font-family: var(--mat-sys-label-small-font, Roboto, Arial, sans-serif);
+  font-size: var(--mat-sys-label-small-size, 0.6875rem);
+  font-weight: 600;
+  line-height: var(--mat-sys-label-small-line-height, 1rem);
+  letter-spacing: var(--mat-sys-label-small-tracking, 0.03125rem);
+  text-transform: uppercase;
+}
+
+.prototype-options__option {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.25rem;
+  padding: 0.5rem 0.875rem;
+  border: 1px solid transparent;
+  color: var(--mat-sys-on-surface-variant);
+  font-family: var(--mat-sys-label-large-font, Roboto, Arial, sans-serif);
+  font-size: var(--mat-sys-label-large-size, 0.875rem);
+  font-weight: var(--mat-sys-label-large-weight, 500);
+  line-height: var(--mat-sys-label-large-line-height, 1.25rem);
+  letter-spacing: var(--mat-sys-label-large-tracking, 0.00625rem);
+  cursor: pointer;
+}
+
+.prototype-options__option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.prototype-options__option:hover {
+  background: var(--mat-sys-surface-container);
+}
+
+.prototype-options__option:has(input:checked) {
+  border-color: var(--mat-sys-primary-container);
+  background: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+}
+
+.prototype-options__option:has(input:focus-visible) {
+  outline: 3px solid var(--mat-sys-primary);
+  outline-offset: 2px;
+}
+
+.prototype-options__summary {
+  flex: 1 1 18rem;
+  margin: 0;
+  color: var(--mat-sys-on-surface-variant);
+  font-size: var(--mat-sys-body-medium-size, 0.875rem);
+  line-height: var(--mat-sys-body-medium-line-height, 1.25rem);
+}
+
 .mhu-cube-preview {
   width: 100%;
-  height: calc(100vh - var(--global-navigation-height));
-  height: calc(100svh - var(--global-navigation-height));
+  height: calc(100vh - var(--global-navigation-height) - var(--prototype-options-height));
+  height: calc(100svh - var(--global-navigation-height) - var(--prototype-options-height));
   min-height: 40rem;
   padding-inline: var(--preview-page-padding);
   overflow-x: clip;

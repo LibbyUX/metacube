@@ -8,6 +8,7 @@ export {
 export {
   type MhuCubeAxes,
   type MhuCubeCategoryAxis,
+  type MhuCubeGuides,
   type MhuCubeItem,
   type MhuCubeItemStatus,
   type MhuCubePosition,
@@ -17,6 +18,7 @@ export {
   type MhuCubeValidationDetail,
   type MhuCubeValidationIssue,
   type MhuCubeValidationSeverity,
+  type MhuCubeView,
 } from "./types";
 
-export { isSafeMetadataHref, validateAxes, validateItems, type ValidationResult } from "./validation";
+export { isSafeMetadataHref, validateAxes, validateGuides, validateItems, validateView, type ValidationResult } from "./validation";

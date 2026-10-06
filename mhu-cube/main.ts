@@ -2,8 +2,10 @@ import {
   MhuCube,
   defineMhuCube,
   type MhuCubeAxes,
+  type MhuCubeGuides,
   type MhuCubeItem,
   type MhuCubePosition,
+  type MhuCubeView,
 } from "../packages/mhu-cube/src";
 
 const SPACE = {
@@ -92,6 +94,44 @@ if (mhuCube) {
   mhuCube.axes = ORGAN_DATASET_AXES;
   mhuCube.items = datasets;
 }
+
+// Stakeholder review options: each maps to the component's `view` and `guides` settings.
+const PROTOTYPE_OPTIONS = {
+  a: { view: "corner", guides: "full", summary: "Low corner view with floor guides, footprints, and drop lines." },
+  b: { view: "corner", guides: "minimal", summary: "The same corner view without floor lines. Time lines and the age bracket on hover remain." },
+  c: { view: "front", guides: "full", summary: "Faces the organs head-on: time runs straight up and space recedes into the page." },
+} satisfies Record<string, { view: MhuCubeView; guides: MhuCubeGuides; summary: string }>;
+type PrototypeOption = keyof typeof PROTOTYPE_OPTIONS;
+
+const optionInputs = document.querySelectorAll<HTMLInputElement>('input[name="prototype-option"]');
+const optionSummary = document.querySelector("#prototype-option-summary");
+
+/**
+ * Shows one prototype option and keeps the page URL shareable.
+ * @param option - Option key from the switcher or the `option` query parameter.
+ * @param updateUrl - Whether to record the option in the address bar.
+ * @returns Nothing.
+ */
+function showPrototypeOption(option: PrototypeOption, updateUrl: boolean) {
+  const { view, guides, summary } = PROTOTYPE_OPTIONS[option];
+  if (mhuCube) {
+    mhuCube.view = view;
+    mhuCube.guides = guides;
+  }
+  optionInputs.forEach((input) => { input.checked = input.value === option; });
+  if (optionSummary) optionSummary.textContent = summary;
+  if (updateUrl) {
+    const url = new URL(window.location.href);
+    url.searchParams.set("option", option);
+    window.history.replaceState(null, "", url);
+  }
+}
+
+const requestedOption = new URLSearchParams(window.location.search).get("option")?.toLowerCase() ?? "";
+showPrototypeOption(requestedOption in PROTOTYPE_OPTIONS ? requestedOption as PrototypeOption : "a", false);
+optionInputs.forEach((input) => {
+  input.addEventListener("change", () => showPrototypeOption(input.value as PrototypeOption, true));
+});
 
 const THEME_STORAGE_KEY = "metacube-theme-mode";
 const themeButtons = document.querySelectorAll<HTMLButtonElement>("[data-theme-option]");

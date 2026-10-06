@@ -3,15 +3,18 @@ import {
   getAxisLayout,
   getFrameEdges,
   getTimeCoordinate,
+  getTimeGuide,
   projectPoint,
   type PlotLayout,
   type Point,
   type ProjectedBoxGeometry,
 } from "./projection";
-import type { MhuCubeAxes, MhuCubeItem, MhuCubeTimeAxis, MhuCubeTimeRange } from "./types";
+import type { MhuCubeAxes, MhuCubeItem, MhuCubeTimeAxis, MhuCubeTimeRange, MhuCubeView } from "./types";
 
 const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 const NUMBER_FORMAT = new Intl.NumberFormat("en", { maximumFractionDigits: 2 });
+// Normal components below this keep a label centered on that axis instead of aligned to one side.
+const LABEL_ALIGN_THRESHOLD = 0.15;
 
 /**
  * Builds SVG path data in plot percentages, the coordinate space shared by the frame and every block.
@@ -46,11 +49,12 @@ export function formatTimeRange(range: MhuCubeTimeRange, axis: MhuCubeTimeAxis) 
 }
 
 /**
- * Creates the perspective bounding cube with time guides on its back walls and floor guides through every category.
+ * Creates the bounding cube with time guides on its far walls and floor guides through every category.
  * @param axes - Validated axes supplying the time ticks and category positions.
+ * @param view - Camera view.
  * @returns A decorative SVG element with crisp, non-scaling frame lines.
  */
-export function createCoordinateFrame(axes: MhuCubeAxes) {
+export function createCoordinateFrame(axes: MhuCubeAxes, view: MhuCubeView) {
   const svg = createSvgElement("svg", {
     class: "mhu-cube__frame",
     viewBox: "0 0 100 100",
@@ -60,33 +64,40 @@ export function createCoordinateFrame(axes: MhuCubeAxes) {
   const layout = getAxisLayout(axes);
   const timeGuides = (axes.time.ticks ?? [])
     .filter((tick) => tick > axes.time.min && tick < axes.time.max)
-    .map((tick) => {
-      const y = getTimeCoordinate(tick, axes.time);
-      return [projectPoint(1, y, 0), projectPoint(1, y, 1), projectPoint(0, y, 1)];
-    });
+    .map((tick) => getTimeGuide(getTimeCoordinate(tick, axes.time), view));
   // Each floor guide runs from a category label across the floor, so a block's footprint sits on its two guides.
   const floorGuides = [
-    ...layout.space.map((x) => [projectPoint(x, 0, 0), projectPoint(x, 0, 1)]),
-    ...layout.organ.map((z) => [projectPoint(0, 0, z), projectPoint(1, 0, z)]),
+    ...layout.space.map((x) => [projectPoint(x, 0, 0, view), projectPoint(x, 0, 1, view)]),
+    ...layout.organ.map((z) => [projectPoint(0, 0, z, view), projectPoint(1, 0, z, view)]),
   ];
   svg.append(
     createSvgElement("path", { class: "mhu-cube__frame-guide", d: toPathData(timeGuides) }),
     createSvgElement("path", { class: "mhu-cube__frame-floor-guide", d: toPathData(floorGuides) }),
-    createSvgElement("path", { class: "mhu-cube__frame-line", d: toPathData(getFrameEdges()) }),
+    createSvgElement("path", { class: "mhu-cube__frame-line", d: toPathData(getFrameEdges(view)) }),
   );
   return svg;
 }
 
 /**
- * Creates visual labels for the time, space, and organ axes.
+ * Picks the label box edge that touches its axis point so the box extends away from the frame.
+ * @param component - One component of the edge's outward unit normal.
+ * @returns A CSS translate percentage for that axis.
+ */
+function getLabelAlignment(component: number) {
+  return component > LABEL_ALIGN_THRESHOLD ? "0%" : component < -LABEL_ALIGN_THRESHOLD ? "-100%" : "-50%";
+}
+
+/**
+ * Creates visual labels for the time, space, and organ axes, placed from the frame's own edges.
  * @param axes - Validated axes; organ values arrive alphabetized.
+ * @param view - Camera view.
  * @returns A decorative label layer positioned over the coordinate frame.
  */
-export function createAxisLabels(axes: MhuCubeAxes) {
+export function createAxisLabels(axes: MhuCubeAxes, view: MhuCubeView) {
   const labels = document.createElement("div");
   labels.className = "mhu-cube__axes";
   labels.setAttribute("aria-hidden", "true");
-  // Each label sits exactly on its axis position; CSS aligns its box and pushes it outward along the edge's normal.
+  // Each label sits exactly on its axis position; CSS pushes it outward along the edge's normal.
   const addLabel = (text: string, className: string, point: Point, normal: Point) => {
     const label = document.createElement("span");
     label.className = className;
@@ -96,25 +107,35 @@ export function createAxisLabels(axes: MhuCubeAxes) {
     label.style.setProperty("--axis-normal-x", normal.x.toFixed(4));
     label.style.setProperty("--axis-normal-y", normal.y.toFixed(4));
     labels.append(label);
+    return label;
   };
-  const midpoint = (start: Point, end: Point) => ({ x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 });
+  const along = (edge: { start: Point; end: Point }, t: number) => ({
+    x: edge.start.x + (edge.end.x - edge.start.x) * t,
+    y: edge.start.y + (edge.end.y - edge.start.y) * t,
+  });
+  const addValue = (text: string, axis: "time" | "space" | "organ", point: Point, normal: Point) => {
+    const label = addLabel(text, `mhu-cube__axis-value mhu-cube__axis-value--${axis}`, point, normal);
+    label.style.setProperty("--_align-x", getLabelAlignment(normal.x));
+    label.style.setProperty("--_align-y", getLabelAlignment(normal.y));
+  };
+  // Floor titles sit centered in a second row. A sloped edge makes value labels reach farther from it, so the
+  // offset clears labels up to about 4rem wide and 1rem tall, plus the title's own half size, along the normal.
+  const addFloorTitle = (text: string, axis: "space" | "organ", edge: { start: Point; end: Point; normal: Point }) => {
+    const label = addLabel(text, `mhu-cube__axis-title mhu-cube__axis-title--${axis}`, along(edge, 0.5), edge.normal);
+    label.style.setProperty("--_offset", `${(0.75 + 1.6 * Math.abs(edge.normal.y) + 5.5 * Math.abs(edge.normal.x)).toFixed(3)}rem`);
+  };
 
-  const edges = getAxisEdges();
+  const edges = getAxisEdges(view);
   const layout = getAxisLayout(axes);
   addLabel(axes.time.label, "mhu-cube__axis-title mhu-cube__axis-title--time", edges.time.end, edges.time.normal);
-  addLabel(axes.space.label, "mhu-cube__axis-title mhu-cube__axis-title--space", midpoint(edges.space.start, edges.space.end), edges.space.normal);
-  addLabel(axes.organ.label, "mhu-cube__axis-title mhu-cube__axis-title--organ", midpoint(edges.organ.start, edges.organ.end), edges.organ.normal);
+  addFloorTitle(axes.space.label, "space", edges.space);
+  addFloorTitle(axes.organ.label, "organ", edges.organ);
   (axes.time.ticks ?? []).forEach((tick) => {
-    const point = projectPoint(1, getTimeCoordinate(tick, axes.time), 0);
-    addLabel(NUMBER_FORMAT.format(tick), "mhu-cube__axis-value mhu-cube__axis-value--time", point, edges.time.normal);
+    addValue(NUMBER_FORMAT.format(tick), "time", along(edges.time, getTimeCoordinate(tick, axes.time)), edges.time.normal);
   });
   // Space and organ labels start exactly where their floor guides meet the frame.
-  axes.space.values.forEach((value, index) => {
-    addLabel(value, "mhu-cube__axis-value mhu-cube__axis-value--space", projectPoint(layout.space[index], 0, 0), edges.space.normal);
-  });
-  axes.organ.values.forEach((value, index) => {
-    addLabel(value, "mhu-cube__axis-value mhu-cube__axis-value--organ", projectPoint(0, 0, layout.organ[index]), edges.organ.normal);
-  });
+  axes.space.values.forEach((value, index) => addValue(value, "space", along(edges.space, layout.space[index]), edges.space.normal));
+  axes.organ.values.forEach((value, index) => addValue(value, "organ", along(edges.organ, layout.organ[index]), edges.organ.normal));
   return labels;
 }
 
@@ -161,51 +182,29 @@ export function createProjectedCube({ corners, bounds }: ProjectedBoxGeometry) {
  * Ties a floating block to the axes: its footprint on the floor, dashed drop lines to it, and an age marker.
  * The age marker traces the exact start and end heights level to the time axis and is revealed on hover,
  * keyboard focus, or selection, so readers never have to judge height across the perspective by eye.
- * @param block - Plot layout for one dataset.
+ * @param block - Plot layout for one dataset, including its precomputed reference lines.
  * @returns A decorative SVG sharing the block's coordinate space, painted beneath every block.
  */
-export function createBlockShadow({ box, time, geometry: { bounds } }: PlotLayout) {
+export function createBlockShadow({ floor, drops, leaders, bracket, geometry: { bounds } }: PlotLayout) {
   const svg = createSvgElement("svg", {
     class: "mhu-cube__shadow",
     viewBox: `${bounds.left} ${bounds.top} ${bounds.width} ${bounds.height}`,
     preserveAspectRatio: "none",
     "aria-hidden": "true",
   });
-  const floor = [
-    projectPoint(box.x0, 0, box.z0),
-    projectPoint(box.x1, 0, box.z0),
-    projectPoint(box.x1, 0, box.z1),
-    projectPoint(box.x0, 0, box.z1),
-  ];
   svg.append(createSvgElement("polygon", {
     class: "mhu-cube__shadow-floor",
     points: floor.map((point) => `${point.x},${point.y}`).join(" "),
     "vector-effect": "non-scaling-stroke",
   }));
-  if (box.y0 > 0) {
-    // The three visible bottom corners drop to the floor, outlining where the block would rest.
-    const corners: Array<[number, number]> = [[box.x0, box.z0], [box.x1, box.z0], [box.x0, box.z1]];
-    svg.append(createSvgElement("path", {
-      class: "mhu-cube__shadow-drop",
-      d: toPathData(corners.map(([x, z]) => [projectPoint(x, box.y0, z), projectPoint(x, 0, z)])),
-      "vector-effect": "non-scaling-stroke",
-    }));
+  if (drops.length > 0) {
+    svg.append(createSvgElement("path", { class: "mhu-cube__shadow-drop", d: toPathData(drops), "vector-effect": "non-scaling-stroke" }));
   }
 
   const marker = createSvgElement("g", { class: "mhu-cube__time-marker" });
-  const levels = time.start === time.end ? [time.start] : [time.start, time.end];
-  // Each level line stays at one height: across to the left wall, then along it to the time axis.
   marker.append(
-    createSvgElement("path", {
-      class: "mhu-cube__time-leader",
-      d: toPathData(levels.map((y) => [projectPoint(box.x1, y, box.z0), projectPoint(1, y, box.z0), projectPoint(1, y, 0)])),
-      "vector-effect": "non-scaling-stroke",
-    }),
-    createSvgElement("path", {
-      class: "mhu-cube__time-bracket",
-      d: toPathData([[projectPoint(1, time.start, 0), projectPoint(1, time.end, 0)]]),
-      "vector-effect": "non-scaling-stroke",
-    }),
+    createSvgElement("path", { class: "mhu-cube__time-leader", d: toPathData(leaders), "vector-effect": "non-scaling-stroke" }),
+    createSvgElement("path", { class: "mhu-cube__time-bracket", d: toPathData([bracket]), "vector-effect": "non-scaling-stroke" }),
   );
   svg.append(marker);
   return svg;

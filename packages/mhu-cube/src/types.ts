@@ -1,6 +1,12 @@
 /** A dataset's availability in the metadata experience. */
 export type MhuCubeItemStatus = "available" | "current" | "unavailable";
 
+/** Desktop camera: looking across the front corner, or facing the organ axis. */
+export type MhuCubeView = "corner" | "front";
+
+/** Desktop reference drawing: every guide, or only the time guides. */
+export type MhuCubeGuides = "full" | "minimal";
+
 /** A donor-age span in time-axis units. A single age uses the same start and end. */
 export interface MhuCubeTimeRange {
   /** Earliest value, inclusive. */

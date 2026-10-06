@@ -98,9 +98,11 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA, input, output } from "@angular/core"
 import {
   defineMhuCube,
   type MhuCubeAxes,
+  type MhuCubeGuides,
   type MhuCubeItem,
   type MhuCubeSelectionDetail,
   type MhuCubeValidationDetail,
+  type MhuCubeView,
 } from "@mhu/mhu-cube";
 
 defineMhuCube();
@@ -114,6 +116,8 @@ defineMhuCube();
       [axes]="axes()"
       [items]="items()"
       [selectedId]="selectedId()"
+      [view]="view()"
+      [guides]="guides()"
       (mhu-cube-selection-change)="selectionChange.emit($event.detail)"
       (mhu-cube-validation)="validation.emit($event.detail)"
     ></mhu-cube>
@@ -124,6 +128,8 @@ export class MhuCubeComponent {
   readonly axes = input.required<MhuCubeAxes>();
   readonly items = input.required<MhuCubeItem[]>();
   readonly selectedId = input<string | null>(null);
+  readonly view = input<MhuCubeView>("corner");
+  readonly guides = input<MhuCubeGuides>("full");
   readonly selectionChange = output<MhuCubeSelectionDetail>();
   readonly validation = output<MhuCubeValidationDetail>();
 }
@@ -163,8 +169,30 @@ The component responds to its available container width rather than the browser 
 | `items` | `MhuCubeItem[]` | Supplies dataset labels, metadata, destinations, statuses, and plot positions. |
 | `selectedId` | `string \| null` | Selects a valid dataset on the desktop canvas. Property only. |
 | `label` | `string` | Gives the component section its accessible name. |
+| `view` | `"corner" \| "front"` | Desktop camera. Defaults to `"corner"`. See [Prototype options](#prototype-options). |
+| `guides` | `"full" \| "minimal"` | Desktop reference drawing. Defaults to `"full"`. See [Prototype options](#prototype-options). |
 
-`axes` and `items` may also be passed as JSON attributes for static HTML prototypes. Property binding is recommended for Angular because it preserves types and avoids serialization.
+`axes` and `items` may also be passed as JSON attributes for static HTML prototypes. Property binding is recommended for Angular because it preserves types and avoids serialization. `view` and `guides` work as plain attributes or properties; unknown values fall back to the default and report a `view.invalid` or `guides.invalid` warning.
+
+### Prototype options
+
+Stakeholders are reviewing three desktop presentations. Each is a combination of `view` and `guides`, and the repository preview offers a switcher with a shareable link for each (`?option=a`, `b`, or `c`):
+
+| Option | `view` | `guides` | What it shows |
+| --- | --- | --- | --- |
+| A · Corner view | `corner` | `full` | A low camera across the front corner, with floor guides, block footprints, and drop lines. |
+| B · No floor lines | `corner` | `minimal` | The same view without anything drawn on the floor. Back-wall time lines and the hover age marker remain. |
+| C · Front view | `front` | `full` | Faces the organ axis: organs run left to right, time runs straight up, and space recedes upward into the page. |
+
+- **Corner view:** space and organ labels run along the two front floor edges, and time ticks up the left edge.
+- **Front view:** organ labels run along the level front edge, space labels along the right floor edge, and time ticks up the front-left edge. Front-row heights read against the ticks; back-row heights read against the back-wall time lines. Overlapping datasets sit side by side within their organ instead of splitting along space.
+- Compact layouts are the same for every option.
+
+Once stakeholders choose, the team can keep both properties as supported settings or fix the chosen values and remove the rest.
+
+```html
+<mhu-cube view="front" guides="full" [axes]="axes" [items]="items"></mhu-cube>
+```
 
 ### Axis model
 
@@ -229,10 +257,10 @@ const item: MhuCubeItem = {
 - Single ages and ranges shorter than a block's width are drawn as cubes centered on their midpoint. Near either end of the axis, the cube shifts inward rather than being clipped, so its exact time is carried by its label, metadata, and accessible description.
 - Datasets that share a space and organ and whose drawn heights overlap split that cell into side-by-side lanes. Only the overlapping datasets narrow; taller blocks take the farther lanes so they never hide shorter ones.
 - Datasets in the same cell that do not overlap stack vertically at full width.
-- Space usually has only a few values, so they spread toward the ends of the space axis instead of filling equal cells. With two values, one row of blocks runs along the left wall and the other along the front. Larger sets fall back to equal cells.
+- Space usually has only a few values, so they spread toward the ends of the space axis instead of filling equal cells. With two values in the corner view, one row of blocks runs along the left wall and the other along the front; in the front view they form a back row and a front row. Larger sets fall back to equal cells.
 - Faint floor guides run from every space and organ label across the floor. Each block casts its footprint onto the floor where its two guides cross, with dashed drop lines from its bottom corners, so a floating block can be traced back to its labels.
-- The camera sits low so the floor stays shallow. Depth then moves a block up the screen far less than time does, and heights read close to the time labels across the whole plot.
-- Even so, a block nearer the viewer sits slightly lower on screen than the time labels at the left edge. Hovering, keyboard focus, or selection reveals a bracket on the time axis for the dataset's exact start and end, plus level lines tracing those heights from the block to the axis. Single ages show a single level line and a dot.
+- Both cameras keep the floor shallow, so depth moves a block up the screen far less than time does and heights read close to the time labels across the whole plot.
+- Even so, a block's depth shifts it slightly against the time ticks. Hovering, keyboard focus, or selection reveals a bracket on the time axis for the dataset's exact start and end, plus level lines tracing those heights from the block to the axis. Single ages show a single level line and a dot.
 - Axis labels are placed from the frame itself. Each value label hangs from its axis position, offset straight out from the frame, and the space and organ titles sit in a second row beyond them. Labels stay clear of the frame and each other for values up to about `4rem` wide; longer space or organ names may need shorter display labels.
 - Keyboard order, reading order, and compact-card order follow the plot: organ, then space, then time.
 
@@ -334,7 +362,7 @@ From the repository root, using the already-present dependencies:
 npm run dev
 ```
 
-Open `/mhu-cube/index.html` for the component preview.
+Open `/mhu-cube/index.html` for the component preview. The switcher above it moves between the [prototype options](#prototype-options); add `?option=b` or `?option=c` to link straight to one.
 
 The example configuration plots donor age from 0 to 100 years and displays its space categories as `100 µm` and `100 mm`. These are preview data rather than hard-coded component defaults, and the preview uses them consistently in the axes, dataset headings, metadata, and accessible descriptions. Its two Liver · 100 µm datasets (age 45 and ages 7–47) demonstrate lanes, and the infant Thymus dataset demonstrates a time label and the inward shift at the axis floor.
 

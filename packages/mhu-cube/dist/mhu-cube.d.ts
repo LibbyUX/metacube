@@ -1,5 +1,5 @@
-import type { MhuCubeAxes, MhuCubeItem, MhuCubeSelectionDetail, MhuCubeValidationDetail, MhuCubeValidationIssue } from "./types";
-export type { MhuCubeAxes, MhuCubeCategoryAxis, MhuCubeItem, MhuCubeItemStatus, MhuCubePosition, MhuCubeSelectionDetail, MhuCubeTimeAxis, MhuCubeTimeRange, MhuCubeValidationDetail, MhuCubeValidationIssue, MhuCubeValidationSeverity, } from "./types";
+import type { MhuCubeAxes, MhuCubeGuides, MhuCubeItem, MhuCubeSelectionDetail, MhuCubeValidationDetail, MhuCubeValidationIssue, MhuCubeView } from "./types";
+export type { MhuCubeAxes, MhuCubeCategoryAxis, MhuCubeGuides, MhuCubeItem, MhuCubeItemStatus, MhuCubePosition, MhuCubeSelectionDetail, MhuCubeTimeAxis, MhuCubeTimeRange, MhuCubeValidationDetail, MhuCubeValidationIssue, MhuCubeValidationSeverity, MhuCubeView, } from "./types";
 export declare const MHU_CUBE_SELECTION_EVENT = "mhu-cube-selection-change";
 export declare const MHU_CUBE_VALIDATION_EVENT = "mhu-cube-validation";
 declare global {
@@ -22,6 +22,12 @@ export declare class MhuCube extends HTMLElementBase {
     /** Normalized time, space, and organ axes used by the desktop visualization. */
     get axes(): MhuCubeAxes;
     set axes(value: MhuCubeAxes);
+    /** Desktop camera: across the front corner, or facing the organ axis. */
+    get view(): MhuCubeView;
+    set view(value: MhuCubeView);
+    /** Desktop reference drawing: every guide, or only the time guides. */
+    get guides(): MhuCubeGuides;
+    set guides(value: MhuCubeGuides);
     /** Current configuration errors and warnings. */
     get validationIssues(): MhuCubeValidationIssue[];
     /** ID selected in the desktop visualization, or null. */

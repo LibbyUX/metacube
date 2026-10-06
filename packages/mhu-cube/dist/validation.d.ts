@@ -1,4 +1,4 @@
-import type { MhuCubeAxes, MhuCubeItem, MhuCubeValidationIssue } from "./types";
+import type { MhuCubeAxes, MhuCubeGuides, MhuCubeItem, MhuCubeValidationIssue, MhuCubeView } from "./types";
 export declare const EMPTY_AXES: MhuCubeAxes;
 /** A normalized value and the issues found while producing it. */
 export interface ValidationResult<T> {
@@ -18,6 +18,18 @@ export declare function compareOrganNames(a: string, b: string): number;
  * @returns Whether time has a positive span and both categorical axes have values.
  */
 export declare function canPlotAxes(axes: MhuCubeAxes): boolean;
+/**
+ * Normalizes the desktop camera view.
+ * @param input - Unknown value received through the `view` property or attribute.
+ * @returns The view, falling back to the corner view with a warning.
+ */
+export declare function validateView(input: unknown): ValidationResult<MhuCubeView>;
+/**
+ * Normalizes how much reference drawing the desktop visualization adds.
+ * @param input - Unknown value received through the `guides` property or attribute.
+ * @returns The guide level, falling back to full guides with a warning.
+ */
+export declare function validateGuides(input: unknown): ValidationResult<MhuCubeGuides>;
 /**
  * Determines whether a metadata destination uses an allowed web URL form.
  * @param value - Candidate destination supplied by component data.

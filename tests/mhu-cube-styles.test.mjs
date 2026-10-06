@@ -76,8 +76,7 @@ test("only painted block faces receive pointer input on desktop", () => {
 
 test("axis styles name the time, space, and organ axes", () => {
   assert.match(styles, /\.mhu-cube__axis-title--time \{/);
-  assert.match(styles, /\.mhu-cube__axis-value--time \{/);
-  assert.match(styles, /\.mhu-cube__axis-value--organ \{/);
+  assert.match(styles, /\.mhu-cube__axis-value \{/);
   assert.match(styles, /\.mhu-cube__axis-title--space, \.mhu-cube__axis-title--organ,/);
   assert.doesNotMatch(styles, /mhu-cube__axis-(title|value)--[xyz]\b/);
   assert.match(styles, /\.mhu-cube__frame-guide, \.mhu-cube__frame-floor-guide \{[\s\S]*?vector-effect: non-scaling-stroke;/);
@@ -88,11 +87,16 @@ test("axis labels are pushed off the frame along each edge's outward normal", as
   const projection = await readFile(new URL("../packages/mhu-cube/src/projection.ts", import.meta.url), "utf8");
 
   assert.match(styles, /transform: translate\(\s*calc\(var\(--_align-x\) \+ var\(--axis-normal-x, 0\) \* var\(--_offset\)\),\s*calc\(var\(--_align-y\) \+ var\(--axis-normal-y, 0\) \* var\(--_offset\)\)\s*\);/);
-  assert.match(styles, /\.mhu-cube__axis-value--space \{ --_align-x: -100%; --_align-y: 0%; \}/);
-  assert.match(styles, /\.mhu-cube__axis-value--organ \{ --_align-x: 0%; --_align-y: 0%; \}/);
+  // Value alignment and floor-title offsets are set inline from each edge's normal, so CSS only supplies defaults.
+  assert.match(styles, /--_align-x: -50%;\s*--_align-y: -50%;\s*--_offset: 0\.5rem;/);
   // Normals are computed for this exact plot shape, so the CSS aspect ratio and projection constant must agree.
   assert.match(styles, /\.mhu-cube__plot \{[^}]*aspect-ratio: 1000 \/ 868;/);
   assert.match(projection, /const PLOT_HEIGHT_RATIO = 0\.868;/);
+});
+
+test("minimal guides drop the floor lines but keep time guides and the age marker", () => {
+  assert.match(styles, /\.mhu-cube--guides-minimal \.mhu-cube__frame-floor-guide,\s*\.mhu-cube--guides-minimal \.mhu-cube__shadow-floor,\s*\.mhu-cube--guides-minimal \.mhu-cube__shadow-drop \{ display: none; \}/);
+  assert.doesNotMatch(styles, /\.mhu-cube--guides-minimal \.mhu-cube__(frame-guide|time-marker|time-leader|time-bracket)/);
 });
 
 test("block shadows paint beneath every block and age markers appear only when a block is active", () => {
