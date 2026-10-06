@@ -22,4 +22,4 @@ export {
   type MhuCubeView,
 } from "./types";
 
-export { isSafeMetadataHref, validateAxes, validateGuides, validateItems, validateView, type ValidationResult } from "./validation";
+export { isSafeMetadataHref, validateAxes, validateCompactMetadata, validateGuides, validateHoverMetadata, validateItems, validateView, type ValidationResult } from "./validation";

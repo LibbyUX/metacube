@@ -21,7 +21,7 @@ import type {
   MhuCubeValidationIssue,
   MhuCubeView,
 } from "./types";
-import { EMPTY_AXES, canPlotAxes, validateAxes, validateGuides, validateItems, validateView } from "./validation";
+import { EMPTY_AXES, canPlotAxes, validateAxes, validateCompactMetadata, validateGuides, validateHoverMetadata, validateItems, validateView } from "./validation";
 
 export type {
   MhuCubeAxes,
@@ -61,7 +61,7 @@ let instanceCount = 0;
 
 /** Accessible, responsive dataset preview custom element. */
 export class MhuCube extends HTMLElementBase {
-  static observedAttributes = ["items", "axes", "label", "view", "guides"];
+  static observedAttributes = ["items", "axes", "label", "view", "guides", "compact-metadata", "hover-metadata"];
   #sourceItems: unknown = [];
   #items: MhuCubeItem[] = [];
   #axes: MhuCubeAxes = EMPTY_AXES;
@@ -72,6 +72,10 @@ export class MhuCube extends HTMLElementBase {
   #attributeIssues: MhuCubeValidationIssue[] = [];
   #viewIssues: MhuCubeValidationIssue[] = [];
   #guidesIssues: MhuCubeValidationIssue[] = [];
+  #compactMetadata: string[] | null = null;
+  #compactMetadataIssues: MhuCubeValidationIssue[] = [];
+  #hoverMetadata: string[] | null = null;
+  #hoverMetadataIssues: MhuCubeValidationIssue[] = [];
   #selectedId: string | null = null;
   #shadow = this.attachShadow({ mode: "open" });
   #instanceId = `mhu-cube-${++instanceCount}`;
@@ -110,9 +114,29 @@ export class MhuCube extends HTMLElementBase {
     this.#applyGuides(value);
     this.#scheduleUpdate(true);
   }
+  /** Metadata names shown on compact cards, in order; null shows every entry the card does not already show. */
+  get compactMetadata() { return this.#compactMetadata; }
+  set compactMetadata(value: string[] | null) {
+    this.#applyCompactMetadata(value);
+    this.#scheduleUpdate(true);
+  }
+  /** Metadata names shown on the desktop hover card, in order; null shows every entry. */
+  get hoverMetadata() { return this.#hoverMetadata; }
+  set hoverMetadata(value: string[] | null) {
+    this.#applyHoverMetadata(value);
+    this.#scheduleUpdate(true);
+  }
   /** Current configuration errors and warnings. */
   get validationIssues() {
-    return [...this.#attributeIssues, ...this.#viewIssues, ...this.#guidesIssues, ...this.#axisIssues, ...this.#itemIssues];
+    return [
+      ...this.#attributeIssues,
+      ...this.#viewIssues,
+      ...this.#guidesIssues,
+      ...this.#compactMetadataIssues,
+      ...this.#hoverMetadataIssues,
+      ...this.#axisIssues,
+      ...this.#itemIssues,
+    ];
   }
   /** ID selected in the desktop visualization, or null. */
   get selectedId() { return this.#selectedId; }
@@ -131,6 +155,8 @@ export class MhuCube extends HTMLElementBase {
   attributeChangedCallback(name: string) {
     if (name === "view") this.#applyView(this.getAttribute(name) ?? undefined);
     else if (name === "guides") this.#applyGuides(this.getAttribute(name) ?? undefined);
+    else if (name === "compact-metadata") this.#applyCompactMetadata(this.#parseJsonAttribute(name));
+    else if (name === "hover-metadata") this.#applyHoverMetadata(this.#parseJsonAttribute(name));
     else if (name !== "label") this.#readJsonAttribute(name as "axes" | "items", true);
     this.#scheduleUpdate(name !== "label");
   }
@@ -145,6 +171,29 @@ export class MhuCube extends HTMLElementBase {
     const result = validateGuides(value);
     this.#guides = result.value;
     this.#guidesIssues = result.issues;
+  }
+
+  #applyCompactMetadata(value: unknown) {
+    const result = validateCompactMetadata(value);
+    this.#compactMetadata = result.value;
+    this.#compactMetadataIssues = result.issues;
+  }
+
+  #applyHoverMetadata(value: unknown) {
+    const result = validateHoverMetadata(value);
+    this.#hoverMetadata = result.value;
+    this.#hoverMetadataIssues = result.issues;
+  }
+
+  /**
+   * Reads a JSON attribute for a setting that validates its own value.
+   * @param name - Attribute name.
+   * @returns The parsed value, undefined when the attribute is absent, or the raw text when it is not JSON.
+   */
+  #parseJsonAttribute(name: string): unknown {
+    const serializedValue = this.getAttribute(name);
+    if (serializedValue === null) return undefined;
+    try { return JSON.parse(serializedValue) as unknown; } catch { return serializedValue; }
   }
 
   /**
@@ -412,7 +461,7 @@ export class MhuCube extends HTMLElementBase {
       const block = layout.get(item.id);
       if (!block) {
         listItem.classList.add("mhu-cube__item--unpositioned");
-        listItem.append(createCompactCard(item, this.#axes));
+        listItem.append(createCompactCard(item, this.#axes, this.#compactMetadata));
         list.append(listItem);
         return;
       }
@@ -432,8 +481,8 @@ export class MhuCube extends HTMLElementBase {
       description.id = `${this.#instanceId}-item-${index}-description`;
       description.textContent = getAccessibleItemDescription(item, this.#axes);
       this.#configureSelectionButton(button, item, description.id);
-      button.append(createBlockShadow(block), createProjectedCube(block.geometry), createPreviewCard(item));
-      listItem.append(description, button, createCompactCard(item, this.#axes));
+      button.append(createBlockShadow(block), createProjectedCube(block.geometry), createPreviewCard(item, this.#hoverMetadata));
+      listItem.append(description, button, createCompactCard(item, this.#axes, this.#compactMetadata));
       list.append(listItem);
     });
     this.#plot.append(list);

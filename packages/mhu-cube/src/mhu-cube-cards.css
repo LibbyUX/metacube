@@ -13,7 +13,7 @@
     height: 100%;
     padding: 1rem;
     border: 1px solid var(--_outline-variant);
-    background: var(--_surface-container);
+    background: var(--_surface-container-lowest);
   }
   /* A square image with a transparent background, on the primary container fill. */
   .mhu-cube__compact-media {

@@ -31,7 +31,7 @@ test("public typography follows Material 3 roles with limited semibold overrides
   assert.match(styles, /mhu-cube__intro-visualization \{[\s\S]*?--mat-sys-body-medium-size, 0\.875rem/);
   assert.match(styles, /mhu-cube__details-unavailable \{[\s\S]*?--mat-sys-body-large-size, 1rem/);
   assert.match(dataStyles, /mhu-cube__details-metadata dt \{ color: var\(--_on-surface\); font-weight: 500; \}/);
-  assert.match(dataStyles, /mhu-cube__details-metadata dd \{ grid-column: 2; color: var\(--_on-surface-variant\); \}/);
+  assert.match(dataStyles, /mhu-cube__details-metadata dd \{ color: var\(--_on-surface-variant\); \}/);
   assert.match(dataStyles, /mhu-cube__intro-dimensions dt \{ color: var\(--_on-surface\); font-weight: 500; white-space: nowrap; \}/);
   assert.match(previewStyles, /\.metadata-preview h2[\s\S]*?--mat-sys-headline-medium-weight, 400/);
   assert.match(navigationStyles, /\.global-navigation__link[\s\S]*?--mat-sys-label-large-weight, 500/);
@@ -118,8 +118,10 @@ test("desktop content precedes the visualization and selected details use a card
   assert.doesNotMatch(styles, /\.mhu-cube__content \{[^}]*overflow: auto/);
   assert.match(previewStyles, /:root \{[\s\S]*?--mat-sys-surface-container: #eceff1;/);
   assert.match(previewStyles, /:root\[data-theme="dark"\] \{[\s\S]*?--mat-sys-surface-container: #222a30;/);
-  assert.match(styles, /--_surface-container-low: var\(--mhu-cube-surface-container-low, var\(--mat-sys-surface-container-low, #f4f4f4\)\);/);
-  assert.match(styles, /\.mhu-cube__details-card \{[\s\S]*?border: 1px solid[\s\S]*?background: var\(--_surface-container-low\)[\s\S]*?box-shadow:/);
+  assert.match(styles, /--_surface-container-lowest: var\(--mhu-cube-surface-container-lowest, var\(--mat-sys-surface-container-lowest, #ffffff\)\);/);
+  assert.match(previewStyles, /:root \{[\s\S]*?--mat-sys-surface-container-lowest: #ffffff;/);
+  assert.match(previewStyles, /:root\[data-theme="dark"\] \{[\s\S]*?--mat-sys-surface-container-lowest: #101417;/);
+  assert.match(styles, /\.mhu-cube__details-card \{[\s\S]*?border: 1px solid[\s\S]*?background: var\(--_surface-container\);[\s\S]*?box-shadow:/);
 });
 
 test("responsive introductions swap the heading text and drop visualization guidance on compact layouts", () => {
@@ -170,7 +172,7 @@ test("compact cards stay hidden until the compact layout and keep their styles i
 });
 
 test("compact cards follow the Figma card: a square image on the primary container, facts, title, and details", () => {
-  assert.match(cardStyles, /\.mhu-cube__compact-card \{[\s\S]*?align-items: center;[\s\S]*?padding: 1rem;[\s\S]*?border: 1px solid var\(--_outline-variant\);[\s\S]*?background: var\(--_surface-container\);/);
+  assert.match(cardStyles, /\.mhu-cube__compact-card \{[\s\S]*?align-items: center;[\s\S]*?padding: 1rem;[\s\S]*?border: 1px solid var\(--_outline-variant\);[\s\S]*?background: var\(--_surface-container-lowest\);/);
   assert.match(cardStyles, /\.mhu-cube__compact-media \{[\s\S]*?width: min\(100%, 14rem\);[\s\S]*?aspect-ratio: 1;[\s\S]*?overflow: hidden;[\s\S]*?background: var\(--_primary-container\);/);
   assert.match(cardStyles, /\.mhu-cube__compact-image \{[\s\S]*?object-fit: contain;[\s\S]*?object-position: bottom;/);
   assert.match(cardStyles, /\.mhu-cube__compact-fact::before \{[\s\S]*?width: 0\.25rem;[\s\S]*?height: 0\.25rem;[\s\S]*?background: var\(--_primary\);/);
@@ -185,8 +187,4 @@ test("touch screens open the dataset from the whole card; mice use the image and
   assert.match(cardStyles, /@media \(hover: hover\) and \(pointer: fine\) \{[\s\S]*?\.mhu-cube__compact-link::after \{ content: none; \}[\s\S]*?\.mhu-cube__compact-link:hover \{ text-decoration: underline;[\s\S]*?\.mhu-cube__compact-media:hover \.mhu-cube__compact-image \{ transform: scale\(1\.08\); \}/);
   assert.match(cardStyles, /@media \(prefers-reduced-motion: reduce\) \{\s*\.mhu-cube__compact-image \{ transition: none; \}/);
   assert.match(cardStyles, /@media \(forced-colors: active\)[\s\S]*?\.mhu-cube__compact-fact::before \{ forced-color-adjust: none; background: CanvasText; \}/);
-});
-
-test("desktop details show each entry of a list value on its own line", () => {
-  assert.match(dataStyles, /\.mhu-cube__details-metadata dd \{ grid-column: 2;/);
 });

@@ -28,6 +28,12 @@ export declare class MhuCube extends HTMLElementBase {
     /** Desktop reference drawing: every guide, or only the time guides. */
     get guides(): MhuCubeGuides;
     set guides(value: MhuCubeGuides);
+    /** Metadata names shown on compact cards, in order; null shows every entry the card does not already show. */
+    get compactMetadata(): string[] | null;
+    set compactMetadata(value: string[] | null);
+    /** Metadata names shown on the desktop hover card, in order; null shows every entry. */
+    get hoverMetadata(): string[] | null;
+    set hoverMetadata(value: string[] | null);
     /** Current configuration errors and warnings. */
     get validationIssues(): MhuCubeValidationIssue[];
     /** ID selected in the desktop visualization, or null. */

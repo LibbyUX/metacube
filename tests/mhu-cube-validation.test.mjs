@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { canPlotAxes, isSafeMetadataHref, validateAxes, validateGuides, validateItems, validateView } from "../packages/mhu-cube/src/validation.ts";
+import { canPlotAxes, isSafeMetadataHref, validateAxes, validateCompactMetadata, validateGuides, validateHoverMetadata, validateItems, validateView } from "../packages/mhu-cube/src/validation.ts";
 
 const validAxes = {
   time: { label: "Time", unit: "years", min: 0, max: 100 },
@@ -203,6 +203,23 @@ test("validateView and validateGuides accept their options and fall back with a 
   assert.deepEqual(codes(view), ["view.invalid"]);
   assert.equal(view.issues[0].severity, "warning");
   assert.deepEqual(codes(validateGuides(true)), ["guides.invalid"]);
+});
+
+test("validateCompactMetadata keeps trimmed unique names and falls back to every entry", () => {
+  assert.deepEqual(validateCompactMetadata(undefined), { value: null, issues: [] });
+  assert.deepEqual(validateCompactMetadata([" Corresponding authors ", "Sex", "Sex", ""]), { value: ["Corresponding authors", "Sex"], issues: [] });
+  const invalid = validateCompactMetadata(["Sex", 4]);
+  assert.equal(invalid.value, null);
+  assert.deepEqual(codes(invalid), ["compact-metadata.invalid"]);
+  assert.equal(invalid.issues[0].severity, "warning");
+});
+
+test("validateHoverMetadata keeps trimmed unique names and falls back to every entry", () => {
+  assert.deepEqual(validateHoverMetadata(null), { value: null, issues: [] });
+  assert.deepEqual(validateHoverMetadata([" Time ", "Sex"]), { value: ["Time", "Sex"], issues: [] });
+  const invalid = validateHoverMetadata("Sex");
+  assert.equal(invalid.value, null);
+  assert.deepEqual(codes(invalid), ["hover-metadata.invalid"]);
 });
 
 test("validateItems keeps safe images and trims list metadata such as several authors", () => {

@@ -14,9 +14,10 @@ export declare function getAccessibleDatasetName(item: MhuCubeItem): string;
 /**
  * Creates the transient preview shown beside a desktop cube.
  * @param item - Dataset represented by the cube.
+ * @param hoverMetadata - Metadata names to show, or null for every entry.
  * @returns A presentation-only card containing safely escaped text nodes.
  */
-export declare function createPreviewCard(item: MhuCubeItem): HTMLSpanElement;
+export declare function createPreviewCard(item: MhuCubeItem, hoverMetadata?: string[] | null): HTMLSpanElement;
 /**
  * Creates the persistent live region for desktop dataset details.
  * @param detailsId - Stable ID used by dataset controls to reference the panel.
@@ -34,11 +35,12 @@ export declare function createDetails(detailsId: string): HTMLDivElement;
 export declare function updateDetails(details: HTMLElement, item: MhuCubeItem | null, headingId: string, closeDetails: () => void): HTMLElement;
 /**
  * Creates a self-contained dataset card for layouts without the cube canvas: a square image, time and space,
- * the organ as the title, and the remaining metadata. The image and title both open the metadata page; with a
+ * the organ as the title, and the chosen metadata. The image and title both open the metadata page; with a
  * touch screen, the title link stretches over the whole card.
  * @param item - Dataset represented by the card.
  * @param axes - Validated axes used for dimension labels and the time unit.
+ * @param compactMetadata - Metadata names to show, or null for every entry the card does not already show.
  * @returns A card whose links share the dataset's metadata destination.
  */
-export declare function createCompactCard(item: MhuCubeItem, axes: MhuCubeAxes): HTMLElement;
+export declare function createCompactCard(item: MhuCubeItem, axes: MhuCubeAxes, compactMetadata?: string[] | null): HTMLElement;
 //# sourceMappingURL=mhu-cube-cards.d.ts.map

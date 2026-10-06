@@ -98,6 +98,32 @@ export function validateGuides(input: unknown): ValidationResult<MhuCubeGuides> 
   return validateChoice<MhuCubeGuides>(input, ["full", "minimal"], "full", "guides");
 }
 
+function validateMetadataNames(input: unknown, path: string, code: string, message: string): ValidationResult<string[] | null> {
+  if (input === undefined || input === null) return { value: null, issues: [] };
+  if (Array.isArray(input) && input.every((key) => typeof key === "string")) {
+    return { value: [...new Set(input.map((key) => key.trim()).filter(Boolean))], issues: [] };
+  }
+  return { value: null, issues: [issue(code, message, path, "warning")] };
+}
+
+/**
+ * Normalizes the metadata names shown on compact cards.
+ * @param input - Unknown value received through the `compactMetadata` property or `compact-metadata` JSON attribute.
+ * @returns Trimmed, unique names in order, or null to show every remaining entry; invalid input warns and uses null.
+ */
+export function validateCompactMetadata(input: unknown): ValidationResult<string[] | null> {
+  return validateMetadataNames(input, "compactMetadata", "compact-metadata.invalid", "Compact metadata must be a list of metadata names; every remaining entry is shown.");
+}
+
+/**
+ * Normalizes the metadata names shown on the desktop hover card.
+ * @param input - Unknown value received through the `hoverMetadata` property or `hover-metadata` JSON attribute.
+ * @returns Trimmed, unique names in order, or null to show every entry; invalid input warns and uses null.
+ */
+export function validateHoverMetadata(input: unknown): ValidationResult<string[] | null> {
+  return validateMetadataNames(input, "hoverMetadata", "hover-metadata.invalid", "Hover metadata must be a list of metadata names; every entry is shown.");
+}
+
 /**
  * Determines whether a metadata destination or image uses an allowed web URL form.
  * @param value - Candidate URL supplied by component data.

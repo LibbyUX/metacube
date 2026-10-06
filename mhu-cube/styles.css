@@ -29,6 +29,7 @@
   --mat-sys-surface: #fcfcfc;
   --mat-sys-surface-container: #eceff1;
   --mat-sys-surface-container-low: #f4f4f4;
+  --mat-sys-surface-container-lowest: #ffffff;
   --mat-sys-on-surface: #1d2429;
   --mat-sys-on-surface-variant: #354b57;
   --mat-sys-primary: #8b1510;
@@ -46,6 +47,7 @@
   --mat-sys-surface: #151a1e;
   --mat-sys-surface-container: #222a30;
   --mat-sys-surface-container-low: #1d2429;
+  --mat-sys-surface-container-lowest: #101417;
   --mat-sys-on-surface: #e0e3e5;
   --mat-sys-on-surface-variant: #e1e8ec;
   --mat-sys-primary: #ffb4a9;

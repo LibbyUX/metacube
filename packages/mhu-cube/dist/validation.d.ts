@@ -31,6 +31,18 @@ export declare function validateView(input: unknown): ValidationResult<MhuCubeVi
  */
 export declare function validateGuides(input: unknown): ValidationResult<MhuCubeGuides>;
 /**
+ * Normalizes the metadata names shown on compact cards.
+ * @param input - Unknown value received through the `compactMetadata` property or `compact-metadata` JSON attribute.
+ * @returns Trimmed, unique names in order, or null to show every remaining entry; invalid input warns and uses null.
+ */
+export declare function validateCompactMetadata(input: unknown): ValidationResult<string[] | null>;
+/**
+ * Normalizes the metadata names shown on the desktop hover card.
+ * @param input - Unknown value received through the `hoverMetadata` property or `hover-metadata` JSON attribute.
+ * @returns Trimmed, unique names in order, or null to show every entry; invalid input warns and uses null.
+ */
+export declare function validateHoverMetadata(input: unknown): ValidationResult<string[] | null>;
+/**
  * Determines whether a metadata destination or image uses an allowed web URL form.
  * @param value - Candidate URL supplied by component data.
  * @returns Whether the URL is relative, same-page, HTTP, or HTTPS.

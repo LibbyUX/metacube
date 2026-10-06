@@ -44,17 +44,24 @@ const DATASET_IMAGES: Record<string, string> = {
  * Builds a preview dataset whose title and metadata agree with its plotted position.
  * @param id - Stable dataset identity used for the metadata destination and image.
  * @param position - Time, space, and organ placement.
- * @param authors - Corresponding authors, shown one per line on compact cards.
+ * @param sex - Donor sex, shown on the visualization's cards.
+ * @param authors - Corresponding authors, shown one per line on compact cards; one author takes the singular label.
  * @returns A dataset with a consistent organ, space, and time title.
  */
-function createDataset(id: string, position: MhuCubePosition, authors: string[]) {
+function createDataset(id: string, position: MhuCubePosition, sex: string, authors: string[]) {
   const time = formatTime(position.time);
   return {
     id,
     label: `${position.organ}, ${position.space}, ${time}`,
     href: `#metadata-${id}`,
     ...(DATASET_IMAGES[id] ? { image: DATASET_IMAGES[id] } : {}),
-    metadata: { Time: time, Space: position.space, Organ: position.organ, "Corresponding authors": authors },
+    metadata: {
+      Time: time,
+      Space: position.space,
+      Organ: position.organ,
+      Sex: sex,
+      [authors.length === 1 ? "Corresponding author" : "Corresponding authors"]: authors,
+    },
     position,
   };
 }
@@ -65,37 +72,44 @@ const datasets: PreviewDataset[] = [
   createDataset(
     "bader-liver-sbf-sem",
     { time: { start: 45, end: 45 }, space: SPACE.hundredMicrons, organ: "Liver" },
-    ["Gary Bader"],
+    "Male",
+    ["Cheng Xing"],
   ),
   createDataset(
     "lee-kidney-hipct-63",
     { time: { start: 63, end: 63 }, space: SPACE.hundredMillimeters, organ: "Kidney" },
-    ["Peter D. Lee"],
+    "Male",
+    ["Claire L. Walsh", "Peter D. Lee"],
   ),
   createDataset(
     "lee-kidney-hipct-85",
     { time: { start: 85, end: 85 }, space: SPACE.hundredMillimeters, organ: "Kidney" },
-    ["Peter D. Lee"],
+    "Male",
+    ["Claire L. Walsh", "Peter D. Lee"],
   ),
   createDataset(
     "lee-heart-hipct",
     { time: { start: 63, end: 63 }, space: SPACE.hundredMillimeters, organ: "Heart" },
-    ["Peter D. Lee"],
+    "Male",
+    ["Claire L. Walsh", "Peter D. Lee"],
   ),
   createDataset(
     "teichmann-heart-hra-pop",
     { time: { start: 40, end: 70, label: "~40–70 years" }, space: SPACE.hundredMicrons, organ: "Heart" },
-    ["Sarah Teichmann"],
+    "Multiple",
+    ["Michela Noseda", "Sarah A. Teichmann"],
   ),
   createDataset(
     "zandstra-thymus-codex",
     { time: { start: 4 / 12, end: 5 / 12, label: "4–5 months" }, space: SPACE.hundredMicrons, organ: "Thymus" },
+    "Multiple",
     ["Peter W. Zandstra", "Fabio M.V. Rossi"],
   ),
   createDataset(
     "bader-liver-xenium",
     { time: { start: 7, end: 47 }, space: SPACE.hundredMicrons, organ: "Liver" },
-    ["Gary Bader"],
+    "Multiple",
+    ["Rachel D. Edgar"],
   ),
 ];
 
@@ -105,6 +119,9 @@ const mhuCube = document.querySelector<MhuCube>("#mhu-cube-preview mhu-cube");
 if (mhuCube) {
   mhuCube.axes = ORGAN_DATASET_AXES;
   mhuCube.items = datasets;
+  // The selected-dataset card shows every detail; the hover and compact cards each show a subset.
+  mhuCube.hoverMetadata = ["Time", "Space", "Organ", "Sex"];
+  mhuCube.compactMetadata = ["Corresponding author", "Corresponding authors"];
 }
 
 // Stakeholder review options: each maps to the component's `view` and `guides` settings.

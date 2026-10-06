@@ -14,7 +14,8 @@ const axes: MhuCubeAxes = {
   organ: { label: "Organ", values: ["Liver", "Heart"] },
 };
 // "two" spans a range and overlaps the single age in "three", so they share their cell in lanes.
-// "one" points at a missing image to exercise the fallback; "three" lists two authors.
+// "one" points at a missing image to exercise the fallback; "two" adds a detail the visualization's cards show;
+// "three" lists two authors.
 const items: MhuCubeItem[] = [
   {
     id: "one",
@@ -29,7 +30,7 @@ const items: MhuCubeItem[] = [
     label: "Dataset two",
     href: "#two",
     image: new URL("../../mhu-cube/images/thymus-zandstra.png", import.meta.url).href,
-    metadata: { Organ: "Liver", "Lead author": "Author two" },
+    metadata: { Organ: "Liver", Sex: "Female", "Lead author": "Author two" },
     position: { time: { start: 10, end: 60 }, space: "large", organ: "Liver" },
   },
   {
@@ -317,7 +318,9 @@ await test("desktop selection swaps the dimension key for a closable dataset car
   assert(Boolean(details.querySelector(".mhu-cube__details-card")), "Selection should render a dataset card in the introduction.");
   const metadata = details.querySelector("dl.mhu-cube__details-metadata");
   const metadataTerms = [...(metadata?.querySelectorAll("dt") ?? [])].map((term) => term.textContent);
-  assert(metadata && metadataTerms.includes("Organ") && metadataTerms.includes("Lead author"), "Selected metadata needs semantic labels.");
+  assert(metadata && metadataTerms.join(",") === "Organ,Sex,Lead author", "Selected metadata needs semantic labels for every detail.");
+  const hoverCard = button.querySelector(".mhu-cube__card");
+  assert(hoverCard?.textContent?.includes("SexFemale"), "The hover preview card should show every detail.");
   let clearedItem: MhuCubeItem | null | undefined;
   component.addEventListener(MHU_CUBE_SELECTION_EVENT, (event) => {
     clearedItem = event.detail.item;
@@ -378,6 +381,40 @@ await test("synchronous Angular-style property updates render and report once", 
   batchedComponent.remove();
 });
 
+await test("hover metadata limits the hover card without changing the selected dataset card", async () => {
+  const hoverTerms = () => [...([...shadow.querySelectorAll<HTMLButtonElement>(".mhu-cube__select")].find((button) => button.dataset.itemId === "two")?.querySelectorAll(".mhu-cube__metadata-key") ?? [])].map((term) => term.textContent).join(",");
+  try {
+    component.hoverMetadata = ["sex", "Organ"];
+    component.selectedId = "two";
+    await nextLayout();
+    assert(hoverTerms() === "Sex,Organ", "The hover card should show only the named metadata, in order, matched ignoring case.");
+    const detailTerms = [...shadow.querySelectorAll(".mhu-cube__details-metadata dt")].map((term) => term.textContent).join(",");
+    assert(detailTerms === "Organ,Sex,Lead author", "The selected dataset card keeps every detail.");
+    assert(shadow.getElementById([...shadow.querySelectorAll<HTMLButtonElement>(".mhu-cube__select")].find((button) => button.dataset.itemId === "two")?.getAttribute("aria-describedby") ?? "")?.textContent?.includes("Lead author: Author two"), "Block descriptions keep every detail for assistive technology.");
+    component.setAttribute("hover-metadata", "Sex");
+    await nextLayout();
+    assert(component.hoverMetadata === null && hoverTerms() === "Organ,Sex,Lead author", "Invalid values fall back to every detail.");
+    assert(component.validationIssues.some((issue) => issue.code === "hover-metadata.invalid"), "Invalid values should be reported.");
+  } finally {
+    component.removeAttribute("hover-metadata");
+    component.selectedId = null;
+    await nextLayout();
+  }
+});
+
+await test("the selected dataset card joins list values with commas", async () => {
+  component.selectedId = "three";
+  await nextLayout();
+  try {
+    const row = [...shadow.querySelectorAll(".mhu-cube__details-metadata-row")].find((candidate) => candidate.querySelector("dt")?.textContent === "Lead author");
+    const values = [...(row?.querySelectorAll("dd") ?? [])].map((value) => value.textContent);
+    assert(values.join("|") === "Author three, Co-author three", "List values should share one comma-separated line.");
+  } finally {
+    component.selectedId = null;
+    await nextLayout();
+  }
+});
+
 await test("compact mode exposes direct cards and removes the selection step", async () => {
   if (!fixture) throw new Error("Fixture container is missing.");
   fixture.style.width = "50rem";
@@ -410,7 +447,7 @@ await test("compact cards show the image, time and space, the organ title, and t
   assert(new Set(linkNames).size === items.length, "Title links need unique accessible names, even when organs repeat.");
   assert(card("two")?.querySelector(".mhu-cube__compact-link")?.textContent === "Liver, 10–60 years, large", "Titles show the organ, with time and space completing the link name.");
   assert(terms(card("two"), ".mhu-cube__compact-facts dt") === "Time,Space" && terms(card("two"), ".mhu-cube__compact-facts dd") === "10–60 years,large", "Facts should list time, then space.");
-  assert(terms(card("two"), ".mhu-cube__compact-details dt") === "Lead author", "Metadata already shown as facts or the title should not repeat.");
+  assert(terms(card("two"), ".mhu-cube__compact-details dt") === "Sex,Lead author", "Metadata already shown as facts or the title should not repeat.");
   assert(terms(card("three"), ".mhu-cube__compact-details dd") === "Author three,Co-author three", "List values should show one entry per line.");
   assert(card("unplotted")?.querySelector(".mhu-cube__compact-link")?.textContent === "Dataset without coordinates" && !card("unplotted")?.querySelector(".mhu-cube__compact-facts"), "Unplotted datasets fall back to their label and full metadata.");
 
@@ -441,6 +478,30 @@ await test("touch screens open the dataset from anywhere on the card; mice use t
   } else {
     assert(at(media) === link && at(details, 0.02) === link, "On touch screens, the whole card should open the metadata page.");
   }
+});
+
+await test("compact metadata limits the details on compact cards without changing the visualization's cards", async () => {
+  const terms = () => {
+    const card = [...shadow.querySelectorAll(".mhu-cube__compact-card")].find((candidate) => candidate.querySelector(".mhu-cube__compact-link")?.getAttribute("href") === "#two");
+    return [...(card?.querySelectorAll(".mhu-cube__compact-details dt") ?? [])].map((term) => term.textContent).join(",");
+  };
+  try {
+    component.compactMetadata = [" lead AUTHOR "];
+    await nextLayout();
+    assert(terms() === "Lead author", "Compact cards should show only the named metadata, matched ignoring case.");
+    assert(shadow.querySelector(".mhu-cube__card")?.textContent?.includes("Lead author"), "Hover cards keep every detail.");
+    component.setAttribute("compact-metadata", "{not json");
+    await nextLayout();
+    assert(component.compactMetadata === null && terms() === "Sex,Lead author", "Invalid values fall back to every remaining detail.");
+    assert(component.validationIssues.some((issue) => issue.code === "compact-metadata.invalid"), "Invalid values should be reported.");
+    component.setAttribute("compact-metadata", JSON.stringify(["Sex"]));
+    await nextLayout();
+    assert(terms() === "Sex", "The JSON attribute should set the names.");
+  } finally {
+    component.removeAttribute("compact-metadata");
+    await nextLayout();
+  }
+  assert(component.compactMetadata === null && terms() === "Sex,Lead author", "Removing the attribute should restore the default.");
 });
 
 await test("compact cards fit as many designed-width columns as the component allows", async () => {

@@ -1,7 +1,7 @@
 :host {
   --_surface: var(--mhu-cube-surface, var(--mat-sys-surface, #fcfcfc));
   --_surface-container: var(--mhu-cube-surface-container, var(--mat-sys-surface-container, #eceff1));
-  --_surface-container-low: var(--mhu-cube-surface-container-low, var(--mat-sys-surface-container-low, #f4f4f4));
+  --_surface-container-lowest: var(--mhu-cube-surface-container-lowest, var(--mat-sys-surface-container-lowest, #ffffff));
   --_on-surface: var(--mhu-cube-on-surface, var(--mat-sys-on-surface, #1d2429));
   --_on-surface-variant: var(--mhu-cube-on-surface-variant, var(--mat-sys-on-surface-variant, #354b57));
   --_primary: var(--mhu-cube-primary, var(--mat-sys-primary, #8b1510));
@@ -444,7 +444,7 @@
 .mhu-cube__details:empty { display: none; }
 .mhu-cube__details-card {
   border: 1px solid var(--_outline-variant);
-  background: var(--_surface-container-low);
+  background: var(--_surface-container);
   box-shadow: 0 1rem 2.5rem color-mix(in srgb, var(--_on-surface) 10%, transparent);
 }
 .mhu-cube__details-card {

@@ -100,12 +100,13 @@ export function getAccessibleDatasetName(item: MhuCubeItem) {
 }
 
 /**
- * Builds the semantic metadata definition list shared by dataset cards. List values get one description per entry.
+ * Builds the semantic metadata definition list shared by dataset cards.
  * @param entries - Metadata entries to display, in order.
  * @param className - Class for the list; each row gets the same class with a `-row` suffix.
+ * @param listsOnSeparateLines - Whether list values get one description per entry instead of one comma-separated line.
  * @returns A grouped definition list, or null when there is nothing to display.
  */
-function createMetadataList(entries: MetadataEntry[], className = "mhu-cube__details-metadata") {
+function createMetadataList(entries: MetadataEntry[], className = "mhu-cube__details-metadata", listsOnSeparateLines = false) {
   if (entries.length === 0) return null;
 
   const metadata = document.createElement("dl");
@@ -116,7 +117,7 @@ function createMetadataList(entries: MetadataEntry[], className = "mhu-cube__det
     const term = document.createElement("dt");
     term.textContent = key;
     row.append(term);
-    (Array.isArray(value) ? value : [String(value)]).forEach((entry) => {
+    (Array.isArray(value) && listsOnSeparateLines ? value : [formatMetadataValue(value)]).forEach((entry) => {
       const description = document.createElement("dd");
       description.textContent = entry;
       row.append(description);
@@ -156,11 +157,23 @@ function createDestination(item: MhuCubeItem, actionClassName: string) {
 }
 
 /**
+ * Picks metadata entries by name, in the order named.
+ * @param item - Dataset whose metadata should be displayed.
+ * @param names - Metadata names, matched ignoring case and surrounding spaces.
+ * @returns The matching entries.
+ */
+function getNamedMetadataEntries(item: MhuCubeItem, names: string[]) {
+  const entries = getMetadataEntries(item);
+  return names.flatMap((name) => entries.filter(([key]) => key.trim().toLowerCase() === name.toLowerCase()));
+}
+
+/**
  * Creates the transient preview shown beside a desktop cube.
  * @param item - Dataset represented by the cube.
+ * @param hoverMetadata - Metadata names to show, or null for every entry.
  * @returns A presentation-only card containing safely escaped text nodes.
  */
-export function createPreviewCard(item: MhuCubeItem) {
+export function createPreviewCard(item: MhuCubeItem, hoverMetadata: string[] | null = null) {
   const card = document.createElement("span");
   card.className = "mhu-cube__card";
   card.setAttribute("aria-hidden", "true");
@@ -169,7 +182,7 @@ export function createPreviewCard(item: MhuCubeItem) {
   label.textContent = item.label;
   card.append(label);
 
-  const entries = getMetadataEntries(item);
+  const entries = hoverMetadata ? getNamedMetadataEntries(item, hoverMetadata) : getMetadataEntries(item);
   if (entries.length > 0) {
     const metadata = document.createElement("span");
     metadata.className = "mhu-cube__metadata";
@@ -262,14 +275,28 @@ function getRemainingMetadataEntries(item: MhuCubeItem, axes: MhuCubeAxes) {
 }
 
 /**
+ * Chooses the metadata a compact card shows below its title.
+ * @param item - Dataset represented by the card.
+ * @param axes - Validated axes whose labels identify entries the card already shows.
+ * @param hasPosition - Whether the card shows time, space, and organ itself.
+ * @param compactMetadata - Names to show in order, matched ignoring case, or null for every remaining entry.
+ * @returns The entries to display.
+ */
+function getCompactMetadataEntries(item: MhuCubeItem, axes: MhuCubeAxes, hasPosition: boolean, compactMetadata: string[] | null) {
+  if (!compactMetadata) return hasPosition ? getRemainingMetadataEntries(item, axes) : getMetadataEntries(item);
+  return getNamedMetadataEntries(item, compactMetadata);
+}
+
+/**
  * Creates a self-contained dataset card for layouts without the cube canvas: a square image, time and space,
- * the organ as the title, and the remaining metadata. The image and title both open the metadata page; with a
+ * the organ as the title, and the chosen metadata. The image and title both open the metadata page; with a
  * touch screen, the title link stretches over the whole card.
  * @param item - Dataset represented by the card.
  * @param axes - Validated axes used for dimension labels and the time unit.
+ * @param compactMetadata - Metadata names to show, or null for every entry the card does not already show.
  * @returns A card whose links share the dataset's metadata destination.
  */
-export function createCompactCard(item: MhuCubeItem, axes: MhuCubeAxes) {
+export function createCompactCard(item: MhuCubeItem, axes: MhuCubeAxes, compactMetadata: string[] | null = null) {
   const card = document.createElement("article");
   card.className = "mhu-cube__compact-card";
   const status = item.status ?? "available";
@@ -343,7 +370,7 @@ export function createCompactCard(item: MhuCubeItem, axes: MhuCubeAxes) {
     badge.textContent = "Current page";
     body.append(badge);
   }
-  const details = createMetadataList(position ? getRemainingMetadataEntries(item, axes) : getMetadataEntries(item), "mhu-cube__compact-details");
+  const details = createMetadataList(getCompactMetadataEntries(item, axes, Boolean(position), compactMetadata), "mhu-cube__compact-details", true);
   if (details) body.append(details);
   if (!href) body.append(createUnavailableMessage());
 

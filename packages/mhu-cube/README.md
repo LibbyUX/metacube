@@ -119,6 +119,8 @@ defineMhuCube();
       [selectedId]="selectedId()"
       [view]="view()"
       [guides]="guides()"
+      [compactMetadata]="compactMetadata()"
+      [hoverMetadata]="hoverMetadata()"
       (mhu-cube-selection-change)="selectionChange.emit($event.detail)"
       (mhu-cube-validation)="validation.emit($event.detail)"
     ></mhu-cube>
@@ -131,6 +133,8 @@ export class MhuCubeComponent {
   readonly selectedId = input<string | null>(null);
   readonly view = input<MhuCubeView>("corner");
   readonly guides = input<MhuCubeGuides>("full");
+  readonly compactMetadata = input<string[] | null>(null);
+  readonly hoverMetadata = input<string[] | null>(null);
   readonly selectionChange = output<MhuCubeSelectionDetail>();
   readonly validation = output<MhuCubeValidationDetail>();
 }
@@ -172,8 +176,10 @@ The component responds to its available container width rather than the browser 
 | `label` | `string` | Gives the component section its accessible name. |
 | `view` | `"corner" \| "front"` | Desktop camera. Defaults to `"corner"`. See [Prototype options](#prototype-options). |
 | `guides` | `"full" \| "minimal"` | Desktop reference drawing. Defaults to `"full"`. See [Prototype options](#prototype-options). |
+| `compactMetadata` | `string[] \| null` | Metadata names shown on [compact cards](#dataset-cards), in order and ignoring case. Defaults to `null`, which shows every entry the card does not already show. The selected dataset card always shows every entry. |
+| `hoverMetadata` | `string[] \| null` | Metadata names shown on the desktop hover card, in order and ignoring case. Defaults to `null`, which shows every entry. Block descriptions for assistive technology always include every entry. |
 
-`axes` and `items` may also be passed as JSON attributes for static HTML prototypes. Property binding is recommended for Angular because it preserves types and avoids serialization. `view` and `guides` work as plain attributes or properties; unknown values fall back to the default and report a `view.invalid` or `guides.invalid` warning.
+`axes` and `items` may also be passed as JSON attributes for static HTML prototypes. Property binding is recommended for Angular because it preserves types and avoids serialization. `view` and `guides` work as plain attributes or properties; unknown values fall back to the default and report a `view.invalid` or `guides.invalid` warning. `compactMetadata` and `hoverMetadata` also accept `compact-metadata` and `hover-metadata` JSON attributes, such as `compact-metadata='["Corresponding authors"]'`; anything other than a list of strings falls back to `null` with a `compact-metadata.invalid` or `hover-metadata.invalid` warning.
 
 ### Prototype options
 
@@ -250,7 +256,7 @@ const item: MhuCubeItem = {
 - `id` must be nonempty and unique.
 - `href` accepts relative, hash, HTTP, and HTTPS destinations. Unsafe or invalid protocols are removed.
 - `image` is a square picture of the dataset with a transparent background, shown on compact cards over the primary container fill. It accepts relative, HTTP, and HTTPS URLs; unsafe ones are removed with an `item.image.unsafe` warning. A missing image, or one that fails to load, leaves the empty fill.
-- `metadata` preserves supported values and their source order. A list of strings, such as several authors, shows one entry per line on compact cards and the desktop details card, and is joined with commas elsewhere. `null`, `undefined`, and empty lists are retained in normalized data but not displayed.
+- `metadata` preserves supported values and their source order. A list of strings, such as several authors, shows one entry per line on compact cards and is joined with commas elsewhere, including the selected dataset card and hover card. `null`, `undefined`, and empty lists are retained in normalized data but not displayed.
 - `position.space` and `position.organ` must exactly match a configured axis value. They are referenced by name, not index, so organ sorting never moves a dataset.
 - `position.time` is inclusive and must lie inside the time axis, with `start` no later than `end`. A single age uses the same `start` and `end`. Use `label` when the numbers alone read poorly, for example months for infant donors; it replaces the formatted range in descriptions.
 - A missing or unusable position keeps the dataset available but moves it to the desktop “Not plotted” fallback instead of inventing a block.
@@ -274,10 +280,11 @@ const item: MhuCubeItem = {
 
 At `64rem` and below, each dataset is a card built from the [Figma design](https://www.figma.com/design/bSpc6bQC5nGwDaWJfx7Cen/CNS-Projects-2026?node-id=3169-242638&m=dev):
 
+- A card on the lowest container surface (`surface-container-lowest`), white in light themes.
 - The dataset's `image`, about `14rem` square, on the primary container fill. Non-square images are contained and sit on the bottom edge.
 - Time and space, each after a small primary square.
 - The organ as the card title.
-- Below a divider, the remaining metadata. Entries whose key matches an axis label (ignoring case) are skipped because the card already shows them.
+- Below a divider, the metadata named in `compactMetadata`. Without it, every remaining entry appears, except entries whose key matches an axis label (ignoring case), because the card already shows them.
 - Interaction depends on the input device, not the width:
   - **Mouse or trackpad** (`(hover: hover) and (pointer: fine)`): the image and the organ name both open the metadata page. Hovering the image grows it within its square; hovering the name underlines it. The rest of the card is not a link.
   - **Touch:** the title link stretches over the whole card, so pressing anywhere opens the metadata page.
@@ -331,7 +338,7 @@ The component first uses its public CSS custom properties, then matching Angular
 mhu-cube {
   --mhu-cube-surface: var(--mat-sys-surface);
   --mhu-cube-surface-container: var(--mat-sys-surface-container);
-  --mhu-cube-surface-container-low: var(--mat-sys-surface-container-low);
+  --mhu-cube-surface-container-lowest: var(--mat-sys-surface-container-lowest);
   --mhu-cube-on-surface: var(--mat-sys-on-surface);
   --mhu-cube-on-surface-variant: var(--mat-sys-on-surface-variant);
   --mhu-cube-primary: var(--mat-sys-primary);
@@ -358,7 +365,7 @@ The host application owns font loading. The Roboto files used by this repository
 
 The prototype introduction is managed in `src/mhu-cube-copy.ts`. `heading` appears beside the desktop canvas and stays on one line, so keep it to about 28 characters at the default type size. `compactHeading` replaces it at `64rem` and below and may wrap. Above `64rem`, a compact, divider-separated dimension key with visual column headings explains time, space, and organ and includes selection guidance. Selecting a block replaces the dimension key and its headings with a closable dataset card in the same left-column position; closing it restores the key and returns focus to the selected block. The Metacube acknowledgment remains anchored to the bottom of the desktop content column in either state. At `64rem` and below, visualization-specific content is removed from the layout and accessibility tree, leaving the compact heading alone above the dataset cards; there is no compact body text.
 
-The dimension key and dataset cards use semantic definition lists with subtle row separators. The selected desktop card uses the low container surface; compact cards are described under [Dataset cards](#dataset-cards). The preview titles use a consistent organ, space, and time sequence so datasets sharing a cell stay distinguishable; the component itself continues to display whatever label the host supplies.
+The dimension key and dataset cards use semantic definition lists with subtle row separators. The selected desktop card uses the container surface; compact cards are described under [Dataset cards](#dataset-cards). The preview titles use a consistent organ, space, and time sequence so datasets sharing a cell stay distinguishable; the component itself continues to display whatever label the host supplies.
 
 The structured copy includes the desktop `heading` and `visualization` copy and a `compactHeading`; `eyebrow` is optional and currently omitted; when absent it leaves no empty element. This is an internal handoff configuration, not a public custom-element property. The receiving team can keep it internal or expose host-provided copy if reuse requires that flexibility.
 
@@ -386,7 +393,7 @@ npm run dev
 
 Open `/mhu-cube/index.html` for the component preview. The switcher above it moves between the [prototype options](#prototype-options); add `?option=b` or `?option=c` to link straight to one. Narrow the window below `64rem` to see the dataset cards, and use the browser's device emulation to try the touch interaction.
 
-The example configuration plots donor age from 0 to 100 years and displays its space categories as `100 µm` and `100 mm`. These are preview data rather than hard-coded component defaults, and the preview uses them consistently in the axes, dataset headings, metadata, and accessible descriptions. Its two Liver · 100 µm datasets (age 45 and ages 7–47) demonstrate lanes, and the infant Thymus dataset demonstrates a time label, the inward shift at the axis floor, a card image, and two corresponding authors. Every preview dataset has a square image in `mhu-cube/images/`, mapped to its dataset ID in `mhu-cube/main.ts`.
+The example configuration plots donor age from 0 to 100 years and displays its space categories as `100 µm` and `100 mm`. These are preview data rather than hard-coded component defaults, and the preview uses them consistently in the axes, dataset headings, metadata, and accessible descriptions. Its two Liver · 100 µm datasets (age 45 and ages 7–47) demonstrate lanes, and the infant Thymus dataset demonstrates a time label, the inward shift at the axis floor, a card image, and two corresponding authors. The preview labels a single author “Corresponding author” and several “Corresponding authors”, and sets `compactMetadata` to both names. `hoverMetadata` is set to time, space, organ, and sex. So the selected dataset card shows everything, the hover card leaves out the authors, and the compact cards show only the authors. Every preview dataset has a square image in `mhu-cube/images/`, mapped to its dataset ID in `mhu-cube/main.ts`.
 
 Run the non-installing validation commands:
 
