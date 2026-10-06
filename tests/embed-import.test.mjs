@@ -1,11 +1,15 @@
 import assert from "node:assert/strict";
 
-const cifarCubeModule = await import("../packages/cifar-cube/dist/cifar-cube.js");
+const mhuCubeModule = await import("../packages/mhu-cube/dist/mhu-cube.js");
 
-assert.equal(typeof cifarCubeModule.CifarCube, "function");
-assert.equal(typeof cifarCubeModule.defineCifarCube, "function");
-assert.equal(typeof cifarCubeModule.validateAxes, "function");
-assert.equal(typeof cifarCubeModule.validateItems, "function");
-assert.equal(cifarCubeModule.CIFAR_CUBE_SELECTION_EVENT, "cifar-cube-selection-change");
-assert.equal(cifarCubeModule.CIFAR_CUBE_VALIDATION_EVENT, "cifar-cube-validation");
-assert.doesNotThrow(() => cifarCubeModule.defineCifarCube());
+assert.equal(typeof mhuCubeModule.MhuCube, "function");
+assert.equal(typeof mhuCubeModule.defineMhuCube, "function");
+assert.equal(typeof mhuCubeModule.validateAxes, "function");
+assert.equal(typeof mhuCubeModule.validateItems, "function");
+assert.equal(typeof mhuCubeModule.validateView, "function");
+assert.equal(typeof mhuCubeModule.validateGuides, "function");
+assert.equal(typeof mhuCubeModule.validateCompactMetadata, "function");
+assert.equal(typeof mhuCubeModule.validateHoverMetadata, "function");
+assert.equal(mhuCubeModule.MHU_CUBE_SELECTION_EVENT, "mhu-cube-selection-change");
+assert.equal(mhuCubeModule.MHU_CUBE_VALIDATION_EVENT, "mhu-cube-validation");
+assert.doesNotThrow(() => mhuCubeModule.defineMhuCube());

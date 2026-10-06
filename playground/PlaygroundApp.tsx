@@ -28,8 +28,8 @@ const TEMPLATE_URL = `${BASE}template.html`;
 interface ExampleDef { key: string; label: string; csv: string; yaml: string;}
 const EXAMPLES: ExampleDef[] = [
   {
-    key:  "cifar_organs",
-    label: "CIFAR — organ imaging datasets",
+    key:  "mhu_organs",
+    label: "MHU — organ imaging datasets",
     csv:  `${BASE}examples/organ_datasets_counts.csv`,
     yaml: `${BASE}examples/organ_datasets_flat.yaml`,
   },

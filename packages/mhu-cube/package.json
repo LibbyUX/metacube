@@ -1,0 +1,26 @@
+{
+  "name": "@mhu/mhu-cube",
+  "version": "0.1.0",
+  "description": "Accessible organ-imaging dataset preview web component handoff.",
+  "private": true,
+  "type": "module",
+  "main": "./dist/mhu-cube.js",
+  "module": "./dist/mhu-cube.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/mhu-cube.js",
+      "default": "./dist/mhu-cube.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "LICENSE",
+    "README.md",
+    "tsconfig.build.json"
+  ],
+  "sideEffects": false,
+  "license": "MIT"
+}
