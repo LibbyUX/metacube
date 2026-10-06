@@ -38,8 +38,8 @@ The package intentionally contains no `dependencies` or `devDependencies`. The r
 | `src/index.ts` | Supported package exports. |
 | `src/mhu-cube.ts` | Custom-element lifecycle, state, rendering coordination, and events. |
 | `src/mhu-cube-cards.ts` | Intro, preview-card, selected-card, and compact-card markup. |
-| `src/mhu-cube-visualization.ts` | SVG frame and time guides, blocks, axis labels, and accessible visualization descriptions. |
-| `src/projection.ts` | Framework-independent projection, time mapping, lane layout, and paint order. |
+| `src/mhu-cube-visualization.ts` | SVG frame with time and floor guides, blocks with floor shadows and age markers, axis labels, and accessible visualization descriptions. |
+| `src/projection.ts` | Framework-independent projection, category spacing, time mapping, lane layout, and paint order. |
 | `src/validation.ts` | Runtime normalization, alphabetical organ order, URL safety, and validation issues. |
 | `src/mhu-cube-copy.ts` | Editable introduction copy. |
 | `src/mhu-cube.css` | Encapsulated responsive presentation and state styling. |
@@ -184,7 +184,7 @@ const axes: MhuCubeAxes = {
 };
 ```
 
-- **Time** is the continuous vertical axis, measured as donor age. `min` must be less than `max`. `ticks` are optional; the default is five equal steps (`0, 20, 40, 60, 80, 100` above). The axis title appends the unit, as in “Time (years)”, and faint guide lines on the back walls mark each interior tick.
+- **Time** is the continuous vertical axis, measured as donor age. `min` must be less than `max`. `ticks` are optional; the default is five equal steps (`0, 20, 40, 60, 80, 100` above). The axis title shows `label` alone; `unit` appears in formatted ranges, such as “7–47 years”, and in the screen-reader axis summary. Faint guide lines on the back walls mark each interior tick.
 - **Space** values are displayed in the order supplied, so list them from smallest to largest.
 - **Organ** values are always displayed alphabetically, regardless of the order supplied. Sorting ignores case and accents, so names that differ only that way are rejected as duplicates.
 - Space and organ values must be nonempty, unique strings. The normalized `element.axes` value reflects the alphabetical organ order and the effective time ticks.
@@ -229,6 +229,9 @@ const item: MhuCubeItem = {
 - Single ages and ranges shorter than a block's width are drawn as cubes centered on their midpoint. Near either end of the axis, the cube shifts inward rather than being clipped, so its exact time is carried by its label, metadata, and accessible description.
 - Datasets that share a space and organ and whose drawn heights overlap split that cell into side-by-side lanes. Only the overlapping datasets narrow; taller blocks take the farther lanes so they never hide shorter ones.
 - Datasets in the same cell that do not overlap stack vertically at full width.
+- Space usually has only a few values, so they spread toward the ends of the space axis instead of filling equal cells. With two values, one row of blocks runs along the left wall and the other along the front. Larger sets fall back to equal cells.
+- Faint floor guides run from every space and organ label across the floor. Each block casts its footprint onto the floor where its two guides cross, with dashed drop lines from its bottom corners, so a floating block can be traced back to its labels.
+- In perspective, a block nearer the viewer sits lower on screen than the time labels at the left edge, so heights can't be judged by eye. Hovering, keyboard focus, or selection reveals a bracket on the time axis for the dataset's exact start and end, plus level lines tracing those heights from the block to the axis. Single ages show a single level line and a dot.
 - Keyboard order, reading order, and compact-card order follow the plot: organ, then space, then time.
 
 Read `element.items`, `element.axes`, and `element.validationIssues` to inspect normalized values and current issues.

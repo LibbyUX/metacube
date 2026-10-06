@@ -125,7 +125,7 @@ await test("cube controls have unique names, descriptions, state, and details re
 
 await test("axes label time, space, and organ with organs in alphabetical order", () => {
   const labels = (selector: string) => [...shadow.querySelectorAll(selector)].map((label) => label.textContent).join(",");
-  assert(labels(".mhu-cube__axis-title--time") === "Time (years)", "The time axis title should include its unit.");
+  assert(labels(".mhu-cube__axis-title--time") === "Time", "The time axis title should show its label alone.");
   assert(labels(".mhu-cube__axis-value--time") === "0,20,40,60,80,100", "The time axis should default to five equal steps.");
   assert(labels(".mhu-cube__axis-value--space") === "small,large", "Space values should keep their supplied order.");
   assert(labels(".mhu-cube__axis-value--organ") === "Heart,Liver", "Organ values should be alphabetical.");
@@ -150,6 +150,31 @@ await test("time ranges draw taller blocks and overlapping ranges split their ce
   assert(single && range && overlapping, "Fixture blocks are missing.");
   assert(range.height > overlapping.height, "A longer time range should draw a taller block.");
   assert(overlapping.width < single.width, "Overlapping datasets should narrow into lanes.");
+});
+
+await test("blocks cast floor shadows and reveal their exact time span when selected", async () => {
+  const marker = () => shadow.querySelector<SVGGElement>('[data-item-id="two"] .mhu-cube__time-marker');
+  assert(
+    [...shadow.querySelectorAll(".mhu-cube__select")].every((button) => button.querySelector(".mhu-cube__shadow .mhu-cube__shadow-floor")),
+    "Every block needs a floor footprint.",
+  );
+  assert(shadow.querySelector('[data-item-id="one"] .mhu-cube__shadow-drop'), "A raised block needs drop lines to its footprint.");
+  assert(getComputedStyle(marker()!).opacity === "0", "Age markers should stay hidden until a block is active.");
+
+  component.selectedId = "two";
+  await waitFor(() => getComputedStyle(marker()!).opacity === "1");
+  const bracket = shadow.querySelector<SVGPathElement>('[data-item-id="two"] .mhu-cube__time-bracket')?.getBoundingClientRect();
+  const tickCenter = (text: string) => {
+    const label = [...shadow.querySelectorAll<HTMLElement>(".mhu-cube__axis-value--time")].find((tick) => tick.textContent === text);
+    const rect = label?.getBoundingClientRect();
+    return rect ? rect.top + rect.height / 2 : NaN;
+  };
+  const axisHeight = tickCenter("0") - tickCenter("100");
+  assert(bracket && axisHeight > 0, "The time bracket and axis ticks are missing.");
+  // The fixture's "two" spans 10–60 years, half of the 0–100 axis.
+  assert(Math.abs(bracket.height / axisHeight - 0.5) < 0.05, "The bracket should span the dataset's exact time range on the axis.");
+  component.selectedId = null;
+  await nextLayout();
 });
 
 await test("pointer input follows painted faces rather than block bounding boxes", async () => {

@@ -1,11 +1,28 @@
-import { getCategoryCenter, getTimeCoordinate, projectPoint, type Point, type ProjectedBoxGeometry } from "./projection";
+import {
+  getAxisLayout,
+  getFrameEdges,
+  getTimeCoordinate,
+  projectPoint,
+  type PlotLayout,
+  type Point,
+  type ProjectedBoxGeometry,
+} from "./projection";
 import type { MhuCubeAxes, MhuCubeItem, MhuCubeTimeAxis, MhuCubeTimeRange } from "./types";
 
 const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
-// The frame's viewBox; projected percentages scale to these units.
-const FRAME_WIDTH = 1000;
-const FRAME_HEIGHT = 868;
 const NUMBER_FORMAT = new Intl.NumberFormat("en", { maximumFractionDigits: 2 });
+
+/**
+ * Builds SVG path data in plot percentages, the coordinate space shared by the frame and every block.
+ * @param segments - Polylines to draw, each a list of projected points.
+ * @returns Path data with one move command per polyline.
+ */
+function toPathData(segments: Point[][]) {
+  return segments
+    .filter((points) => points.length > 1)
+    .map((points) => points.map((point, index) => `${index === 0 ? "M" : "L"}${point.x} ${point.y}`).join(""))
+    .join("");
+}
 
 function createSvgElement<K extends keyof SVGElementTagNameMap>(tagName: K, attributes: Record<string, string>) {
   const element = document.createElementNS(SVG_NAMESPACE, tagName);
@@ -28,38 +45,34 @@ export function formatTimeRange(range: MhuCubeTimeRange, axis: MhuCubeTimeAxis) 
 }
 
 /**
- * Draws faint lines across both back walls at each interior time tick so block heights can be read in perspective.
- * @param axis - Validated time axis.
- * @returns A decorative guide path in frame coordinates.
- */
-function createTimeGuides(axis: MhuCubeTimeAxis) {
-  const toFrame = (point: Point) => `${(point.x * FRAME_WIDTH) / 100} ${(point.y * FRAME_HEIGHT) / 100}`;
-  const d = (axis.ticks ?? [])
-    .filter((tick) => tick > axis.min && tick < axis.max)
-    .map((tick) => {
-      const y = getTimeCoordinate(tick, axis);
-      return `M${toFrame(projectPoint(1, y, 0))}L${toFrame(projectPoint(1, y, 1))}L${toFrame(projectPoint(0, y, 1))}`;
-    })
-    .join("");
-  return createSvgElement("path", { class: "mhu-cube__frame-guide", d });
-}
-
-/**
- * Creates the reference-style perspective bounding cube with time guides on its back walls.
- * @param axes - Validated axes supplying the time ticks.
+ * Creates the perspective bounding cube with time guides on its back walls and floor guides through every category.
+ * @param axes - Validated axes supplying the time ticks and category positions.
  * @returns A decorative SVG element with crisp, non-scaling frame lines.
  */
 export function createCoordinateFrame(axes: MhuCubeAxes) {
   const svg = createSvgElement("svg", {
     class: "mhu-cube__frame",
-    viewBox: `0 0 ${FRAME_WIDTH} ${FRAME_HEIGHT}`,
-    preserveAspectRatio: "xMidYMid meet",
+    viewBox: "0 0 100 100",
+    preserveAspectRatio: "none",
     "aria-hidden": "true",
   });
-  svg.append(createTimeGuides(axes.time), createSvgElement("path", {
-    class: "mhu-cube__frame-line",
-    d: "M573 5 152 103 573 276 995 103 573 5M152 103 224 586 573 861 925 586 995 103M573 276 573 861M573 5 573 405M224 586 573 405 925 586",
-  }));
+  const layout = getAxisLayout(axes);
+  const timeGuides = (axes.time.ticks ?? [])
+    .filter((tick) => tick > axes.time.min && tick < axes.time.max)
+    .map((tick) => {
+      const y = getTimeCoordinate(tick, axes.time);
+      return [projectPoint(1, y, 0), projectPoint(1, y, 1), projectPoint(0, y, 1)];
+    });
+  // Each floor guide runs from a category label across the floor, so a block's footprint sits on its two guides.
+  const floorGuides = [
+    ...layout.space.map((x) => [projectPoint(x, 0, 0), projectPoint(x, 0, 1)]),
+    ...layout.organ.map((z) => [projectPoint(0, 0, z), projectPoint(1, 0, z)]),
+  ];
+  svg.append(
+    createSvgElement("path", { class: "mhu-cube__frame-guide", d: toPathData(timeGuides) }),
+    createSvgElement("path", { class: "mhu-cube__frame-floor-guide", d: toPathData(floorGuides) }),
+    createSvgElement("path", { class: "mhu-cube__frame-line", d: toPathData(getFrameEdges()) }),
+  );
   return svg;
 }
 
@@ -81,20 +94,20 @@ export function createAxisLabels(axes: MhuCubeAxes) {
     labels.append(label);
   };
 
-  const timeTitle = axes.time.unit ? `${axes.time.label} (${axes.time.unit})` : axes.time.label;
-  addLabel(timeTitle, "mhu-cube__axis-title mhu-cube__axis-title--time", { x: 4.5, y: 5 });
+  addLabel(axes.time.label, "mhu-cube__axis-title mhu-cube__axis-title--time", { x: 4.5, y: 5 });
   addLabel(axes.space.label, "mhu-cube__axis-title mhu-cube__axis-title--space", { x: 30, y: 89 });
   addLabel(axes.organ.label, "mhu-cube__axis-title mhu-cube__axis-title--organ", { x: 84.5, y: 91.5 });
   (axes.time.ticks ?? []).forEach((tick) => {
     const point = projectPoint(1, getTimeCoordinate(tick, axes.time), 0);
     addLabel(NUMBER_FORMAT.format(tick), "mhu-cube__axis-value mhu-cube__axis-value--time", { x: point.x - 5, y: point.y });
   });
+  const layout = getAxisLayout(axes);
   axes.space.values.forEach((value, index) => {
-    const point = projectPoint(1 - getCategoryCenter(index, axes.space.values.length), 0, 0);
+    const point = projectPoint(layout.space[index], 0, 0);
     addLabel(value, "mhu-cube__axis-value mhu-cube__axis-value--space", { x: point.x - 4.5, y: point.y + 1.8 });
   });
   axes.organ.values.forEach((value, index) => {
-    const point = projectPoint(0, 0, getCategoryCenter(index, axes.organ.values.length));
+    const point = projectPoint(0, 0, layout.organ[index]);
     addLabel(value, "mhu-cube__axis-value mhu-cube__axis-value--organ", { x: point.x + 2.5, y: point.y + 1.7 });
   });
   return labels;
@@ -136,6 +149,60 @@ export function createProjectedCube({ corners, bounds }: ProjectedBoxGeometry) {
       "vector-effect": "non-scaling-stroke",
     }),
   );
+  return svg;
+}
+
+/**
+ * Ties a floating block to the axes: its footprint on the floor, dashed drop lines to it, and an age marker.
+ * The age marker traces the exact start and end heights level to the time axis and is revealed on hover,
+ * keyboard focus, or selection, so readers never have to judge height across the perspective by eye.
+ * @param block - Plot layout for one dataset.
+ * @returns A decorative SVG sharing the block's coordinate space, painted beneath every block.
+ */
+export function createBlockShadow({ box, time, geometry: { bounds } }: PlotLayout) {
+  const svg = createSvgElement("svg", {
+    class: "mhu-cube__shadow",
+    viewBox: `${bounds.left} ${bounds.top} ${bounds.width} ${bounds.height}`,
+    preserveAspectRatio: "none",
+    "aria-hidden": "true",
+  });
+  const floor = [
+    projectPoint(box.x0, 0, box.z0),
+    projectPoint(box.x1, 0, box.z0),
+    projectPoint(box.x1, 0, box.z1),
+    projectPoint(box.x0, 0, box.z1),
+  ];
+  svg.append(createSvgElement("polygon", {
+    class: "mhu-cube__shadow-floor",
+    points: floor.map((point) => `${point.x},${point.y}`).join(" "),
+    "vector-effect": "non-scaling-stroke",
+  }));
+  if (box.y0 > 0) {
+    // The three visible bottom corners drop to the floor, outlining where the block would rest.
+    const corners: Array<[number, number]> = [[box.x0, box.z0], [box.x1, box.z0], [box.x0, box.z1]];
+    svg.append(createSvgElement("path", {
+      class: "mhu-cube__shadow-drop",
+      d: toPathData(corners.map(([x, z]) => [projectPoint(x, box.y0, z), projectPoint(x, 0, z)])),
+      "vector-effect": "non-scaling-stroke",
+    }));
+  }
+
+  const marker = createSvgElement("g", { class: "mhu-cube__time-marker" });
+  const levels = time.start === time.end ? [time.start] : [time.start, time.end];
+  // Each level line stays at one height: across to the left wall, then along it to the time axis.
+  marker.append(
+    createSvgElement("path", {
+      class: "mhu-cube__time-leader",
+      d: toPathData(levels.map((y) => [projectPoint(box.x1, y, box.z0), projectPoint(1, y, box.z0), projectPoint(1, y, 0)])),
+      "vector-effect": "non-scaling-stroke",
+    }),
+    createSvgElement("path", {
+      class: "mhu-cube__time-bracket",
+      d: toPathData([[projectPoint(1, time.start, 0), projectPoint(1, time.end, 0)]]),
+      "vector-effect": "non-scaling-stroke",
+    }),
+  );
+  svg.append(marker);
   return svg;
 }
 

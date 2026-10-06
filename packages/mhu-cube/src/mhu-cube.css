@@ -80,12 +80,13 @@
   stroke-width: 1.1;
   vector-effect: non-scaling-stroke;
 }
-.mhu-cube__frame-guide {
+.mhu-cube__frame-guide, .mhu-cube__frame-floor-guide {
   fill: none;
   stroke: color-mix(in srgb, var(--_outline) 30%, transparent);
   stroke-width: 1;
   vector-effect: non-scaling-stroke;
 }
+.mhu-cube__frame-floor-guide { stroke: color-mix(in srgb, var(--_outline) 45%, transparent); }
 .mhu-cube__axes { position: absolute; z-index: 1; inset: 0; user-select: text; }
 .mhu-cube__axis-title, .mhu-cube__axis-value {
   position: absolute;
@@ -146,6 +147,49 @@
   pointer-events: none;
 }
 .mhu-cube__select:focus-visible { z-index: 999; outline: 3px solid var(--_focus); outline-offset: 5px; }
+/* Shadows share each block's coordinate space but paint beneath every block, directly over the floor. */
+.mhu-cube__shadow {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.mhu-cube__shadow-floor {
+  fill: var(--_primary);
+  fill-opacity: 0.12;
+  stroke: color-mix(in srgb, var(--_primary) 45%, transparent);
+  stroke-width: 1;
+  transition: fill-opacity 170ms ease;
+}
+.mhu-cube__shadow-drop {
+  fill: none;
+  stroke: color-mix(in srgb, var(--_on-surface) 40%, transparent);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+.mhu-cube__time-marker { opacity: 0; transition: opacity 120ms ease; }
+.mhu-cube__time-leader {
+  fill: none;
+  stroke: var(--_primary);
+  stroke-width: 1.25;
+  stroke-dasharray: 5 3;
+}
+.mhu-cube__time-bracket {
+  fill: none;
+  stroke: var(--_primary);
+  stroke-width: 6;
+  stroke-linecap: round;
+}
+.mhu-cube__select:hover .mhu-cube__time-marker,
+.mhu-cube__select:focus-visible .mhu-cube__time-marker,
+.mhu-cube__item--selected .mhu-cube__time-marker { opacity: 1; }
+.mhu-cube__select:hover .mhu-cube__shadow-floor,
+.mhu-cube__select:focus-visible .mhu-cube__shadow-floor,
+.mhu-cube__item--selected .mhu-cube__shadow-floor { fill-opacity: 0.28; }
+.mhu-cube--has-selection .mhu-cube__item:not(.mhu-cube__item--selected) .mhu-cube__shadow { opacity: 0.35; }
 /* Paint order lives on the block itself so hover cards can rise above every block without reordering the scene. */
 .mhu-cube__cube {
   position: relative;
@@ -482,7 +526,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .mhu-cube__top, .mhu-cube__left, .mhu-cube__right,
-  .mhu-cube__edge, .mhu-cube__card { transition: none; }
+  .mhu-cube__edge, .mhu-cube__card, .mhu-cube__shadow-floor, .mhu-cube__time-marker { transition: none; }
 }
 
 @media (forced-colors: active) {
@@ -491,7 +535,9 @@
   .mhu-cube__left,
   .mhu-cube__right,
   .mhu-cube__edge { stroke: CanvasText; }
-  .mhu-cube__frame-guide { stroke: GrayText; }
+  .mhu-cube__frame-guide, .mhu-cube__frame-floor-guide, .mhu-cube__shadow-drop { stroke: GrayText; }
+  .mhu-cube__shadow-floor { fill: Canvas; stroke: GrayText; }
+  .mhu-cube__time-leader, .mhu-cube__time-bracket { stroke: Highlight; }
   .mhu-cube__top, .mhu-cube__left, .mhu-cube__right { fill: Canvas; fill-opacity: 1; }
   .mhu-cube--has-selection .mhu-cube__item:not(.mhu-cube__item--selected) .mhu-cube__top,
   .mhu-cube--has-selection .mhu-cube__item:not(.mhu-cube__item--selected) .mhu-cube__left,

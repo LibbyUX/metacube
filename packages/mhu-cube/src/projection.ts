@@ -31,6 +31,8 @@ export interface ProjectedBoxGeometry {
 /** Placement, paint order, and hover-card anchoring for one plotted dataset. */
 export interface PlotLayout {
   box: Box;
+  /** The dataset's exact normalized time span, which single ages and short ranges draw larger than. */
+  time: { start: number; end: number };
   geometry: ProjectedBoxGeometry;
   /** Paint order starting at one; higher values render in front. */
   layer: number;
@@ -57,8 +59,24 @@ const FRAME_PLANES = {
   },
 } as const;
 
+/** Where each category sits on the floor and how much room its blocks have. */
+export interface AxisLayout {
+  /** Half of a full-width block's normalized footprint. */
+  halfSize: number;
+  /** Normalized x center for each space value, in axis order. */
+  space: number[];
+  /** Normalized x range each space value's lanes may occupy, in axis order. */
+  spaceBands: Array<[number, number]>;
+  /** Normalized z center for each organ value, in axis order. */
+  organ: number[];
+}
+
 // Share of a categorical cell covered by a block's footprint.
 const FOOTPRINT_FILL = 0.7;
+// Gap kept between the outermost space blocks and the frame.
+const SPACE_EDGE_MARGIN = 0.07;
+// Share of a space band that lane groups may fill.
+const LANE_BAND_FILL = 0.9;
 // Normalized space between side-by-side lanes.
 const LANE_GAP = 0.02;
 // Rendered time extents closer than this share a cluster so stacked blocks never visually touch.
@@ -66,6 +84,12 @@ const OVERLAP_TOLERANCE = 0.02;
 // Hover cards stay within this vertical band of the plot.
 const CARD_ANCHOR_MIN = 12;
 const CARD_ANCHOR_MAX = 88;
+// Every edge of the unit cube as pairs of [x, y, z] corners.
+const CUBE_EDGES: Array<[[number, number, number], [number, number, number]]> = [
+  [[0, 0, 0], [1, 0, 0]], [[0, 0, 1], [1, 0, 1]], [[0, 1, 0], [1, 1, 0]], [[0, 1, 1], [1, 1, 1]],
+  [[0, 0, 0], [0, 0, 1]], [[1, 0, 0], [1, 0, 1]], [[0, 1, 0], [0, 1, 1]], [[1, 1, 0], [1, 1, 1]],
+  [[0, 0, 0], [0, 1, 0]], [[1, 0, 0], [1, 1, 0]], [[0, 0, 1], [0, 1, 1]], [[1, 0, 1], [1, 1, 1]],
+];
 
 /**
  * Places a categorical index at the center of its equal-width axis cell.
@@ -75,6 +99,19 @@ const CARD_ANCHOR_MAX = 88;
  */
 export function getCategoryCenter(value: number, count: number) {
   return count > 0 ? (value + 0.5) / count : 0.5;
+}
+
+/**
+ * Spreads a few categories toward the ends of an axis so their blocks read as distinct groups.
+ * @param value - Zero-based category index.
+ * @param count - Total categories on the axis.
+ * @param halfSize - Half of a block's footprint, used to keep blocks inside the frame.
+ * @returns A normalized position between zero and one; never closer together than equal-width cells.
+ */
+export function getSpreadCenter(value: number, count: number, halfSize: number) {
+  if (count <= 1) return 0.5;
+  const inset = Math.min(0.5 / count, halfSize + SPACE_EDGE_MARGIN);
+  return inset + (value * (1 - 2 * inset)) / (count - 1);
 }
 
 function interpolatePlane(plane: typeof FRAME_PLANES.top | typeof FRAME_PLANES.bottom, x: number, z: number): Point {
@@ -124,6 +161,35 @@ export function getTimeCoordinate(value: number, axis: MhuCubeTimeAxis) {
  */
 export function getFootprintHalfSize(spaceCount: number, organCount: number) {
   return (0.5 / Math.max(spaceCount, organCount, 1)) * FOOTPRINT_FILL;
+}
+
+/**
+ * Positions every space and organ category on the floor; labels, guides, and blocks all share these centers.
+ * @param axes - Validated, plottable axes.
+ * @returns Footprint size, spread space centers with their lane bands, and organ centers.
+ */
+export function getAxisLayout(axes: MhuCubeAxes): AxisLayout {
+  const spaceCount = axes.space.values.length;
+  const organCount = axes.organ.values.length;
+  const halfSize = getFootprintHalfSize(spaceCount, organCount);
+  // Space runs from the front corner (x = 0) to the left corner (x = 1); the first value sits nearest the left.
+  const along = axes.space.values.map((_, index) => getSpreadCenter(index, spaceCount, halfSize));
+  const space = along.map((center) => 1 - center);
+  const spaceBands = along.map((center, index): [number, number] => {
+    const lower = index === 0 ? 0 : (along[index - 1] + center) / 2;
+    const upper = index === spaceCount - 1 ? 1 : (center + along[index + 1]) / 2;
+    return [1 - upper, 1 - lower];
+  });
+  const organ = axes.organ.values.map((_, index) => getCategoryCenter(index, organCount));
+  return { halfSize, space, spaceBands, organ };
+}
+
+/**
+ * Projects the twelve edges of the bounding cube so the frame and its contents share one projection.
+ * @returns Start and end points of each frame edge in plot percentages.
+ */
+export function getFrameEdges(): Array<[Point, Point]> {
+  return CUBE_EDGES.map(([start, end]) => [projectPoint(...start), projectPoint(...end)]);
 }
 
 /**
@@ -196,6 +262,7 @@ interface Placement {
   id: string;
   spaceIndex: number;
   organIndex: number;
+  time: { start: number; end: number };
   y0: number;
   y1: number;
 }
@@ -264,16 +331,17 @@ function assignLanes(placements: Placement[]) {
 
 /**
  * Finds a block's extent along the space axis, narrowing it only when it shares a cluster.
- * @param center - Normalized center of the block's space cell.
+ * @param center - Normalized center of the block's space value.
  * @param halfSize - Half of a full-width footprint.
- * @param cellWidth - Normalized width of one space cell.
+ * @param band - Normalized x range the space value's lanes may occupy.
  * @param slot - The block's lane assignment.
  * @returns Normalized start and end along the space axis.
  */
-function getLaneExtent(center: number, halfSize: number, cellWidth: number, slot: LaneSlot): [number, number] {
+function getLaneExtent(center: number, halfSize: number, band: [number, number], slot: LaneSlot): [number, number] {
   if (slot.laneCount === 1) return [center - halfSize, center + halfSize];
-  // Lanes may spread a little into the cell's spare width so each stays a usable target.
-  const span = Math.min(2 * halfSize * (1 + 0.5 * (slot.laneCount - 1)), cellWidth * 0.8);
+  // Lanes may spread a little into the band's spare width so each stays a usable target, but never past it.
+  const room = 2 * Math.min(center - band[0], band[1] - center) * LANE_BAND_FILL;
+  const span = Math.min(2 * halfSize * (1 + 0.5 * (slot.laneCount - 1)), room);
   const width = (span - LANE_GAP * (slot.laneCount - 1)) / slot.laneCount;
   const end = center + span / 2 - slot.lane * (width + LANE_GAP);
   return [end - width, end];
@@ -286,9 +354,8 @@ function getLaneExtent(center: number, halfSize: number, cellWidth: number, slot
  * @returns Layout keyed by dataset ID.
  */
 export function layoutPlot(items: readonly MhuCubeItem[], axes: MhuCubeAxes) {
-  const spaceCount = axes.space.values.length;
-  const organCount = axes.organ.values.length;
-  const halfSize = getFootprintHalfSize(spaceCount, organCount);
+  const axisLayout = getAxisLayout(axes);
+  const { halfSize } = axisLayout;
   const placements: Placement[] = [];
   items.forEach((item) => {
     if (!item.position) return;
@@ -299,17 +366,22 @@ export function layoutPlot(items: readonly MhuCubeItem[], axes: MhuCubeAxes) {
       id: item.id,
       spaceIndex,
       organIndex,
+      time: {
+        start: getTimeCoordinate(item.position.time.start, axes.time),
+        end: getTimeCoordinate(item.position.time.end, axes.time),
+      },
       ...getRenderedTimeExtent(item.position.time, axes.time, halfSize * 2),
     });
   });
 
   const slots = assignLanes(placements);
   const blocks = placements.map((placement) => {
-    const centerX = 1 - getCategoryCenter(placement.spaceIndex, spaceCount);
-    const centerZ = getCategoryCenter(placement.organIndex, organCount);
-    const [x0, x1] = getLaneExtent(centerX, halfSize, 1 / spaceCount, slots.get(placement.id) ?? { lane: 0, laneCount: 1 });
+    const centerX = axisLayout.space[placement.spaceIndex];
+    const centerZ = axisLayout.organ[placement.organIndex];
+    const slot = slots.get(placement.id) ?? { lane: 0, laneCount: 1 };
+    const [x0, x1] = getLaneExtent(centerX, halfSize, axisLayout.spaceBands[placement.spaceIndex], slot);
     const box: Box = { x0, x1, y0: placement.y0, y1: placement.y1, z0: centerZ - halfSize, z1: centerZ + halfSize };
-    return { id: placement.id, box, cellDepth: centerX + centerZ };
+    return { id: placement.id, box, time: placement.time, cellDepth: centerX + centerZ };
   });
 
   // Paint farther cells, then farther lanes, then lower blocks first so nearer faces and upper blocks stay visible.
@@ -319,13 +391,14 @@ export function layoutPlot(items: readonly MhuCubeItem[], axes: MhuCubeAxes) {
     || compareText(a.id, b.id));
 
   const layout = new Map<string, PlotLayout>();
-  blocks.forEach(({ id, box }, rank) => {
+  blocks.forEach(({ id, box, time }, rank) => {
     const geometry = getProjectedBoxGeometry(box);
     const { bounds } = geometry;
     const topCenter = projectPoint((box.x0 + box.x1) / 2, box.y1, (box.z0 + box.z1) / 2);
     const anchor = Math.min(Math.max(topCenter.y, CARD_ANCHOR_MIN), CARD_ANCHOR_MAX);
     layout.set(id, {
       box,
+      time,
       geometry,
       layer: rank + 1,
       cardSide: bounds.left + bounds.width / 2 > 66 ? "left" : "right",

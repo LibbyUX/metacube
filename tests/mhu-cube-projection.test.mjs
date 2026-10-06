@@ -2,10 +2,13 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  getAxisLayout,
   getCategoryCenter,
   getFootprintHalfSize,
+  getFrameEdges,
   getProjectedBoxGeometry,
   getRenderedTimeExtent,
+  getSpreadCenter,
   getTimeCoordinate,
   layoutPlot,
   projectPoint,
@@ -29,6 +32,45 @@ const fullWidth = getFootprintHalfSize(2, 4) * 2;
 test("getCategoryCenter centers indexes within equal categorical cells", () => {
   assert.equal(getCategoryCenter(0, 2), 0.25);
   assert.equal(getCategoryCenter(1, 2), 0.75);
+});
+
+test("getSpreadCenter separates two space values well beyond equal-width cells", () => {
+  const halfSize = getFootprintHalfSize(2, 4);
+  const first = getSpreadCenter(0, 2, halfSize);
+  const second = getSpreadCenter(1, 2, halfSize);
+
+  assert.ok(second - first > getCategoryCenter(1, 2) - getCategoryCenter(0, 2));
+  assert.ok(Math.abs(first + second - 1) < 1e-9, "Spread values stay symmetric.");
+  assert.ok(first - halfSize > 0 && second + halfSize < 1, "Blocks stay inside the frame.");
+  assert.equal(getSpreadCenter(0, 1, halfSize), 0.5);
+});
+
+test("getSpreadCenter never packs many values tighter than equal-width cells", () => {
+  const halfSize = getFootprintHalfSize(8, 4);
+
+  for (let index = 0; index < 8; index += 1) {
+    assert.ok(Math.abs(getSpreadCenter(index, 8, halfSize) - getCategoryCenter(index, 8)) < 1e-9);
+  }
+});
+
+test("getAxisLayout places the first space value nearest the left corner with non-overlapping lane bands", () => {
+  const layout = getAxisLayout(axes);
+
+  assert.ok(layout.space[0] > layout.space[1], "The first space value sits toward x = 1, the left corner.");
+  assert.deepEqual(layout.spaceBands, [[0.5, 1], [0, 0.5]]);
+  layout.space.forEach((center, index) => {
+    assert.ok(center > layout.spaceBands[index][0] && center < layout.spaceBands[index][1]);
+  });
+  assert.deepEqual(layout.organ, [0.125, 0.375, 0.625, 0.875]);
+});
+
+test("getFrameEdges projects all twelve edges of the bounding cube", () => {
+  const edges = getFrameEdges();
+  const frontEdge = edges.find(([start, end]) => start.x === projectPoint(0, 0, 0).x && start.y === projectPoint(0, 0, 0).y
+    && end.x === projectPoint(0, 1, 0).x && end.y === projectPoint(0, 1, 0).y);
+
+  assert.equal(edges.length, 12);
+  assert.ok(frontEdge, "The front vertical edge is part of the frame.");
 });
 
 test("getTimeCoordinate maps the time domain onto the vertical axis", () => {
@@ -106,6 +148,28 @@ test("layoutPlot splits only overlapping datasets into lanes with the taller blo
   // Higher x is farther from the viewer, so the taller range sits behind the single age.
   assert.ok(range.box.x0 > single.box.x0);
   assert.ok(single.layer > range.layer);
+});
+
+test("layoutPlot keeps lane groups inside their space band", () => {
+  const items = ["a", "b", "c"].map((id) => dataset(id, 20, 60, "100 µm", "Heart"));
+  const layout = layoutPlot(items, axes);
+  const [bandStart, bandEnd] = getAxisLayout(axes).spaceBands[0];
+
+  items.forEach(({ id }) => {
+    assert.ok(layout.get(id).box.x0 >= bandStart && layout.get(id).box.x1 <= bandEnd, `${id} left its band`);
+  });
+});
+
+test("layoutPlot keeps each dataset's exact time span even when the block is drawn taller", () => {
+  const layout = layoutPlot([
+    dataset("single", 45, 45, "100 µm", "Liver"),
+    dataset("infant", 4 / 12, 5 / 12, "100 µm", "Thymus"),
+  ], axes);
+
+  assert.deepEqual(layout.get("single").time, { start: 0.45, end: 0.45 });
+  assert.ok(layout.get("single").box.y1 - layout.get("single").box.y0 > 0);
+  assert.ok(Math.abs(layout.get("infant").time.start - 4 / 1200) < 1e-12);
+  assert.equal(layout.get("infant").box.y0, 0);
 });
 
 test("layoutPlot keeps separated datasets in one cell at full width", () => {

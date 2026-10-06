@@ -32,6 +32,11 @@ export interface ProjectedBoxGeometry {
 /** Placement, paint order, and hover-card anchoring for one plotted dataset. */
 export interface PlotLayout {
     box: Box;
+    /** The dataset's exact normalized time span, which single ages and short ranges draw larger than. */
+    time: {
+        start: number;
+        end: number;
+    };
     geometry: ProjectedBoxGeometry;
     /** Paint order starting at one; higher values render in front. */
     layer: number;
@@ -40,6 +45,17 @@ export interface PlotLayout {
     /** Vertical hover-card anchor as a percentage of the block's bounds. */
     cardTop: number;
 }
+/** Where each category sits on the floor and how much room its blocks have. */
+export interface AxisLayout {
+    /** Half of a full-width block's normalized footprint. */
+    halfSize: number;
+    /** Normalized x center for each space value, in axis order. */
+    space: number[];
+    /** Normalized x range each space value's lanes may occupy, in axis order. */
+    spaceBands: Array<[number, number]>;
+    /** Normalized z center for each organ value, in axis order. */
+    organ: number[];
+}
 /**
  * Places a categorical index at the center of its equal-width axis cell.
  * @param value - Zero-based category index.
@@ -47,6 +63,14 @@ export interface PlotLayout {
  * @returns A normalized position between zero and one.
  */
 export declare function getCategoryCenter(value: number, count: number): number;
+/**
+ * Spreads a few categories toward the ends of an axis so their blocks read as distinct groups.
+ * @param value - Zero-based category index.
+ * @param count - Total categories on the axis.
+ * @param halfSize - Half of a block's footprint, used to keep blocks inside the frame.
+ * @returns A normalized position between zero and one; never closer together than equal-width cells.
+ */
+export declare function getSpreadCenter(value: number, count: number, halfSize: number): number;
 /**
  * Projects normalized coordinates onto the reference perspective.
  * @param x - Normalized space position.
@@ -69,6 +93,17 @@ export declare function getTimeCoordinate(value: number, axis: MhuCubeTimeAxis):
  * @returns Half of a full-width block's normalized footprint.
  */
 export declare function getFootprintHalfSize(spaceCount: number, organCount: number): number;
+/**
+ * Positions every space and organ category on the floor; labels, guides, and blocks all share these centers.
+ * @param axes - Validated, plottable axes.
+ * @returns Footprint size, spread space centers with their lane bands, and organ centers.
+ */
+export declare function getAxisLayout(axes: MhuCubeAxes): AxisLayout;
+/**
+ * Projects the twelve edges of the bounding cube so the frame and its contents share one projection.
+ * @returns Start and end points of each frame edge in plot percentages.
+ */
+export declare function getFrameEdges(): Array<[Point, Point]>;
 /**
  * Converts a time range to a drawn vertical extent, keeping short ranges and single ages cube-height.
  * @param range - Validated time range inside the axis domain.

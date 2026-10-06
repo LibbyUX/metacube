@@ -80,8 +80,16 @@ test("axis styles name the time, space, and organ axes", () => {
   assert.match(styles, /\.mhu-cube__axis-value--organ \{/);
   assert.match(styles, /\.mhu-cube__axis-title--space, \.mhu-cube__axis-title--organ,/);
   assert.doesNotMatch(styles, /mhu-cube__axis-(title|value)--[xyz]\b/);
-  assert.match(styles, /\.mhu-cube__frame-guide \{[\s\S]*?vector-effect: non-scaling-stroke;/);
-  assert.match(styles, /@media \(forced-colors: active\)[\s\S]*?\.mhu-cube__frame-guide \{ stroke: GrayText; \}/);
+  assert.match(styles, /\.mhu-cube__frame-guide, \.mhu-cube__frame-floor-guide \{[\s\S]*?vector-effect: non-scaling-stroke;/);
+  assert.match(styles, /@media \(forced-colors: active\)[\s\S]*?\.mhu-cube__frame-guide, \.mhu-cube__frame-floor-guide, \.mhu-cube__shadow-drop \{ stroke: GrayText; \}/);
+});
+
+test("block shadows paint beneath every block and age markers appear only when a block is active", () => {
+  assert.match(styles, /\.mhu-cube__shadow \{[^}]*z-index: 0;[^}]*overflow: visible;[^}]*pointer-events: none;/);
+  assert.match(styles, /\.mhu-cube__time-marker \{ opacity: 0;/);
+  assert.match(styles, /\.mhu-cube__select:hover \.mhu-cube__time-marker,\s*\.mhu-cube__select:focus-visible \.mhu-cube__time-marker,\s*\.mhu-cube__item--selected \.mhu-cube__time-marker \{ opacity: 1; \}/);
+  assert.match(styles, /\.mhu-cube--has-selection \.mhu-cube__item:not\(\.mhu-cube__item--selected\) \.mhu-cube__shadow \{ opacity: 0\.35; \}/);
+  assert.match(styles, /@media \(forced-colors: active\)[\s\S]*?\.mhu-cube__time-leader, \.mhu-cube__time-bracket \{ stroke: Highlight; \}/);
 });
 
 test("desktop content precedes the visualization and selected details use a card", () => {

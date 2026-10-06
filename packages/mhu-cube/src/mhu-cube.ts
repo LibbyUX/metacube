@@ -4,6 +4,7 @@ import { createCompactCard, createDetails, createIntro, createPreviewCard, getAc
 import {
   createAccessibleAxisSummary,
   createAxisLabels,
+  createBlockShadow,
   createCoordinateFrame,
   createProjectedCube,
   getAccessibleItemDescription,
@@ -390,7 +391,7 @@ export class MhuCube extends HTMLElementBase {
       description.id = `${this.#instanceId}-item-${index}-description`;
       description.textContent = getAccessibleItemDescription(item, this.#axes);
       this.#configureSelectionButton(button, item, description.id);
-      button.append(createProjectedCube(block.geometry), createPreviewCard(item));
+      button.append(createBlockShadow(block), createProjectedCube(block.geometry), createPreviewCard(item));
       listItem.append(description, button, createCompactCard(item));
       list.append(listItem);
     });

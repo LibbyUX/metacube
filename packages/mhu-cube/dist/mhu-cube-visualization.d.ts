@@ -1,4 +1,4 @@
-import { type ProjectedBoxGeometry } from "./projection";
+import { type PlotLayout, type ProjectedBoxGeometry } from "./projection";
 import type { MhuCubeAxes, MhuCubeItem, MhuCubeTimeAxis, MhuCubeTimeRange } from "./types";
 /**
  * Formats a dataset's time range for labels and assistive technology.
@@ -8,8 +8,8 @@ import type { MhuCubeAxes, MhuCubeItem, MhuCubeTimeAxis, MhuCubeTimeRange } from
  */
 export declare function formatTimeRange(range: MhuCubeTimeRange, axis: MhuCubeTimeAxis): string;
 /**
- * Creates the reference-style perspective bounding cube with time guides on its back walls.
- * @param axes - Validated axes supplying the time ticks.
+ * Creates the perspective bounding cube with time guides on its back walls and floor guides through every category.
+ * @param axes - Validated axes supplying the time ticks and category positions.
  * @returns A decorative SVG element with crisp, non-scaling frame lines.
  */
 export declare function createCoordinateFrame(axes: MhuCubeAxes): SVGSVGElement;
@@ -25,6 +25,14 @@ export declare function createAxisLabels(axes: MhuCubeAxes): HTMLDivElement;
  * @returns The decorative block SVG.
  */
 export declare function createProjectedCube({ corners, bounds }: ProjectedBoxGeometry): SVGSVGElement;
+/**
+ * Ties a floating block to the axes: its footprint on the floor, dashed drop lines to it, and an age marker.
+ * The age marker traces the exact start and end heights level to the time axis and is revealed on hover,
+ * keyboard focus, or selection, so readers never have to judge height across the perspective by eye.
+ * @param block - Plot layout for one dataset.
+ * @returns A decorative SVG sharing the block's coordinate space, painted beneath every block.
+ */
+export declare function createBlockShadow({ box, time, geometry: { bounds } }: PlotLayout): SVGSVGElement;
 /**
  * Creates the screen-reader equivalent of the decorative axis labels.
  * @param axes - Validated axes.
