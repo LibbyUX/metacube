@@ -42,22 +42,27 @@ export interface PlotLayout {
   cardTop: number;
 }
 
-// Percentage coordinates traced from the reference perspective. Each plane is
-// ordered front, left, back, right so points can be projected bilinearly.
+// Percentage coordinates of the bounding cube's top and bottom faces. The low
+// camera keeps the floor shallow, so depth moves a block up the screen far less
+// than time does and heights stay comparable across the plot. The bottom of the
+// plot is left free for the space and organ labels. Each plane is ordered front,
+// left, back, right so points can be projected bilinearly.
 const FRAME_PLANES = {
   top: {
-    front: { x: 57.31, y: 31.81 },
-    left: { x: 15.15, y: 11.92 },
-    back: { x: 57.31, y: 0.53 },
-    right: { x: 99.47, y: 11.92 },
+    front: { x: 57.31, y: 19.2 },
+    left: { x: 15.15, y: 9.6 },
+    back: { x: 57.31, y: 1.8 },
+    right: { x: 99.47, y: 9.6 },
   },
   bottom: {
-    front: { x: 57.31, y: 99.16 },
-    left: { x: 22.4, y: 67.43 },
-    back: { x: 57.31, y: 46.7 },
-    right: { x: 92.49, y: 67.43 },
+    front: { x: 57.31, y: 90.5 },
+    left: { x: 19.5, y: 77.2 },
+    back: { x: 57.31, y: 65.8 },
+    right: { x: 95.1, y: 77.2 },
   },
 } as const;
+// Plot height as a share of its width; must match the plot's CSS aspect-ratio (1000 / 868).
+const PLOT_HEIGHT_RATIO = 0.868;
 
 /** Where each category sits on the floor and how much room its blocks have. */
 export interface AxisLayout {
@@ -190,6 +195,40 @@ export function getAxisLayout(axes: MhuCubeAxes): AxisLayout {
  */
 export function getFrameEdges(): Array<[Point, Point]> {
   return CUBE_EDGES.map(([start, end]) => [projectPoint(...start), projectPoint(...end)]);
+}
+
+/**
+ * Finds the on-screen direction pointing straight away from a frame edge, away from the cube.
+ * @param start - One end of the edge in plot percentages.
+ * @param end - The other end of the edge in plot percentages.
+ * @returns A unit vector in screen space, correcting for the plot's non-square percentages.
+ */
+export function getOutwardNormal(start: Point, end: Point): Point {
+  const dx = end.x - start.x;
+  const dy = (end.y - start.y) * PLOT_HEIGHT_RATIO;
+  const length = Math.hypot(dx, dy) || 1;
+  const normal = { x: dy / length, y: -dx / length };
+  const center = projectPoint(0.5, 0.5, 0.5);
+  const outward = { x: (start.x + end.x) / 2 - center.x, y: ((start.y + end.y) / 2 - center.y) * PLOT_HEIGHT_RATIO };
+  return normal.x * outward.x + normal.y * outward.y < 0 ? { x: -normal.x, y: -normal.y } : normal;
+}
+
+/**
+ * Locates the three labeled frame edges and the direction their labels sit away from the cube.
+ * @returns For each axis, its edge's start and end points in plot percentages and its outward unit normal.
+ */
+export function getAxisEdges() {
+  const edge = (start: [number, number, number], end: [number, number, number]) => {
+    const from = projectPoint(...start);
+    const to = projectPoint(...end);
+    return { start: from, end: to, normal: getOutwardNormal(from, to) };
+  };
+  return {
+    // The left vertical edge carries the time ticks; the two front floor edges carry space and organ.
+    time: edge([1, 0, 0], [1, 1, 0]),
+    space: edge([0, 0, 0], [1, 0, 0]),
+    organ: edge([0, 0, 0], [0, 0, 1]),
+  };
 }
 
 /**

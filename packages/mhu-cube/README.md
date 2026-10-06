@@ -231,7 +231,9 @@ const item: MhuCubeItem = {
 - Datasets in the same cell that do not overlap stack vertically at full width.
 - Space usually has only a few values, so they spread toward the ends of the space axis instead of filling equal cells. With two values, one row of blocks runs along the left wall and the other along the front. Larger sets fall back to equal cells.
 - Faint floor guides run from every space and organ label across the floor. Each block casts its footprint onto the floor where its two guides cross, with dashed drop lines from its bottom corners, so a floating block can be traced back to its labels.
-- In perspective, a block nearer the viewer sits lower on screen than the time labels at the left edge, so heights can't be judged by eye. Hovering, keyboard focus, or selection reveals a bracket on the time axis for the dataset's exact start and end, plus level lines tracing those heights from the block to the axis. Single ages show a single level line and a dot.
+- The camera sits low so the floor stays shallow. Depth then moves a block up the screen far less than time does, and heights read close to the time labels across the whole plot.
+- Even so, a block nearer the viewer sits slightly lower on screen than the time labels at the left edge. Hovering, keyboard focus, or selection reveals a bracket on the time axis for the dataset's exact start and end, plus level lines tracing those heights from the block to the axis. Single ages show a single level line and a dot.
+- Axis labels are placed from the frame itself. Each value label hangs from its axis position, offset straight out from the frame, and the space and organ titles sit in a second row beyond them. Labels stay clear of the frame and each other for values up to about `4rem` wide; longer space or organ names may need shorter display labels.
 - Keyboard order, reading order, and compact-card order follow the plot: organ, then space, then time.
 
 Read `element.items`, `element.axes`, and `element.validationIssues` to inspect normalized values and current issues.

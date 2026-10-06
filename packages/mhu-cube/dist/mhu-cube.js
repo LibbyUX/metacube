@@ -1,5 +1,5 @@
 //#region packages/mhu-cube/src/mhu-cube.css?inline
-var e = ":host{--_surface:var(--mhu-cube-surface,var(--mat-sys-surface,#fcfcfc));--_surface-container:var(--mhu-cube-surface-container,var(--mat-sys-surface-container,#eceff1));--_on-surface:var(--mhu-cube-on-surface,var(--mat-sys-on-surface,#1d2429));--_on-surface-variant:var(--mhu-cube-on-surface-variant,var(--mat-sys-on-surface-variant,#354b57));--_primary:var(--mhu-cube-primary,var(--mat-sys-primary,#8b1510));--_on-primary:var(--mhu-cube-on-primary,var(--mat-sys-on-primary,#fff));--_primary-container:var(--mhu-cube-primary-container,var(--mat-sys-primary-container,#ffdad5));--_on-primary-container:var(--mhu-cube-on-primary-container,var(--mat-sys-on-primary-container,#6b0f0a));--_outline:var(--mhu-cube-outline,var(--mat-sys-outline,#6c7f8a));--_outline-variant:var(--mhu-cube-outline-variant,var(--mat-sys-outline-variant,#c0cbd1));--_focus:var(--mhu-cube-focus,var(--mat-sys-primary,#8b1510));box-sizing:border-box;width:100%;min-width:0;max-width:100%;color:var(--_on-surface);font-family:var(--mat-sys-body-large-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-body-large-size,1rem);font-weight:var(--mat-sys-body-large-weight,400);line-height:var(--mat-sys-body-large-line-height,1.5rem);letter-spacing:var(--mat-sys-body-large-tracking,.03125rem);display:block;container:mhu-cube-host/inline-size}*{box-sizing:border-box}.mhu-cube{background:var(--_surface);grid-template:\"content stage\"minmax(0,1fr)/minmax(22rem,28rem) minmax(0,1fr);gap:clamp(1.5rem,3vw,4rem);width:100%;height:100%;min-height:36rem;padding:clamp(1.5rem,3vw,3rem);display:grid;overflow:visible}.mhu-cube__content{flex-direction:column;grid-area:content;align-self:stretch;gap:clamp(1.5rem,3vh,2.5rem);width:100%;height:100%;min-height:0;padding:0 0 1rem;display:flex}.mhu-cube__stage{grid-area:stage;grid-template-rows:minmax(0,1fr) auto;place-items:center;gap:.75rem;min-width:0;min-height:0;display:grid;container-type:size}.mhu-cube__plot{aspect-ratio:1000/868;width:min(100cqw,115.207cqh);position:relative}.mhu-cube__frame{z-index:0;pointer-events:none;shape-rendering:geometricprecision;width:100%;height:100%;position:absolute;inset:0;overflow:visible}.mhu-cube__frame-line{fill:none;stroke:color-mix(in srgb, var(--_outline) 68%, transparent);stroke-width:1.1px;vector-effect:non-scaling-stroke}.mhu-cube__frame-guide,.mhu-cube__frame-floor-guide{fill:none;stroke:color-mix(in srgb, var(--_outline) 30%, transparent);stroke-width:1px;vector-effect:non-scaling-stroke}.mhu-cube__frame-floor-guide{stroke:color-mix(in srgb, var(--_outline) 45%, transparent)}.mhu-cube__axes{z-index:1;-webkit-user-select:text;user-select:text;position:absolute;inset:0}.mhu-cube__axis-title,.mhu-cube__axis-value{white-space:nowrap;position:absolute;transform:translate(-50%,-50%)}.mhu-cube__axis-title{color:var(--_primary);font-family:var(--mat-sys-label-large-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-label-large-size,.875rem);font-weight:600;line-height:var(--mat-sys-label-large-line-height,1.25rem);letter-spacing:var(--mat-sys-label-large-tracking,.00625rem)}.mhu-cube__axis-title--time{transform:translateY(-50%)}.mhu-cube__axis-value{color:var(--_on-surface-variant);font-family:var(--mat-sys-body-small-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-body-small-size,.75rem);font-weight:var(--mat-sys-body-small-weight,400);line-height:var(--mat-sys-body-small-line-height,1rem);letter-spacing:var(--mat-sys-body-small-tracking,.025rem)}.mhu-cube__axis-value--time{transform:translate(-100%,-50%)}.mhu-cube__axis-value--organ{transform:translateY(-50%)}.mhu-cube__axis-title--space,.mhu-cube__axis-title--organ,.mhu-cube__axis-value--space,.mhu-cube__axis-value--organ{text-shadow:-2px -2px 0 var(--_surface), 2px -2px 0 var(--_surface), -2px 2px 0 var(--_surface), 2px 2px 0 var(--_surface)}.mhu-cube__list{z-index:2;pointer-events:none;margin:0;padding:0;list-style:none;position:absolute;inset:0}.mhu-cube__item{top:var(--cube-top);left:var(--cube-left);width:var(--cube-width);height:var(--cube-height);pointer-events:none;position:absolute}.mhu-cube__item--unpositioned{display:none}.mhu-cube__select{width:100%;height:100%;color:inherit;font:inherit;text-align:left;cursor:pointer;pointer-events:none;background:0 0;border:0;margin:0;padding:0;display:block;position:relative}.mhu-cube__select:focus-visible{z-index:999;outline:3px solid var(--_focus);outline-offset:5px}.mhu-cube__shadow{z-index:0;pointer-events:none;width:100%;height:100%;position:absolute;inset:0;overflow:visible}.mhu-cube__shadow-floor{fill:var(--_primary);fill-opacity:.12;stroke:color-mix(in srgb, var(--_primary) 45%, transparent);stroke-width:1px;transition:fill-opacity .17s}.mhu-cube__shadow-drop{fill:none;stroke:color-mix(in srgb, var(--_on-surface) 40%, transparent);stroke-width:1px;stroke-dasharray:3 3}.mhu-cube__time-marker{opacity:0;transition:opacity .12s}.mhu-cube__time-leader{fill:none;stroke:var(--_primary);stroke-width:1.25px;stroke-dasharray:5 3}.mhu-cube__time-bracket{fill:none;stroke:var(--_primary);stroke-width:6px;stroke-linecap:round}.mhu-cube__select:hover .mhu-cube__time-marker,.mhu-cube__select:focus-visible .mhu-cube__time-marker,.mhu-cube__item--selected .mhu-cube__time-marker{opacity:1}.mhu-cube__select:hover .mhu-cube__shadow-floor,.mhu-cube__select:focus-visible .mhu-cube__shadow-floor,.mhu-cube__item--selected .mhu-cube__shadow-floor{fill-opacity:.28}.mhu-cube--has-selection .mhu-cube__item:not(.mhu-cube__item--selected) .mhu-cube__shadow{opacity:.35}.mhu-cube__cube{z-index:var(--cube-layer,1);shape-rendering:geometricprecision;width:100%;height:100%;display:block;position:relative;overflow:visible}.mhu-cube__top,.mhu-cube__left,.mhu-cube__right{stroke:color-mix(in srgb, var(--_outline) 75%, transparent);stroke-width:.85px;stroke-linejoin:bevel;pointer-events:fill;transition:fill-opacity .17s,stroke .17s,stroke-width .17s}.mhu-cube__top{fill:var(--_primary);fill-opacity:.4}.mhu-cube__left{fill:var(--_primary);fill-opacity:.5}.mhu-cube__right{fill:var(--_primary);fill-opacity:.64}.mhu-cube__edge{fill:none;stroke:color-mix(in srgb, var(--_on-surface) 38%, transparent);stroke-width:.75px;pointer-events:none;transition:stroke .17s,stroke-width .17s}.mhu-cube__select:hover .mhu-cube__top,.mhu-cube__select:hover .mhu-cube__left,.mhu-cube__select:hover .mhu-cube__right,.mhu-cube__select:focus-visible .mhu-cube__top,.mhu-cube__select:focus-visible .mhu-cube__left,.mhu-cube__select:focus-visible .mhu-cube__right{stroke:var(--_on-surface);stroke-width:2.3px}.mhu-cube__select:hover .mhu-cube__edge,.mhu-cube__select:focus-visible .mhu-cube__edge{stroke:var(--_on-surface);stroke-width:2px}.mhu-cube__select:hover .mhu-cube__top,.mhu-cube__select:focus-visible .mhu-cube__top{fill-opacity:.46}.mhu-cube__select:hover .mhu-cube__left,.mhu-cube__select:focus-visible .mhu-cube__left{fill-opacity:.56}.mhu-cube__select:hover .mhu-cube__right,.mhu-cube__select:focus-visible .mhu-cube__right{fill-opacity:.68}.mhu-cube__item--selected .mhu-cube__select .mhu-cube__top,.mhu-cube__item--selected .mhu-cube__select .mhu-cube__left,.mhu-cube__item--selected .mhu-cube__select .mhu-cube__right,.mhu-cube__item--selected .mhu-cube__select .mhu-cube__edge{stroke:var(--_primary);stroke-width:1.2px}.mhu-cube__item--selected .mhu-cube__select .mhu-cube__top{fill-opacity:.9}.mhu-cube__item--selected .mhu-cube__select .mhu-cube__left{fill-opacity:.96}.mhu-cube__item--selected .mhu-cube__select .mhu-cube__right{fill-opacity:1}.mhu-cube--has-selection .mhu-cube__item:not(.mhu-cube__item--selected) .mhu-cube__top{fill-opacity:.08}.mhu-cube--has-selection .mhu-cube__item:not(.mhu-cube__item--selected) .mhu-cube__left{fill-opacity:.1}.mhu-cube--has-selection .mhu-cube__item:not(.mhu-cube__item--selected) .mhu-cube__right{fill-opacity:.12}.mhu-cube__card{z-index:1000;top:var(--card-top,50%);border:1px solid color-mix(in srgb, var(--_outline) 75%, transparent);opacity:0;background:var(--_surface-container);width:15rem;box-shadow:0 .5rem 1.2rem color-mix(in srgb, var(--_on-surface) 22%, transparent);pointer-events:none;padding:.75rem .85rem;transition:opacity .12s;position:absolute;left:calc(100% + .75rem);transform:translateY(-50%)}.mhu-cube__item--card-left .mhu-cube__card{left:auto;right:calc(100% + .75rem)}.mhu-cube__select:hover .mhu-cube__card,.mhu-cube__select:focus-visible .mhu-cube__card{opacity:1}.mhu-cube__item--selected .mhu-cube__select .mhu-cube__card{opacity:0}.mhu-cube__label{color:var(--_on-surface);font-family:var(--mat-sys-title-small-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-title-small-size,.875rem);font-weight:var(--mat-sys-title-small-weight,500);line-height:var(--mat-sys-title-small-line-height,1.25rem);letter-spacing:var(--mat-sys-title-small-tracking,.00625rem);display:block}.mhu-cube__metadata{color:var(--_on-surface-variant);font-family:var(--mat-sys-body-small-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-body-small-size,.75rem);font-weight:var(--mat-sys-body-small-weight,400);line-height:var(--mat-sys-body-small-line-height,1rem);letter-spacing:var(--mat-sys-body-small-tracking,.025rem);grid-template-columns:auto 1fr;gap:.2rem .5rem;margin:.5rem 0 0;display:grid}.mhu-cube__metadata-key{font-family:var(--mat-sys-label-small-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-label-small-size,.6875rem);font-weight:var(--mat-sys-label-small-weight,500);line-height:var(--mat-sys-label-small-line-height,1rem);letter-spacing:var(--mat-sys-label-small-tracking,.03125rem)}.mhu-cube__metadata-value{overflow-wrap:anywhere;min-width:0}.mhu-cube__status{color:var(--_on-primary-container);font-family:var(--mat-sys-label-small-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-label-small-size,.6875rem);font-weight:var(--mat-sys-label-small-weight,500);line-height:var(--mat-sys-label-small-line-height,1rem);letter-spacing:var(--mat-sys-label-small-tracking,.03125rem);text-transform:uppercase;margin-top:.4rem;display:inline-block}.mhu-cube__item--current .mhu-cube__top,.mhu-cube__item--current .mhu-cube__left,.mhu-cube__item--current .mhu-cube__right{stroke:var(--_primary);stroke-width:2.5px}.mhu-cube__item--unavailable .mhu-cube__cube{opacity:.62;filter:grayscale()}.mhu-cube__item--unavailable .mhu-cube__top,.mhu-cube__item--unavailable .mhu-cube__left,.mhu-cube__item--unavailable .mhu-cube__right,.mhu-cube__item--unavailable .mhu-cube__edge{stroke-dasharray:3 2}.mhu-cube__compact-card{display:none}.mhu-cube__unpositioned{border-left:3px solid var(--_outline);background:var(--_surface-container);align-self:end;width:min(100%,38rem);padding:.75rem 1rem}.mhu-cube__unpositioned-heading{font-family:var(--mat-sys-title-small-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-title-small-size,.875rem);font-weight:var(--mat-sys-title-small-weight,500);line-height:var(--mat-sys-title-small-line-height,1.25rem);letter-spacing:var(--mat-sys-title-small-tracking,.00625rem);margin:0}.mhu-cube__unpositioned-guidance{color:var(--_on-surface-variant);font-family:var(--mat-sys-body-small-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-body-small-size,.75rem);font-weight:var(--mat-sys-body-small-weight,400);line-height:var(--mat-sys-body-small-line-height,1rem);letter-spacing:var(--mat-sys-body-small-tracking,.025rem);margin:.25rem 0 0}.mhu-cube__unpositioned-list{flex-wrap:wrap;gap:.5rem;margin:.625rem 0 0;padding:0;list-style:none;display:flex}.mhu-cube__unpositioned-button{border:1px solid var(--_outline);background:var(--_surface);min-height:2.75rem;color:var(--_on-surface);font-family:var(--mat-sys-label-large-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-label-large-size,.875rem);font-weight:var(--mat-sys-label-large-weight,500);line-height:var(--mat-sys-label-large-line-height,1.25rem);letter-spacing:var(--mat-sys-label-large-tracking,.00625rem);cursor:pointer;padding:.625rem .75rem}.mhu-cube__unpositioned-button:hover{background:var(--_primary-container);color:var(--_on-primary-container)}.mhu-cube__unpositioned-button:focus-visible{outline:3px solid var(--_focus);outline-offset:3px}.mhu-cube__unpositioned-item.mhu-cube__item--selected .mhu-cube__unpositioned-button{border-color:var(--_primary);background:var(--_primary-container);color:var(--_on-primary-container);border-width:2px}.mhu-cube__intro{flex-direction:column;height:100%;min-height:0;display:flex}.mhu-cube__intro-eyebrow,.mhu-cube__details-eyebrow{color:var(--_primary);font-family:var(--mat-sys-label-small-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-label-small-size,.6875rem);font-weight:600;line-height:var(--mat-sys-label-small-line-height,1rem);letter-spacing:var(--mat-sys-label-small-tracking,.03125rem);text-transform:uppercase;margin:0 0 .5rem}.mhu-cube__intro-heading{font-family:var(--mat-sys-headline-large-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-headline-large-size,2rem);font-weight:var(--mat-sys-headline-large-weight,600);line-height:var(--mat-sys-headline-large-line-height,2.5rem);letter-spacing:var(--mat-sys-headline-large-tracking,0);white-space:nowrap;margin:0}.mhu-cube__details-heading,.mhu-cube__compact-heading{font-family:var(--mat-sys-title-large-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-title-large-size,1.375rem);font-weight:500;line-height:var(--mat-sys-title-large-line-height,1.75rem);letter-spacing:var(--mat-sys-title-large-tracking,0);margin:0}.mhu-cube__intro-compact,.mhu-cube__details-unavailable{color:var(--_on-surface-variant);font-family:var(--mat-sys-body-large-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-body-large-size,1rem);font-weight:var(--mat-sys-body-large-weight,400);line-height:var(--mat-sys-body-large-line-height,1.5rem);letter-spacing:var(--mat-sys-body-large-tracking,.03125rem);margin:1rem 0 0}.mhu-cube__intro-visualization{min-height:0;color:var(--_on-surface-variant);font-family:var(--mat-sys-body-medium-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-body-medium-size,.875rem);font-weight:var(--mat-sys-body-medium-weight,400);line-height:var(--mat-sys-body-medium-line-height,1.25rem);letter-spacing:var(--mat-sys-body-medium-tracking,.015625rem);flex-direction:column;flex:1;margin:.75rem 0 0;display:flex}.mhu-cube__intro-summary,.mhu-cube__intro-attribution{margin:0}.mhu-cube__intro-compact,.mhu-cube__details:empty{display:none}.mhu-cube__details-card,.mhu-cube__compact-card{border:1px solid var(--_outline-variant);background:var(--_surface-container);box-shadow:0 1rem 2.5rem color-mix(in srgb, var(--_on-surface) 10%, transparent)}.mhu-cube__details-card{width:100%;padding:1.25rem}.mhu-cube__details-action,.mhu-cube__compact-action{background:var(--_primary);min-height:2.75rem;color:var(--_on-primary);font-family:var(--mat-sys-label-large-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-label-large-size,.875rem);font-weight:var(--mat-sys-label-large-weight,500);line-height:var(--mat-sys-label-large-line-height,1.25rem);letter-spacing:var(--mat-sys-label-large-tracking,.00625rem);white-space:nowrap;justify-content:center;align-items:center;margin-top:1.75rem;padding:.75rem 1rem;text-decoration:none;display:inline-flex}.mhu-cube__details-action:hover,.mhu-cube__compact-action:hover{filter:brightness(.92)}.mhu-cube__details-action:focus-visible,.mhu-cube__compact-action:focus-visible{outline:3px solid var(--_focus);outline-offset:3px}.mhu-cube__empty,.mhu-cube__plot-unavailable{color:var(--_on-surface-variant);text-align:center;place-items:center;margin:0;padding:2rem;display:grid;position:absolute;inset:0}.mhu-cube__sr-only{clip:rect(0, 0, 0, 0);white-space:nowrap;border:0;width:1px;height:1px;margin:-1px;padding:0;position:absolute;overflow:hidden}@container mhu-cube-host (width<=64rem){.mhu-cube{flex-direction:column;height:auto;min-height:0;padding:clamp(1.5rem,4vw,2.5rem) 0 0;display:flex;overflow:visible}.mhu-cube__content{max-width:45rem;padding:0;display:block}.mhu-cube__intro{height:auto;min-height:0;margin-bottom:2rem;display:block}.mhu-cube__intro-eyebrow{margin:0 0 .875rem}.mhu-cube__intro-heading{font-family:var(--mat-sys-headline-medium-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-headline-medium-size,1.75rem);font-weight:var(--mat-sys-headline-medium-weight,600);line-height:var(--mat-sys-headline-medium-line-height,2.25rem);letter-spacing:var(--mat-sys-headline-medium-tracking,0);white-space:normal}.mhu-cube__intro-visualization{display:none}.mhu-cube__intro-compact{margin-top:.875rem;display:block}.mhu-cube__stage{display:block;container-type:normal}.mhu-cube__plot{aspect-ratio:auto;width:100%;max-height:none}.mhu-cube__frame,.mhu-cube__axes{display:none}.mhu-cube__list{grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;display:grid;position:static}.mhu-cube__item{pointer-events:auto;width:auto;min-width:0;height:auto;display:grid;position:static}.mhu-cube__select{display:none}.mhu-cube__compact-card{flex-direction:column;gap:1.5rem;width:100%;min-width:0;height:100%;padding:1.25rem;display:flex}.mhu-cube__compact-heading{overflow-wrap:anywhere}.mhu-cube__compact-action{align-self:flex-start;margin-top:auto}.mhu-cube__compact-card .mhu-cube__details-unavailable{margin-top:auto}.mhu-cube__details,.mhu-cube__unpositioned{display:none}.mhu-cube__empty,.mhu-cube__plot-unavailable{position:static}}@container mhu-cube-host (width<=40rem){.mhu-cube__list{grid-template-columns:minmax(0,1fr)}}@media (prefers-reduced-motion:reduce){.mhu-cube__top,.mhu-cube__left,.mhu-cube__right,.mhu-cube__edge,.mhu-cube__card,.mhu-cube__shadow-floor,.mhu-cube__time-marker{transition:none}}@media (forced-colors:active){.mhu-cube__frame-line,.mhu-cube__top,.mhu-cube__left,.mhu-cube__right,.mhu-cube__edge{stroke:canvastext}.mhu-cube__frame-guide,.mhu-cube__frame-floor-guide,.mhu-cube__shadow-drop{stroke:graytext}.mhu-cube__shadow-floor{fill:canvas;stroke:graytext}.mhu-cube__time-leader,.mhu-cube__time-bracket{stroke:highlight}.mhu-cube__top,.mhu-cube__left,.mhu-cube__right{fill:canvas;fill-opacity:1}.mhu-cube--has-selection .mhu-cube__item:not(.mhu-cube__item--selected) .mhu-cube__top,.mhu-cube--has-selection .mhu-cube__item:not(.mhu-cube__item--selected) .mhu-cube__left,.mhu-cube--has-selection .mhu-cube__item:not(.mhu-cube__item--selected) .mhu-cube__right{fill-opacity:1}.mhu-cube__item--selected .mhu-cube__select .mhu-cube__top,.mhu-cube__item--selected .mhu-cube__select .mhu-cube__left,.mhu-cube__item--selected .mhu-cube__select .mhu-cube__right,.mhu-cube__select:hover .mhu-cube__top,.mhu-cube__select:hover .mhu-cube__left,.mhu-cube__select:hover .mhu-cube__right{fill:highlight;stroke:highlighttext}.mhu-cube__item--selected .mhu-cube__select .mhu-cube__edge,.mhu-cube__select:hover .mhu-cube__edge{stroke:highlighttext}.mhu-cube__item--unavailable .mhu-cube__cube{opacity:1;filter:none}.mhu-cube__card,.mhu-cube__details-card,.mhu-cube__compact-card,.mhu-cube__unpositioned{box-shadow:none;border-color:canvastext}.mhu-cube__details-action,.mhu-cube__compact-action,.mhu-cube__unpositioned-button{border:1px solid buttontext}.mhu-cube__select:focus-visible,.mhu-cube__details-action:focus-visible,.mhu-cube__compact-action:focus-visible,.mhu-cube__unpositioned-button:focus-visible{outline-color:highlight}}", t = ".mhu-cube__intro-attribution{font-family:var(--mat-sys-body-small-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-body-small-size,.75rem);line-height:var(--mat-sys-body-small-line-height,1rem);letter-spacing:var(--mat-sys-body-small-tracking,.025rem);margin-top:auto;padding-top:1rem}.mhu-cube__intro-attribution a{color:var(--_primary)}.mhu-cube__intro-attribution a:focus-visible{outline:3px solid var(--_focus);outline-offset:3px}.mhu-cube__intro-dimensions{margin:0}.mhu-cube__intro-dimensions-header,.mhu-cube__intro-dimensions-row{grid-template-columns:minmax(7rem,32%) minmax(0,1fr);gap:.75rem;display:grid}.mhu-cube__intro-dimensions-header{border-bottom:1px solid var(--_outline-variant);color:var(--_on-surface);margin-top:1.5rem;padding-bottom:.5rem;font-weight:600}.mhu-cube__intro-dimensions-row{border-bottom:1px solid var(--_outline-variant);padding:.5rem 0}.mhu-cube__intro-dimensions-row:last-child{border-bottom:0}.mhu-cube__intro-dimensions dt,.mhu-cube__intro-dimensions dd{overflow-wrap:anywhere;min-width:0;margin:0}.mhu-cube__intro-dimensions dt{color:var(--_on-surface);white-space:nowrap;font-weight:500}.mhu-cube__intro-dimensions dd{color:var(--_on-surface-variant)}.mhu-cube--has-selection .mhu-cube__intro-dimensions-header,.mhu-cube--has-selection .mhu-cube__intro-dimensions{display:none}.mhu-cube__details{margin:1.5rem 0 0}.mhu-cube__details-header{grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:.75rem;display:grid}.mhu-cube__details-close{width:2.75rem;height:2.75rem;min-height:2.75rem;color:var(--_on-surface);cursor:pointer;background:0 0;border:0;border-radius:50%;place-items:center;padding:0;display:grid}.mhu-cube__details-close:hover{background:color-mix(in srgb, var(--_on-surface) 8%, transparent)}.mhu-cube__details-close:focus-visible{outline:3px solid var(--_focus);outline-offset:2px;background:color-mix(in srgb, var(--_on-surface) 10%, transparent)}.mhu-cube__details-close:active{background:color-mix(in srgb, var(--_on-surface) 10%, transparent)}.mhu-cube__details-close-icon{fill:currentColor;width:1.5rem;height:1.5rem;display:block}.mhu-cube__details-metadata{font-family:var(--mat-sys-body-medium-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-body-medium-size,.875rem);font-weight:var(--mat-sys-body-medium-weight,400);line-height:var(--mat-sys-body-medium-line-height,1.25rem);letter-spacing:var(--mat-sys-body-medium-tracking,.015625rem);margin:1.5rem 0 0}.mhu-cube__details-metadata-row{border-bottom:1px solid var(--_outline-variant);grid-template-columns:minmax(5.5rem,38%) minmax(0,1fr);gap:.75rem;padding:.5rem 0;display:grid}.mhu-cube__details-metadata-row:last-child{border-bottom:0}.mhu-cube__details-metadata dt,.mhu-cube__details-metadata dd{overflow-wrap:anywhere;min-width:0;margin:0}.mhu-cube__details-metadata dt{color:var(--_on-surface);font-weight:500}.mhu-cube__details-metadata dd{color:var(--_on-surface-variant)}.mhu-cube__details-card>.mhu-cube__details-metadata,.mhu-cube__details-card>.mhu-cube__details-action{margin-top:1rem}@container mhu-cube-host (width<=64rem){.mhu-cube__compact-card .mhu-cube__details-metadata{margin-top:0}}@media (forced-colors:active){.mhu-cube__intro-dimensions-header,.mhu-cube__intro-dimensions-row,.mhu-cube__details-metadata-row{border-color:canvastext}.mhu-cube__details-close{color:buttontext;border:1px solid buttontext}}", n = {
+var e = ":host{--_surface:var(--mhu-cube-surface,var(--mat-sys-surface,#fcfcfc));--_surface-container:var(--mhu-cube-surface-container,var(--mat-sys-surface-container,#eceff1));--_on-surface:var(--mhu-cube-on-surface,var(--mat-sys-on-surface,#1d2429));--_on-surface-variant:var(--mhu-cube-on-surface-variant,var(--mat-sys-on-surface-variant,#354b57));--_primary:var(--mhu-cube-primary,var(--mat-sys-primary,#8b1510));--_on-primary:var(--mhu-cube-on-primary,var(--mat-sys-on-primary,#fff));--_primary-container:var(--mhu-cube-primary-container,var(--mat-sys-primary-container,#ffdad5));--_on-primary-container:var(--mhu-cube-on-primary-container,var(--mat-sys-on-primary-container,#6b0f0a));--_outline:var(--mhu-cube-outline,var(--mat-sys-outline,#6c7f8a));--_outline-variant:var(--mhu-cube-outline-variant,var(--mat-sys-outline-variant,#c0cbd1));--_focus:var(--mhu-cube-focus,var(--mat-sys-primary,#8b1510));box-sizing:border-box;width:100%;min-width:0;max-width:100%;color:var(--_on-surface);font-family:var(--mat-sys-body-large-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-body-large-size,1rem);font-weight:var(--mat-sys-body-large-weight,400);line-height:var(--mat-sys-body-large-line-height,1.5rem);letter-spacing:var(--mat-sys-body-large-tracking,.03125rem);display:block;container:mhu-cube-host/inline-size}*{box-sizing:border-box}.mhu-cube{background:var(--_surface);grid-template:\"content stage\"minmax(0,1fr)/minmax(22rem,28rem) minmax(0,1fr);gap:clamp(1.5rem,3vw,4rem);width:100%;height:100%;min-height:36rem;padding:clamp(1.5rem,3vw,3rem);display:grid;overflow:visible}.mhu-cube__content{flex-direction:column;grid-area:content;align-self:stretch;gap:clamp(1.5rem,3vh,2.5rem);width:100%;height:100%;min-height:0;padding:0 0 1rem;display:flex}.mhu-cube__stage{grid-area:stage;grid-template-rows:minmax(0,1fr) auto;place-items:center;gap:.75rem;min-width:0;min-height:0;display:grid;container-type:size}.mhu-cube__plot{aspect-ratio:1000/868;width:min(100cqw,115.207cqh);position:relative}.mhu-cube__frame{z-index:0;pointer-events:none;shape-rendering:geometricprecision;width:100%;height:100%;position:absolute;inset:0;overflow:visible}.mhu-cube__frame-line{fill:none;stroke:color-mix(in srgb, var(--_outline) 68%, transparent);stroke-width:1.1px;vector-effect:non-scaling-stroke}.mhu-cube__frame-guide,.mhu-cube__frame-floor-guide{fill:none;stroke:color-mix(in srgb, var(--_outline) 30%, transparent);stroke-width:1px;vector-effect:non-scaling-stroke}.mhu-cube__frame-floor-guide{stroke:color-mix(in srgb, var(--_outline) 45%, transparent)}.mhu-cube__axes{z-index:1;-webkit-user-select:text;user-select:text;position:absolute;inset:0}.mhu-cube__axis-title,.mhu-cube__axis-value{--_align-x:-50%;--_align-y:-50%;--_offset:.5rem;transform:translate(calc(var(--_align-x) + var(--axis-normal-x,0) * var(--_offset)), calc(var(--_align-y) + var(--axis-normal-y,0) * var(--_offset)));white-space:nowrap;position:absolute}.mhu-cube__axis-title{color:var(--_primary);font-family:var(--mat-sys-label-large-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-label-large-size,.875rem);font-weight:600;line-height:var(--mat-sys-label-large-line-height,1.25rem);letter-spacing:var(--mat-sys-label-large-tracking,.00625rem)}.mhu-cube__axis-title--space,.mhu-cube__axis-title--organ{--_offset:3.75rem}.mhu-cube__axis-title--time{--_align-x:-100%;--_align-y:calc(-100% - .75rem)}.mhu-cube__axis-value{color:var(--_on-surface-variant);font-family:var(--mat-sys-body-small-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-body-small-size,.75rem);font-weight:var(--mat-sys-body-small-weight,400);line-height:var(--mat-sys-body-small-line-height,1rem);letter-spacing:var(--mat-sys-body-small-tracking,.025rem)}.mhu-cube__axis-value--time{--_align-x:-100%}.mhu-cube__axis-value--space{--_align-x:-100%;--_align-y:0%}.mhu-cube__axis-value--organ{--_align-x:0%;--_align-y:0%}.mhu-cube__axis-title--space,.mhu-cube__axis-title--organ,.mhu-cube__axis-value--space,.mhu-cube__axis-value--organ{text-shadow:-2px -2px 0 var(--_surface), 2px -2px 0 var(--_surface), -2px 2px 0 var(--_surface), 2px 2px 0 var(--_surface)}.mhu-cube__list{z-index:2;pointer-events:none;margin:0;padding:0;list-style:none;position:absolute;inset:0}.mhu-cube__item{top:var(--cube-top);left:var(--cube-left);width:var(--cube-width);height:var(--cube-height);pointer-events:none;position:absolute}.mhu-cube__item--unpositioned{display:none}.mhu-cube__select{width:100%;height:100%;color:inherit;font:inherit;text-align:left;cursor:pointer;pointer-events:none;background:0 0;border:0;margin:0;padding:0;display:block;position:relative}.mhu-cube__select:focus-visible{z-index:999;outline:3px solid var(--_focus);outline-offset:5px}.mhu-cube__shadow{z-index:0;pointer-events:none;width:100%;height:100%;position:absolute;inset:0;overflow:visible}.mhu-cube__shadow-floor{fill:var(--_primary);fill-opacity:.12;stroke:color-mix(in srgb, var(--_primary) 45%, transparent);stroke-width:1px;transition:fill-opacity .17s}.mhu-cube__shadow-drop{fill:none;stroke:color-mix(in srgb, var(--_on-surface) 40%, transparent);stroke-width:1px;stroke-dasharray:3 3}.mhu-cube__time-marker{opacity:0;transition:opacity .12s}.mhu-cube__time-leader{fill:none;stroke:var(--_primary);stroke-width:1.25px;stroke-dasharray:5 3}.mhu-cube__time-bracket{fill:none;stroke:var(--_primary);stroke-width:6px;stroke-linecap:round}.mhu-cube__select:hover .mhu-cube__time-marker,.mhu-cube__select:focus-visible .mhu-cube__time-marker,.mhu-cube__item--selected .mhu-cube__time-marker{opacity:1}.mhu-cube__select:hover .mhu-cube__shadow-floor,.mhu-cube__select:focus-visible .mhu-cube__shadow-floor,.mhu-cube__item--selected .mhu-cube__shadow-floor{fill-opacity:.28}.mhu-cube--has-selection .mhu-cube__item:not(.mhu-cube__item--selected) .mhu-cube__shadow{opacity:.35}.mhu-cube__cube{z-index:var(--cube-layer,1);shape-rendering:geometricprecision;width:100%;height:100%;display:block;position:relative;overflow:visible}.mhu-cube__top,.mhu-cube__left,.mhu-cube__right{stroke:color-mix(in srgb, var(--_outline) 75%, transparent);stroke-width:.85px;stroke-linejoin:bevel;pointer-events:fill;transition:fill-opacity .17s,stroke .17s,stroke-width .17s}.mhu-cube__top{fill:var(--_primary);fill-opacity:.4}.mhu-cube__left{fill:var(--_primary);fill-opacity:.5}.mhu-cube__right{fill:var(--_primary);fill-opacity:.64}.mhu-cube__edge{fill:none;stroke:color-mix(in srgb, var(--_on-surface) 38%, transparent);stroke-width:.75px;pointer-events:none;transition:stroke .17s,stroke-width .17s}.mhu-cube__select:hover .mhu-cube__top,.mhu-cube__select:hover .mhu-cube__left,.mhu-cube__select:hover .mhu-cube__right,.mhu-cube__select:focus-visible .mhu-cube__top,.mhu-cube__select:focus-visible .mhu-cube__left,.mhu-cube__select:focus-visible .mhu-cube__right{stroke:var(--_on-surface);stroke-width:2.3px}.mhu-cube__select:hover .mhu-cube__edge,.mhu-cube__select:focus-visible .mhu-cube__edge{stroke:var(--_on-surface);stroke-width:2px}.mhu-cube__select:hover .mhu-cube__top,.mhu-cube__select:focus-visible .mhu-cube__top{fill-opacity:.46}.mhu-cube__select:hover .mhu-cube__left,.mhu-cube__select:focus-visible .mhu-cube__left{fill-opacity:.56}.mhu-cube__select:hover .mhu-cube__right,.mhu-cube__select:focus-visible .mhu-cube__right{fill-opacity:.68}.mhu-cube__item--selected .mhu-cube__select .mhu-cube__top,.mhu-cube__item--selected .mhu-cube__select .mhu-cube__left,.mhu-cube__item--selected .mhu-cube__select .mhu-cube__right,.mhu-cube__item--selected .mhu-cube__select .mhu-cube__edge{stroke:var(--_primary);stroke-width:1.2px}.mhu-cube__item--selected .mhu-cube__select .mhu-cube__top{fill-opacity:.9}.mhu-cube__item--selected .mhu-cube__select .mhu-cube__left{fill-opacity:.96}.mhu-cube__item--selected .mhu-cube__select .mhu-cube__right{fill-opacity:1}.mhu-cube--has-selection .mhu-cube__item:not(.mhu-cube__item--selected) .mhu-cube__top{fill-opacity:.08}.mhu-cube--has-selection .mhu-cube__item:not(.mhu-cube__item--selected) .mhu-cube__left{fill-opacity:.1}.mhu-cube--has-selection .mhu-cube__item:not(.mhu-cube__item--selected) .mhu-cube__right{fill-opacity:.12}.mhu-cube__card{z-index:1000;top:var(--card-top,50%);border:1px solid color-mix(in srgb, var(--_outline) 75%, transparent);opacity:0;background:var(--_surface-container);width:15rem;box-shadow:0 .5rem 1.2rem color-mix(in srgb, var(--_on-surface) 22%, transparent);pointer-events:none;padding:.75rem .85rem;transition:opacity .12s;position:absolute;left:calc(100% + .75rem);transform:translateY(-50%)}.mhu-cube__item--card-left .mhu-cube__card{left:auto;right:calc(100% + .75rem)}.mhu-cube__select:hover .mhu-cube__card,.mhu-cube__select:focus-visible .mhu-cube__card{opacity:1}.mhu-cube__item--selected .mhu-cube__select .mhu-cube__card{opacity:0}.mhu-cube__label{color:var(--_on-surface);font-family:var(--mat-sys-title-small-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-title-small-size,.875rem);font-weight:var(--mat-sys-title-small-weight,500);line-height:var(--mat-sys-title-small-line-height,1.25rem);letter-spacing:var(--mat-sys-title-small-tracking,.00625rem);display:block}.mhu-cube__metadata{color:var(--_on-surface-variant);font-family:var(--mat-sys-body-small-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-body-small-size,.75rem);font-weight:var(--mat-sys-body-small-weight,400);line-height:var(--mat-sys-body-small-line-height,1rem);letter-spacing:var(--mat-sys-body-small-tracking,.025rem);grid-template-columns:auto 1fr;gap:.2rem .5rem;margin:.5rem 0 0;display:grid}.mhu-cube__metadata-key{font-family:var(--mat-sys-label-small-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-label-small-size,.6875rem);font-weight:var(--mat-sys-label-small-weight,500);line-height:var(--mat-sys-label-small-line-height,1rem);letter-spacing:var(--mat-sys-label-small-tracking,.03125rem)}.mhu-cube__metadata-value{overflow-wrap:anywhere;min-width:0}.mhu-cube__status{color:var(--_on-primary-container);font-family:var(--mat-sys-label-small-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-label-small-size,.6875rem);font-weight:var(--mat-sys-label-small-weight,500);line-height:var(--mat-sys-label-small-line-height,1rem);letter-spacing:var(--mat-sys-label-small-tracking,.03125rem);text-transform:uppercase;margin-top:.4rem;display:inline-block}.mhu-cube__item--current .mhu-cube__top,.mhu-cube__item--current .mhu-cube__left,.mhu-cube__item--current .mhu-cube__right{stroke:var(--_primary);stroke-width:2.5px}.mhu-cube__item--unavailable .mhu-cube__cube{opacity:.62;filter:grayscale()}.mhu-cube__item--unavailable .mhu-cube__top,.mhu-cube__item--unavailable .mhu-cube__left,.mhu-cube__item--unavailable .mhu-cube__right,.mhu-cube__item--unavailable .mhu-cube__edge{stroke-dasharray:3 2}.mhu-cube__compact-card{display:none}.mhu-cube__unpositioned{border-left:3px solid var(--_outline);background:var(--_surface-container);align-self:end;width:min(100%,38rem);padding:.75rem 1rem}.mhu-cube__unpositioned-heading{font-family:var(--mat-sys-title-small-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-title-small-size,.875rem);font-weight:var(--mat-sys-title-small-weight,500);line-height:var(--mat-sys-title-small-line-height,1.25rem);letter-spacing:var(--mat-sys-title-small-tracking,.00625rem);margin:0}.mhu-cube__unpositioned-guidance{color:var(--_on-surface-variant);font-family:var(--mat-sys-body-small-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-body-small-size,.75rem);font-weight:var(--mat-sys-body-small-weight,400);line-height:var(--mat-sys-body-small-line-height,1rem);letter-spacing:var(--mat-sys-body-small-tracking,.025rem);margin:.25rem 0 0}.mhu-cube__unpositioned-list{flex-wrap:wrap;gap:.5rem;margin:.625rem 0 0;padding:0;list-style:none;display:flex}.mhu-cube__unpositioned-button{border:1px solid var(--_outline);background:var(--_surface);min-height:2.75rem;color:var(--_on-surface);font-family:var(--mat-sys-label-large-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-label-large-size,.875rem);font-weight:var(--mat-sys-label-large-weight,500);line-height:var(--mat-sys-label-large-line-height,1.25rem);letter-spacing:var(--mat-sys-label-large-tracking,.00625rem);cursor:pointer;padding:.625rem .75rem}.mhu-cube__unpositioned-button:hover{background:var(--_primary-container);color:var(--_on-primary-container)}.mhu-cube__unpositioned-button:focus-visible{outline:3px solid var(--_focus);outline-offset:3px}.mhu-cube__unpositioned-item.mhu-cube__item--selected .mhu-cube__unpositioned-button{border-color:var(--_primary);background:var(--_primary-container);color:var(--_on-primary-container);border-width:2px}.mhu-cube__intro{flex-direction:column;height:100%;min-height:0;display:flex}.mhu-cube__intro-eyebrow,.mhu-cube__details-eyebrow{color:var(--_primary);font-family:var(--mat-sys-label-small-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-label-small-size,.6875rem);font-weight:600;line-height:var(--mat-sys-label-small-line-height,1rem);letter-spacing:var(--mat-sys-label-small-tracking,.03125rem);text-transform:uppercase;margin:0 0 .5rem}.mhu-cube__intro-heading{font-family:var(--mat-sys-headline-large-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-headline-large-size,2rem);font-weight:var(--mat-sys-headline-large-weight,600);line-height:var(--mat-sys-headline-large-line-height,2.5rem);letter-spacing:var(--mat-sys-headline-large-tracking,0);white-space:nowrap;margin:0}.mhu-cube__details-heading,.mhu-cube__compact-heading{font-family:var(--mat-sys-title-large-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-title-large-size,1.375rem);font-weight:500;line-height:var(--mat-sys-title-large-line-height,1.75rem);letter-spacing:var(--mat-sys-title-large-tracking,0);margin:0}.mhu-cube__intro-compact,.mhu-cube__details-unavailable{color:var(--_on-surface-variant);font-family:var(--mat-sys-body-large-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-body-large-size,1rem);font-weight:var(--mat-sys-body-large-weight,400);line-height:var(--mat-sys-body-large-line-height,1.5rem);letter-spacing:var(--mat-sys-body-large-tracking,.03125rem);margin:1rem 0 0}.mhu-cube__intro-visualization{min-height:0;color:var(--_on-surface-variant);font-family:var(--mat-sys-body-medium-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-body-medium-size,.875rem);font-weight:var(--mat-sys-body-medium-weight,400);line-height:var(--mat-sys-body-medium-line-height,1.25rem);letter-spacing:var(--mat-sys-body-medium-tracking,.015625rem);flex-direction:column;flex:1;margin:.75rem 0 0;display:flex}.mhu-cube__intro-summary,.mhu-cube__intro-attribution{margin:0}.mhu-cube__intro-compact,.mhu-cube__details:empty{display:none}.mhu-cube__details-card,.mhu-cube__compact-card{border:1px solid var(--_outline-variant);background:var(--_surface-container);box-shadow:0 1rem 2.5rem color-mix(in srgb, var(--_on-surface) 10%, transparent)}.mhu-cube__details-card{width:100%;padding:1.25rem}.mhu-cube__details-action,.mhu-cube__compact-action{background:var(--_primary);min-height:2.75rem;color:var(--_on-primary);font-family:var(--mat-sys-label-large-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-label-large-size,.875rem);font-weight:var(--mat-sys-label-large-weight,500);line-height:var(--mat-sys-label-large-line-height,1.25rem);letter-spacing:var(--mat-sys-label-large-tracking,.00625rem);white-space:nowrap;justify-content:center;align-items:center;margin-top:1.75rem;padding:.75rem 1rem;text-decoration:none;display:inline-flex}.mhu-cube__details-action:hover,.mhu-cube__compact-action:hover{filter:brightness(.92)}.mhu-cube__details-action:focus-visible,.mhu-cube__compact-action:focus-visible{outline:3px solid var(--_focus);outline-offset:3px}.mhu-cube__empty,.mhu-cube__plot-unavailable{color:var(--_on-surface-variant);text-align:center;place-items:center;margin:0;padding:2rem;display:grid;position:absolute;inset:0}.mhu-cube__sr-only{clip:rect(0, 0, 0, 0);white-space:nowrap;border:0;width:1px;height:1px;margin:-1px;padding:0;position:absolute;overflow:hidden}@container mhu-cube-host (width<=64rem){.mhu-cube{flex-direction:column;height:auto;min-height:0;padding:clamp(1.5rem,4vw,2.5rem) 0 0;display:flex;overflow:visible}.mhu-cube__content{max-width:45rem;padding:0;display:block}.mhu-cube__intro{height:auto;min-height:0;margin-bottom:2rem;display:block}.mhu-cube__intro-eyebrow{margin:0 0 .875rem}.mhu-cube__intro-heading{font-family:var(--mat-sys-headline-medium-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-headline-medium-size,1.75rem);font-weight:var(--mat-sys-headline-medium-weight,600);line-height:var(--mat-sys-headline-medium-line-height,2.25rem);letter-spacing:var(--mat-sys-headline-medium-tracking,0);white-space:normal}.mhu-cube__intro-visualization{display:none}.mhu-cube__intro-compact{margin-top:.875rem;display:block}.mhu-cube__stage{display:block;container-type:normal}.mhu-cube__plot{aspect-ratio:auto;width:100%;max-height:none}.mhu-cube__frame,.mhu-cube__axes{display:none}.mhu-cube__list{grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;display:grid;position:static}.mhu-cube__item{pointer-events:auto;width:auto;min-width:0;height:auto;display:grid;position:static}.mhu-cube__select{display:none}.mhu-cube__compact-card{flex-direction:column;gap:1.5rem;width:100%;min-width:0;height:100%;padding:1.25rem;display:flex}.mhu-cube__compact-heading{overflow-wrap:anywhere}.mhu-cube__compact-action{align-self:flex-start;margin-top:auto}.mhu-cube__compact-card .mhu-cube__details-unavailable{margin-top:auto}.mhu-cube__details,.mhu-cube__unpositioned{display:none}.mhu-cube__empty,.mhu-cube__plot-unavailable{position:static}}@container mhu-cube-host (width<=40rem){.mhu-cube__list{grid-template-columns:minmax(0,1fr)}}@media (prefers-reduced-motion:reduce){.mhu-cube__top,.mhu-cube__left,.mhu-cube__right,.mhu-cube__edge,.mhu-cube__card,.mhu-cube__shadow-floor,.mhu-cube__time-marker{transition:none}}@media (forced-colors:active){.mhu-cube__frame-line,.mhu-cube__top,.mhu-cube__left,.mhu-cube__right,.mhu-cube__edge{stroke:canvastext}.mhu-cube__frame-guide,.mhu-cube__frame-floor-guide,.mhu-cube__shadow-drop{stroke:graytext}.mhu-cube__shadow-floor{fill:canvas;stroke:graytext}.mhu-cube__time-leader,.mhu-cube__time-bracket{stroke:highlight}.mhu-cube__top,.mhu-cube__left,.mhu-cube__right{fill:canvas;fill-opacity:1}.mhu-cube--has-selection .mhu-cube__item:not(.mhu-cube__item--selected) .mhu-cube__top,.mhu-cube--has-selection .mhu-cube__item:not(.mhu-cube__item--selected) .mhu-cube__left,.mhu-cube--has-selection .mhu-cube__item:not(.mhu-cube__item--selected) .mhu-cube__right{fill-opacity:1}.mhu-cube__item--selected .mhu-cube__select .mhu-cube__top,.mhu-cube__item--selected .mhu-cube__select .mhu-cube__left,.mhu-cube__item--selected .mhu-cube__select .mhu-cube__right,.mhu-cube__select:hover .mhu-cube__top,.mhu-cube__select:hover .mhu-cube__left,.mhu-cube__select:hover .mhu-cube__right{fill:highlight;stroke:highlighttext}.mhu-cube__item--selected .mhu-cube__select .mhu-cube__edge,.mhu-cube__select:hover .mhu-cube__edge{stroke:highlighttext}.mhu-cube__item--unavailable .mhu-cube__cube{opacity:1;filter:none}.mhu-cube__card,.mhu-cube__details-card,.mhu-cube__compact-card,.mhu-cube__unpositioned{box-shadow:none;border-color:canvastext}.mhu-cube__details-action,.mhu-cube__compact-action,.mhu-cube__unpositioned-button{border:1px solid buttontext}.mhu-cube__select:focus-visible,.mhu-cube__details-action:focus-visible,.mhu-cube__compact-action:focus-visible,.mhu-cube__unpositioned-button:focus-visible{outline-color:highlight}}", t = ".mhu-cube__intro-attribution{font-family:var(--mat-sys-body-small-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-body-small-size,.75rem);line-height:var(--mat-sys-body-small-line-height,1rem);letter-spacing:var(--mat-sys-body-small-tracking,.025rem);margin-top:auto;padding-top:1rem}.mhu-cube__intro-attribution a{color:var(--_primary)}.mhu-cube__intro-attribution a:focus-visible{outline:3px solid var(--_focus);outline-offset:3px}.mhu-cube__intro-dimensions{margin:0}.mhu-cube__intro-dimensions-header,.mhu-cube__intro-dimensions-row{grid-template-columns:minmax(7rem,32%) minmax(0,1fr);gap:.75rem;display:grid}.mhu-cube__intro-dimensions-header{border-bottom:1px solid var(--_outline-variant);color:var(--_on-surface);margin-top:1.5rem;padding-bottom:.5rem;font-weight:600}.mhu-cube__intro-dimensions-row{border-bottom:1px solid var(--_outline-variant);padding:.5rem 0}.mhu-cube__intro-dimensions-row:last-child{border-bottom:0}.mhu-cube__intro-dimensions dt,.mhu-cube__intro-dimensions dd{overflow-wrap:anywhere;min-width:0;margin:0}.mhu-cube__intro-dimensions dt{color:var(--_on-surface);white-space:nowrap;font-weight:500}.mhu-cube__intro-dimensions dd{color:var(--_on-surface-variant)}.mhu-cube--has-selection .mhu-cube__intro-dimensions-header,.mhu-cube--has-selection .mhu-cube__intro-dimensions{display:none}.mhu-cube__details{margin:1.5rem 0 0}.mhu-cube__details-header{grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:.75rem;display:grid}.mhu-cube__details-close{width:2.75rem;height:2.75rem;min-height:2.75rem;color:var(--_on-surface);cursor:pointer;background:0 0;border:0;border-radius:50%;place-items:center;padding:0;display:grid}.mhu-cube__details-close:hover{background:color-mix(in srgb, var(--_on-surface) 8%, transparent)}.mhu-cube__details-close:focus-visible{outline:3px solid var(--_focus);outline-offset:2px;background:color-mix(in srgb, var(--_on-surface) 10%, transparent)}.mhu-cube__details-close:active{background:color-mix(in srgb, var(--_on-surface) 10%, transparent)}.mhu-cube__details-close-icon{fill:currentColor;width:1.5rem;height:1.5rem;display:block}.mhu-cube__details-metadata{font-family:var(--mat-sys-body-medium-font,Roboto, Arial, sans-serif);font-size:var(--mat-sys-body-medium-size,.875rem);font-weight:var(--mat-sys-body-medium-weight,400);line-height:var(--mat-sys-body-medium-line-height,1.25rem);letter-spacing:var(--mat-sys-body-medium-tracking,.015625rem);margin:1.5rem 0 0}.mhu-cube__details-metadata-row{border-bottom:1px solid var(--_outline-variant);grid-template-columns:minmax(5.5rem,38%) minmax(0,1fr);gap:.75rem;padding:.5rem 0;display:grid}.mhu-cube__details-metadata-row:last-child{border-bottom:0}.mhu-cube__details-metadata dt,.mhu-cube__details-metadata dd{overflow-wrap:anywhere;min-width:0;margin:0}.mhu-cube__details-metadata dt{color:var(--_on-surface);font-weight:500}.mhu-cube__details-metadata dd{color:var(--_on-surface-variant)}.mhu-cube__details-card>.mhu-cube__details-metadata,.mhu-cube__details-card>.mhu-cube__details-action{margin-top:1rem}@container mhu-cube-host (width<=64rem){.mhu-cube__compact-card .mhu-cube__details-metadata{margin-top:0}}@media (forced-colors:active){.mhu-cube__intro-dimensions-header,.mhu-cube__intro-dimensions-row,.mhu-cube__details-metadata-row{border-color:canvastext}.mhu-cube__details-close{color:buttontext;border:1px solid buttontext}}", n = {
 	eyebrow: "Organ imaging datasets",
 	heading: "Explore multiscale human data",
 	visualization: {
@@ -146,40 +146,40 @@ var p = {
 	top: {
 		front: {
 			x: 57.31,
-			y: 31.81
+			y: 19.2
 		},
 		left: {
 			x: 15.15,
-			y: 11.92
+			y: 9.6
 		},
 		back: {
 			x: 57.31,
-			y: .53
+			y: 1.8
 		},
 		right: {
 			x: 99.47,
-			y: 11.92
+			y: 9.6
 		}
 	},
 	bottom: {
 		front: {
 			x: 57.31,
-			y: 99.16
+			y: 90.5
 		},
 		left: {
-			x: 22.4,
-			y: 67.43
+			x: 19.5,
+			y: 77.2
 		},
 		back: {
 			x: 57.31,
-			y: 46.7
+			y: 65.8
 		},
 		right: {
-			x: 92.49,
-			y: 67.43
+			x: 95.1,
+			y: 77.2
 		}
 	}
-}, m = .7, h = .07, ee = .9, g = .02, _ = .02, te = 12, ne = 88, re = [
+}, m = .868, h = .7, ee = .07, te = .9, g = .02, _ = .02, ne = 12, re = 88, ie = [
 	[[
 		0,
 		0,
@@ -289,12 +289,12 @@ var p = {
 		1
 	]]
 ];
-function ie(e, t) {
+function ae(e, t) {
 	return t > 0 ? (e + .5) / t : .5;
 }
-function ae(e, t, n) {
+function oe(e, t, n) {
 	if (t <= 1) return .5;
-	let r = Math.min(.5 / t, n + h);
+	let r = Math.min(.5 / t, n + ee);
 	return r + e * (1 - 2 * r) / (t - 1);
 }
 function v(e, t, n) {
@@ -319,11 +319,11 @@ function y(e, t, n) {
 function b(e, t) {
 	return (e - t.min) / (t.max - t.min);
 }
-function x(e, t) {
-	return .5 / Math.max(e, t, 1) * m;
+function se(e, t) {
+	return .5 / Math.max(e, t, 1) * h;
 }
-function S(e) {
-	let t = e.space.values.length, n = e.organ.values.length, r = x(t, n), i = e.space.values.map((e, n) => ae(n, t, r));
+function x(e) {
+	let t = e.space.values.length, n = e.organ.values.length, r = se(t, n), i = e.space.values.map((e, n) => oe(n, t, r));
 	return {
 		halfSize: r,
 		space: i.map((e) => 1 - e),
@@ -331,13 +331,65 @@ function S(e) {
 			let r = n === 0 ? 0 : (i[n - 1] + e) / 2;
 			return [1 - (n === t - 1 ? 1 : (e + i[n + 1]) / 2), 1 - r];
 		}),
-		organ: e.organ.values.map((e, t) => ie(t, n))
+		organ: e.organ.values.map((e, t) => ae(t, n))
 	};
 }
-function oe() {
-	return re.map(([e, t]) => [y(...e), y(...t)]);
+function ce() {
+	return ie.map(([e, t]) => [y(...e), y(...t)]);
 }
-function se(e, t, n) {
+function le(e, t) {
+	let n = t.x - e.x, r = (t.y - e.y) * m, i = Math.hypot(n, r) || 1, a = {
+		x: r / i,
+		y: -n / i
+	}, o = y(.5, .5, .5), s = {
+		x: (e.x + t.x) / 2 - o.x,
+		y: ((e.y + t.y) / 2 - o.y) * m
+	};
+	return a.x * s.x + a.y * s.y < 0 ? {
+		x: -a.x,
+		y: -a.y
+	} : a;
+}
+function ue() {
+	let e = (e, t) => {
+		let n = y(...e), r = y(...t);
+		return {
+			start: n,
+			end: r,
+			normal: le(n, r)
+		};
+	};
+	return {
+		time: e([
+			1,
+			0,
+			0
+		], [
+			1,
+			1,
+			0
+		]),
+		space: e([
+			0,
+			0,
+			0
+		], [
+			1,
+			0,
+			0
+		]),
+		organ: e([
+			0,
+			0,
+			0
+		], [
+			0,
+			0,
+			1
+		])
+	};
+}
+function de(e, t, n) {
 	let r = b(e.start, t), i = b(e.end, t);
 	if (i - r >= n) return {
 		y0: r,
@@ -349,7 +401,7 @@ function se(e, t, n) {
 		y1: o + a
 	};
 }
-function ce(e) {
+function fe(e) {
 	let t = {
 		topFront: y(e.x0, e.y1, e.z0),
 		topLeft: y(e.x1, e.y1, e.z0),
@@ -369,19 +421,19 @@ function ce(e) {
 		}
 	};
 }
-function C(e, t) {
+function S(e, t) {
 	return e < t ? -1 : e > t ? 1 : 0;
 }
-function le(e, t) {
+function pe(e, t) {
 	return e.map((e, t) => ({
 		item: e,
 		index: t
 	})).sort((e, n) => {
 		let r = e.item.position, i = n.item.position;
-		return !r || !i ? r ? -1 : i ? 1 : e.index - n.index : t.organ.values.indexOf(r.organ) - t.organ.values.indexOf(i.organ) || t.space.values.indexOf(r.space) - t.space.values.indexOf(i.space) || r.time.start - i.time.start || r.time.end - i.time.end || C(e.item.id, n.item.id);
+		return !r || !i ? r ? -1 : i ? 1 : e.index - n.index : t.organ.values.indexOf(r.organ) - t.organ.values.indexOf(i.organ) || t.space.values.indexOf(r.space) - t.space.values.indexOf(i.space) || r.time.start - i.time.start || r.time.end - i.time.end || S(e.item.id, n.item.id);
 	}).map(({ item: e }) => e);
 }
-function w(e, t) {
+function C(e, t) {
 	let n = [];
 	e.forEach((e) => {
 		let t = n.find((t) => e.y0 >= t.end + _);
@@ -400,26 +452,26 @@ function w(e, t) {
 		}));
 	});
 }
-function ue(e) {
+function me(e) {
 	let t = /* @__PURE__ */ new Map(), n = /* @__PURE__ */ new Map();
 	return e.forEach((e) => {
 		let t = `${e.spaceIndex}:${e.organIndex}`;
 		n.set(t, [...n.get(t) ?? [], e]);
 	}), n.forEach((e) => {
-		e.sort((e, t) => e.y0 - t.y0 || e.y1 - t.y1 || C(e.id, t.id));
+		e.sort((e, t) => e.y0 - t.y0 || e.y1 - t.y1 || S(e.id, t.id));
 		let n = [], r = -Infinity;
 		e.forEach((e) => {
-			n.length > 0 && e.y0 >= r + _ && (w(n, t), n = []), r = n.length === 0 ? e.y1 : Math.max(r, e.y1), n.push(e);
-		}), n.length > 0 && w(n, t);
+			n.length > 0 && e.y0 >= r + _ && (C(n, t), n = []), r = n.length === 0 ? e.y1 : Math.max(r, e.y1), n.push(e);
+		}), n.length > 0 && C(n, t);
 	}), t;
 }
-function de(e, t, n, r) {
+function he(e, t, n, r) {
 	if (r.laneCount === 1) return [e - t, e + t];
-	let i = 2 * Math.min(e - n[0], n[1] - e) * ee, a = Math.min(2 * t * (1 + .5 * (r.laneCount - 1)), i), o = (a - g * (r.laneCount - 1)) / r.laneCount, s = e + a / 2 - r.lane * (o + g);
+	let i = 2 * Math.min(e - n[0], n[1] - e) * te, a = Math.min(2 * t * (1 + .5 * (r.laneCount - 1)), i), o = (a - g * (r.laneCount - 1)) / r.laneCount, s = e + a / 2 - r.lane * (o + g);
 	return [s - o, s];
 }
-function fe(e, t) {
-	let n = S(t), { halfSize: r } = n, i = [];
+function ge(e, t) {
+	let n = x(t), { halfSize: r } = n, i = [];
 	e.forEach((e) => {
 		if (!e.position) return;
 		let n = t.space.values.indexOf(e.position.space), a = t.organ.values.indexOf(e.position.organ);
@@ -431,14 +483,14 @@ function fe(e, t) {
 				start: b(e.position.time.start, t.time),
 				end: b(e.position.time.end, t.time)
 			},
-			...se(e.position.time, t.time, r * 2)
+			...de(e.position.time, t.time, r * 2)
 		});
 	});
-	let a = ue(i), o = i.map((e) => {
+	let a = me(i), o = i.map((e) => {
 		let t = n.space[e.spaceIndex], i = n.organ[e.organIndex], o = a.get(e.id) ?? {
 			lane: 0,
 			laneCount: 1
-		}, [s, c] = de(t, r, n.spaceBands[e.spaceIndex], o), l = {
+		}, [s, c] = he(t, r, n.spaceBands[e.spaceIndex], o), l = {
 			x0: s,
 			x1: c,
 			y0: e.y0,
@@ -453,10 +505,10 @@ function fe(e, t) {
 			cellDepth: t + i
 		};
 	});
-	o.sort((e, t) => t.cellDepth - e.cellDepth || t.box.x0 + t.box.x1 - (e.box.x0 + e.box.x1) || e.box.y0 - t.box.y0 || C(e.id, t.id));
+	o.sort((e, t) => t.cellDepth - e.cellDepth || t.box.x0 + t.box.x1 - (e.box.x0 + e.box.x1) || e.box.y0 - t.box.y0 || S(e.id, t.id));
 	let s = /* @__PURE__ */ new Map();
 	return o.forEach(({ id: e, box: t, time: n }, r) => {
-		let i = ce(t), { bounds: a } = i, o = y((t.x0 + t.x1) / 2, t.y1, (t.z0 + t.z1) / 2), c = Math.min(Math.max(o.y, te), ne);
+		let i = fe(t), { bounds: a } = i, o = y((t.x0 + t.x1) / 2, t.y1, (t.z0 + t.z1) / 2), c = Math.min(Math.max(o.y, ne), re);
 		s.set(e, {
 			box: t,
 			time: n,
@@ -469,26 +521,26 @@ function fe(e, t) {
 }
 //#endregion
 //#region packages/mhu-cube/src/mhu-cube-visualization.ts
-var pe = "http://www.w3.org/2000/svg", T = new Intl.NumberFormat("en", { maximumFractionDigits: 2 });
-function E(e) {
+var _e = "http://www.w3.org/2000/svg", w = new Intl.NumberFormat("en", { maximumFractionDigits: 2 });
+function T(e) {
 	return e.filter((e) => e.length > 1).map((e) => e.map((e, t) => `${t === 0 ? "M" : "L"}${e.x} ${e.y}`).join("")).join("");
 }
-function D(e, t) {
-	let n = document.createElementNS(pe, e);
+function E(e, t) {
+	let n = document.createElementNS(_e, e);
 	return Object.entries(t).forEach(([e, t]) => n.setAttribute(e, t)), n;
 }
-function me(e, t) {
+function D(e, t) {
 	if (e.label) return e.label;
-	let n = e.start === e.end ? T.format(e.start) : `${T.format(e.start)}–${T.format(e.end)}`;
+	let n = e.start === e.end ? w.format(e.start) : `${w.format(e.start)}–${w.format(e.end)}`;
 	return t.unit ? `${n} ${t.unit}` : n;
 }
-function he(e) {
-	let t = D("svg", {
+function O(e) {
+	let t = E("svg", {
 		class: "mhu-cube__frame",
 		viewBox: "0 0 100 100",
 		preserveAspectRatio: "none",
 		"aria-hidden": "true"
-	}), n = S(e), r = (e.time.ticks ?? []).filter((t) => t > e.time.min && t < e.time.max).map((t) => {
+	}), n = x(e), r = (e.time.ticks ?? []).filter((t) => t > e.time.min && t < e.time.max).map((t) => {
 		let n = b(t, e.time);
 		return [
 			y(1, n, 0),
@@ -496,57 +548,38 @@ function he(e) {
 			y(0, n, 1)
 		];
 	}), i = [...n.space.map((e) => [y(e, 0, 0), y(e, 0, 1)]), ...n.organ.map((e) => [y(0, 0, e), y(1, 0, e)])];
-	return t.append(D("path", {
+	return t.append(E("path", {
 		class: "mhu-cube__frame-guide",
-		d: E(r)
-	}), D("path", {
+		d: T(r)
+	}), E("path", {
 		class: "mhu-cube__frame-floor-guide",
-		d: E(i)
-	}), D("path", {
+		d: T(i)
+	}), E("path", {
 		class: "mhu-cube__frame-line",
-		d: E(oe())
+		d: T(ce())
 	})), t;
 }
-function O(e) {
+function k(e) {
 	let t = document.createElement("div");
 	t.className = "mhu-cube__axes", t.setAttribute("aria-hidden", "true");
-	let n = (e, n, r) => {
-		let i = document.createElement("span");
-		i.className = n, i.textContent = e, i.style.left = `${r.x}%`, i.style.top = `${r.y}%`, t.append(i);
-	};
-	n(e.time.label, "mhu-cube__axis-title mhu-cube__axis-title--time", {
-		x: 4.5,
-		y: 5
-	}), n(e.space.label, "mhu-cube__axis-title mhu-cube__axis-title--space", {
-		x: 30,
-		y: 89
-	}), n(e.organ.label, "mhu-cube__axis-title mhu-cube__axis-title--organ", {
-		x: 84.5,
-		y: 91.5
-	}), (e.time.ticks ?? []).forEach((t) => {
+	let n = (e, n, r, i) => {
+		let a = document.createElement("span");
+		a.className = n, a.textContent = e, a.style.left = `${r.x}%`, a.style.top = `${r.y}%`, a.style.setProperty("--axis-normal-x", i.x.toFixed(4)), a.style.setProperty("--axis-normal-y", i.y.toFixed(4)), t.append(a);
+	}, r = (e, t) => ({
+		x: (e.x + t.x) / 2,
+		y: (e.y + t.y) / 2
+	}), i = ue(), a = x(e);
+	return n(e.time.label, "mhu-cube__axis-title mhu-cube__axis-title--time", i.time.end, i.time.normal), n(e.space.label, "mhu-cube__axis-title mhu-cube__axis-title--space", r(i.space.start, i.space.end), i.space.normal), n(e.organ.label, "mhu-cube__axis-title mhu-cube__axis-title--organ", r(i.organ.start, i.organ.end), i.organ.normal), (e.time.ticks ?? []).forEach((t) => {
 		let r = y(1, b(t, e.time), 0);
-		n(T.format(t), "mhu-cube__axis-value mhu-cube__axis-value--time", {
-			x: r.x - 5,
-			y: r.y
-		});
-	});
-	let r = S(e);
-	return e.space.values.forEach((e, t) => {
-		let i = y(r.space[t], 0, 0);
-		n(e, "mhu-cube__axis-value mhu-cube__axis-value--space", {
-			x: i.x - 4.5,
-			y: i.y + 1.8
-		});
+		n(w.format(t), "mhu-cube__axis-value mhu-cube__axis-value--time", r, i.time.normal);
+	}), e.space.values.forEach((e, t) => {
+		n(e, "mhu-cube__axis-value mhu-cube__axis-value--space", y(a.space[t], 0, 0), i.space.normal);
 	}), e.organ.values.forEach((e, t) => {
-		let i = y(0, 0, r.organ[t]);
-		n(e, "mhu-cube__axis-value mhu-cube__axis-value--organ", {
-			x: i.x + 2.5,
-			y: i.y + 1.7
-		});
+		n(e, "mhu-cube__axis-value mhu-cube__axis-value--organ", y(0, 0, a.organ[t]), i.organ.normal);
 	}), t;
 }
-function k({ corners: e, bounds: t }) {
-	let n = (...e) => e.map((e) => `${e.x},${e.y}`).join(" "), r = (...e) => e.map((e, t) => `${t === 0 ? "M" : "L"}${e.x} ${e.y}`).join(""), i = D("svg", {
+function A({ corners: e, bounds: t }) {
+	let n = (...e) => e.map((e) => `${e.x},${e.y}`).join(" "), r = (...e) => e.map((e, t) => `${t === 0 ? "M" : "L"}${e.x} ${e.y}`).join(""), i = E("svg", {
 		class: "mhu-cube__cube",
 		viewBox: `${t.left} ${t.top} ${t.width} ${t.height}`,
 		preserveAspectRatio: "none",
@@ -567,19 +600,19 @@ function k({ corners: e, bounds: t }) {
 		e.bottomRight,
 		e.bottomFront
 	];
-	return i.append(D("polygon", {
+	return i.append(E("polygon", {
 		class: "mhu-cube__top",
 		points: n(...a),
 		"vector-effect": "non-scaling-stroke"
-	}), D("polygon", {
+	}), E("polygon", {
 		class: "mhu-cube__left",
 		points: n(...o),
 		"vector-effect": "non-scaling-stroke"
-	}), D("polygon", {
+	}), E("polygon", {
 		class: "mhu-cube__right",
 		points: n(...s),
 		"vector-effect": "non-scaling-stroke"
-	}), D("path", {
+	}), E("path", {
 		class: "mhu-cube__edge",
 		d: [
 			r(e.topFront, e.topBack),
@@ -592,8 +625,8 @@ function k({ corners: e, bounds: t }) {
 		"vector-effect": "non-scaling-stroke"
 	})), i;
 }
-function A({ box: e, time: t, geometry: { bounds: n } }) {
-	let r = D("svg", {
+function j({ box: e, time: t, geometry: { bounds: n } }) {
+	let r = E("svg", {
 		class: "mhu-cube__shadow",
 		viewBox: `${n.left} ${n.top} ${n.width} ${n.height}`,
 		preserveAspectRatio: "none",
@@ -604,7 +637,7 @@ function A({ box: e, time: t, geometry: { bounds: n } }) {
 		y(e.x1, 0, e.z1),
 		y(e.x0, 0, e.z1)
 	];
-	if (r.append(D("polygon", {
+	if (r.append(E("polygon", {
 		class: "mhu-cube__shadow-floor",
 		points: i.map((e) => `${e.x},${e.y}`).join(" "),
 		"vector-effect": "non-scaling-stroke"
@@ -614,40 +647,40 @@ function A({ box: e, time: t, geometry: { bounds: n } }) {
 			[e.x1, e.z0],
 			[e.x0, e.z1]
 		];
-		r.append(D("path", {
+		r.append(E("path", {
 			class: "mhu-cube__shadow-drop",
-			d: E(t.map(([t, n]) => [y(t, e.y0, n), y(t, 0, n)])),
+			d: T(t.map(([t, n]) => [y(t, e.y0, n), y(t, 0, n)])),
 			"vector-effect": "non-scaling-stroke"
 		}));
 	}
-	let a = D("g", { class: "mhu-cube__time-marker" }), o = t.start === t.end ? [t.start] : [t.start, t.end];
-	return a.append(D("path", {
+	let a = E("g", { class: "mhu-cube__time-marker" }), o = t.start === t.end ? [t.start] : [t.start, t.end];
+	return a.append(E("path", {
 		class: "mhu-cube__time-leader",
-		d: E(o.map((t) => [
+		d: T(o.map((t) => [
 			y(e.x1, t, e.z0),
 			y(1, t, e.z0),
 			y(1, t, 0)
 		])),
 		"vector-effect": "non-scaling-stroke"
-	}), D("path", {
+	}), E("path", {
 		class: "mhu-cube__time-bracket",
-		d: E([[y(1, t.start, 0), y(1, t.end, 0)]]),
+		d: T([[y(1, t.start, 0), y(1, t.end, 0)]]),
 		"vector-effect": "non-scaling-stroke"
 	})), r.append(a), r;
 }
-function j(e) {
+function M(e) {
 	let t = document.createElement("p");
 	t.className = "mhu-cube__sr-only";
 	let n = e.time.unit ? ` ${e.time.unit}` : "";
 	return t.textContent = [
-		`${e.time.label}: ${T.format(e.time.min)} to ${T.format(e.time.max)}${n}`,
+		`${e.time.label}: ${w.format(e.time.min)} to ${w.format(e.time.max)}${n}`,
 		`${e.space.label}: ${e.space.values.join(", ")}`,
 		`${e.organ.label}: ${e.organ.values.join(", ")}`
 	].join(". "), t;
 }
-function M(e, t) {
+function N(e, t) {
 	let n = Object.entries(e.metadata ?? {}).filter((e) => e[1] !== null && e[1] !== void 0).map(([e, t]) => `${e}: ${t}`), r = e.position, i = r ? [
-		`${t.time.label}: ${me(r.time, t.time)}`,
+		`${t.time.label}: ${D(r.time, t.time)}`,
 		`${t.space.label}: ${r.space}`,
 		`${t.organ.label}: ${r.organ}`
 	] : [], a = e.status ?? "available", o = a === "current" ? "Current page" : a === "unavailable" ? "Metadata unavailable" : "Metadata available";
@@ -659,7 +692,7 @@ function M(e, t) {
 }
 //#endregion
 //#region packages/mhu-cube/src/details-transition.ts
-var N = 90, P = 140, F = class {
+var P = 90, F = 140, I = class {
 	#e = null;
 	#t = 0;
 	cancel() {
@@ -673,7 +706,7 @@ var N = 90, P = 140, F = class {
 			return;
 		}
 		let r = e.animate([{ opacity: 1 }, { opacity: 0 }], {
-			duration: N,
+			duration: P,
 			easing: "ease-out",
 			fill: "forwards"
 		});
@@ -681,7 +714,7 @@ var N = 90, P = 140, F = class {
 			if (n !== this.#t) return;
 			t();
 			let i = e.animate([{ opacity: 0 }, { opacity: 1 }], {
-				duration: P,
+				duration: F,
 				easing: "ease-in",
 				fill: "forwards"
 			});
@@ -690,7 +723,7 @@ var N = 90, P = 140, F = class {
 			}).catch(() => void 0);
 		}).catch(() => void 0);
 	}
-}, I = {
+}, L = {
 	time: {
 		label: "Time",
 		min: 0,
@@ -705,7 +738,7 @@ var N = 90, P = 140, F = class {
 		label: "Organ",
 		values: []
 	}
-}, L = new Set([
+}, ve = new Set([
 	"available",
 	"current",
 	"unavailable"
@@ -731,10 +764,10 @@ function U(e, t, n, r, i) {
 		...i ? { itemId: i } : {}
 	};
 }
-function ge(e, t) {
+function ye(e, t) {
 	return z.compare(e, t) || (e < t ? -1 : e > t ? 1 : 0);
 }
-function _e(e) {
+function be(e) {
 	return e.time.max > e.time.min && e.space.values.length > 0 && e.organ.values.length > 0;
 }
 function W(e) {
@@ -772,13 +805,13 @@ function K(e, t, n, r) {
 		values: []
 	}) : {
 		label: a,
-		values: t === "organ" ? s.sort(ge) : s
+		values: t === "organ" ? s.sort(ye) : s
 	};
 }
-function ve(e, t) {
+function xe(e, t) {
 	let n = "axes.time";
 	if (!B(e)) return t.push(U("axis.invalid", "Time axis must provide a label, min, and max.", n, "error")), {
-		...I.time,
+		...L.time,
 		ticks: []
 	};
 	let r = G(e, "Time", n, t), i;
@@ -806,24 +839,24 @@ function ve(e, t) {
 }
 function q(e) {
 	if (!B(e)) return {
-		value: I,
+		value: L,
 		issues: [U("axes.invalid", "Axes must be an object with time, space, and organ definitions.", "axes", "error")]
 	};
 	if (H(e)) return {
-		value: I,
+		value: L,
 		issues: [U("axes.invalid", "Axes use the retired x, y, and z format; provide time, space, and organ definitions.", "axes", "error")]
 	};
 	let t = [];
 	return {
 		value: {
-			time: ve(e.time, t),
+			time: xe(e.time, t),
 			space: K(e.space, "space", "Space", t),
 			organ: K(e.organ, "organ", "Organ", t)
 		},
 		issues: t
 	};
 }
-function ye(e, t, n, r) {
+function Se(e, t, n, r) {
 	if (e === void 0) return;
 	if (!B(e)) {
 		r.push(U("item.metadata.invalid", "Metadata must be an object.", t, "warning", n));
@@ -838,7 +871,7 @@ function ye(e, t, n, r) {
 		typeof a == "string" || typeof a == "number" && Number.isFinite(a) || a == null ? i[e] = a : r.push(U("item.metadata.value.invalid", `Metadata field “${e}” was omitted because its value is unsupported.`, `${t}.${e}`, "warning", n));
 	}), i;
 }
-function be(e, t, n, r, i) {
+function Ce(e, t, n, r, i) {
 	if (!B(e) || !V(e.start) || !V(e.end) || e.start > e.end) {
 		i.push(U("item.position.time.invalid", "Time must provide finite start and end values with start no later than end; the dataset will not be plotted.", n, "warning", r));
 		return;
@@ -860,7 +893,7 @@ function J(e, t, n, r, i, a) {
 	let s = o ? `${t.label} “${o}” does not match a configured value; the dataset will not be plotted.` : `Position is missing a ${t.label.toLowerCase()} value; the dataset will not be plotted.`;
 	a.push(U(`item.position.${n}.unknown`, s, r, "warning", i));
 }
-function Y(e, t, n, r, i) {
+function we(e, t, n, r, i) {
 	if (e == null) {
 		i.push(U("item.position.missing", "Dataset is available but will not be plotted because it has no position.", n, "warning", r));
 		return;
@@ -873,14 +906,14 @@ function Y(e, t, n, r, i) {
 		i.push(U("item.position.invalid", "Position uses the retired x, y, and z index format; provide time, space, and organ instead.", n, "warning", r));
 		return;
 	}
-	let a = be(e.time, t.time, `${n}.time`, r, i), o = J(e.space, t.space, "space", `${n}.space`, r, i), s = J(e.organ, t.organ, "organ", `${n}.organ`, r, i);
+	let a = Ce(e.time, t.time, `${n}.time`, r, i), o = J(e.space, t.space, "space", `${n}.space`, r, i), s = J(e.organ, t.organ, "organ", `${n}.organ`, r, i);
 	return a && o && s ? {
 		time: a,
 		space: o,
 		organ: s
 	} : void 0;
 }
-function X(e, t) {
+function Y(e, t) {
 	let n = [];
 	if (!Array.isArray(e)) return {
 		value: [],
@@ -908,8 +941,8 @@ function X(e, t) {
 		let u;
 		e.href !== void 0 && (typeof e.href == "string" && W(e.href) ? u = e.href.trim() : n.push(U("item.href.unsafe", "Metadata destination was removed because it is invalid or uses an unsafe protocol.", `${o}.href`, "error", s)));
 		let d = "available";
-		e.status !== void 0 && (typeof e.status == "string" && L.has(e.status) ? d = e.status : n.push(U("item.status.invalid", "Unknown status was replaced with “available”.", `${o}.status`, "warning", s))), !u && d === "available" && (d = "unavailable", n.push(U("item.href.missing", "Dataset has no metadata destination and is treated as unavailable.", `${o}.href`, "warning", s)));
-		let f = ye(e.metadata, `${o}.metadata`, s, n), p = Y(e.position, t, `${o}.position`, s, n);
+		e.status !== void 0 && (typeof e.status == "string" && ve.has(e.status) ? d = e.status : n.push(U("item.status.invalid", "Unknown status was replaced with “available”.", `${o}.status`, "warning", s))), !u && d === "available" && (d = "unavailable", n.push(U("item.href.missing", "Dataset has no metadata destination and is treated as unavailable.", `${o}.href`, "warning", s)));
+		let f = Se(e.metadata, `${o}.metadata`, s, n), p = we(e.position, t, `${o}.position`, s, n);
 		i.push({
 			id: s,
 			label: l,
@@ -925,7 +958,7 @@ function X(e, t) {
 }
 //#endregion
 //#region packages/mhu-cube/src/mhu-cube.ts
-var Z = "mhu-cube-selection-change", Q = "mhu-cube-validation", xe = typeof HTMLElement > "u" ? class {} : HTMLElement, Se = 0, $ = class extends xe {
+var X = "mhu-cube-selection-change", Z = "mhu-cube-validation", Q = typeof HTMLElement > "u" ? class {} : HTMLElement, Te = 0, $ = class extends Q {
 	static observedAttributes = [
 		"items",
 		"axes",
@@ -933,13 +966,13 @@ var Z = "mhu-cube-selection-change", Q = "mhu-cube-validation", xe = typeof HTML
 	];
 	#e = [];
 	#t = [];
-	#n = I;
+	#n = L;
 	#r = [];
 	#i = [];
 	#a = [];
 	#o = null;
 	#s = this.attachShadow({ mode: "open" });
-	#c = `mhu-cube-${++Se}`;
+	#c = `mhu-cube-${++Te}`;
 	#l = null;
 	#u = null;
 	#d = null;
@@ -948,7 +981,7 @@ var Z = "mhu-cube-selection-change", Q = "mhu-cube-validation", xe = typeof HTML
 	#m = `${this.#c}-details-heading`;
 	#h = !1;
 	#g = !1;
-	#_ = new F();
+	#_ = new I();
 	get items() {
 		return this.#t;
 	}
@@ -989,7 +1022,7 @@ var Z = "mhu-cube-selection-change", Q = "mhu-cube-validation", xe = typeof HTML
 		}));
 	}
 	#y() {
-		let e = X(this.#e, this.#n);
+		let e = Y(this.#e, this.#n);
 		this.#t = e.value, this.#i = e.issues, this.#t.some((e) => e.id === this.#o) || (this.#o = null);
 	}
 	#b(e) {
@@ -1000,7 +1033,7 @@ var Z = "mhu-cube-selection-change", Q = "mhu-cube-validation", xe = typeof HTML
 		this.#a = this.#a.filter((t) => t.path !== e);
 		let n = this.getAttribute(e);
 		if (n === null) {
-			t && (e === "axes" ? this.#b(I) : (this.#e = [], this.#y()));
+			t && (e === "axes" ? this.#b(L) : (this.#e = [], this.#y()));
 			return;
 		}
 		let r;
@@ -1017,7 +1050,7 @@ var Z = "mhu-cube-selection-change", Q = "mhu-cube-validation", xe = typeof HTML
 		e === "axes" ? this.#b(r) : (this.#e = r, this.#y());
 	}
 	#S() {
-		this.isConnected && this.dispatchEvent(new CustomEvent(Q, {
+		this.isConnected && this.dispatchEvent(new CustomEvent(Z, {
 			bubbles: !0,
 			composed: !0,
 			detail: { issues: this.validationIssues }
@@ -1027,7 +1060,7 @@ var Z = "mhu-cube-selection-change", Q = "mhu-cube-validation", xe = typeof HTML
 		let n = this.#o !== e.id;
 		this.#o = e.id, this.#E(), n && this.#u ? this.#_.run(this.#u, () => {
 			this.#u && (d(this.#u, e, this.#m, () => this.#w()), t && this.#u.querySelector(".mhu-cube__details-action")?.focus());
-		}) : t && this.#u?.querySelector(".mhu-cube__details-action")?.focus(), this.dispatchEvent(new CustomEvent(Z, {
+		}) : t && this.#u?.querySelector(".mhu-cube__details-action")?.focus(), this.dispatchEvent(new CustomEvent(X, {
 			bubbles: !0,
 			composed: !0,
 			detail: { item: e }
@@ -1037,7 +1070,7 @@ var Z = "mhu-cube-selection-change", Q = "mhu-cube-validation", xe = typeof HTML
 		let e = this.#o;
 		if (!e || !this.#u) return;
 		let t = [...this.#s.querySelectorAll("[data-item-id]")].find((t) => t.dataset.itemId === e);
-		this.#_.cancel(), this.#o = null, this.#E(), d(this.#u, null, this.#m, () => this.#w()), t?.focus(), this.dispatchEvent(new CustomEvent(Z, {
+		this.#_.cancel(), this.#o = null, this.#E(), d(this.#u, null, this.#m, () => this.#w()), t?.focus(), this.dispatchEvent(new CustomEvent(X, {
 			bubbles: !0,
 			composed: !0,
 			detail: { item: null }
@@ -1079,7 +1112,7 @@ var Z = "mhu-cube-selection-change", Q = "mhu-cube-validation", xe = typeof HTML
 			let n = t.get(e.id) ?? 0, r = document.createElement("li");
 			r.className = "mhu-cube__unpositioned-item", e.id === this.#o && r.classList.add("mhu-cube__item--selected");
 			let i = document.createElement("span");
-			i.className = "mhu-cube__sr-only", i.id = `${this.#c}-unpositioned-${n}-description`, i.textContent = M(e, this.#n);
+			i.className = "mhu-cube__sr-only", i.id = `${this.#c}-unpositioned-${n}-description`, i.textContent = N(e, this.#n);
 			let o = document.createElement("button");
 			o.className = "mhu-cube__unpositioned-button", o.textContent = e.label, this.#D(o, e, i.id), r.append(i, o), a.append(r);
 		}), n.append(r, i, a), n;
@@ -1087,8 +1120,8 @@ var Z = "mhu-cube-selection-change", Q = "mhu-cube-validation", xe = typeof HTML
 	#k() {
 		if ((!this.#l || !this.#u || !this.#d || !this.#f) && this.#T(), !this.#l || !this.#u || !this.#d || !this.#f) return;
 		this.#l.setAttribute("aria-label", this.getAttribute("label") ?? "Metadata datasets"), this.#d.querySelector(".mhu-cube__unpositioned")?.remove();
-		let e = _e(this.#n);
-		if (e) this.#f.replaceChildren(he(this.#n), O(this.#n), j(this.#n));
+		let e = be(this.#n);
+		if (e) this.#f.replaceChildren(O(this.#n), k(this.#n), M(this.#n));
 		else {
 			let e = document.createElement("p");
 			e.className = "mhu-cube__plot-unavailable", e.textContent = "Visualization unavailable because the axis data is incomplete.", this.#f.replaceChildren(e);
@@ -1103,8 +1136,8 @@ var Z = "mhu-cube-selection-change", Q = "mhu-cube-validation", xe = typeof HTML
 		}
 		let n = document.createElement("ul");
 		n.className = "mhu-cube__list";
-		let r = new Map(this.#t.map((e, t) => [e.id, t])), i = e ? fe(this.#t, this.#n) : /* @__PURE__ */ new Map();
-		le(this.#t, this.#n).forEach((e) => {
+		let r = new Map(this.#t.map((e, t) => [e.id, t])), i = e ? ge(this.#t, this.#n) : /* @__PURE__ */ new Map();
+		pe(this.#t, this.#n).forEach((e) => {
 			let t = r.get(e.id) ?? 0, a = e.status ?? "available", o = e.id === this.#o, s = document.createElement("li");
 			s.className = `mhu-cube__item mhu-cube__item--${a}`, o && s.classList.add("mhu-cube__item--selected");
 			let c = i.get(e.id);
@@ -1117,16 +1150,16 @@ var Z = "mhu-cube-selection-change", Q = "mhu-cube-validation", xe = typeof HTML
 			let d = document.createElement("button");
 			d.className = "mhu-cube__select";
 			let p = document.createElement("span");
-			p.className = "mhu-cube__sr-only", p.id = `${this.#c}-item-${t}-description`, p.textContent = M(e, this.#n), this.#D(d, e, p.id), d.append(A(c), k(c.geometry), l(e)), s.append(p, d, f(e)), n.append(s);
+			p.className = "mhu-cube__sr-only", p.id = `${this.#c}-item-${t}-description`, p.textContent = N(e, this.#n), this.#D(d, e, p.id), d.append(j(c), A(c.geometry), l(e)), s.append(p, d, f(e)), n.append(s);
 		}), this.#f.append(n);
 		let a = this.#t.filter((e) => !i.has(e.id));
 		a.length > 0 && this.#d.append(this.#O(a, r));
 	}
 };
-function Ce() {
+function Ee() {
 	typeof customElements > "u" || customElements.get("mhu-cube") || customElements.define("mhu-cube", $);
 }
 //#endregion
-export { Z as MHU_CUBE_SELECTION_EVENT, Q as MHU_CUBE_VALIDATION_EVENT, $ as MhuCube, Ce as defineMhuCube, W as isSafeMetadataHref, q as validateAxes, X as validateItems };
+export { X as MHU_CUBE_SELECTION_EVENT, Z as MHU_CUBE_VALIDATION_EVENT, $ as MhuCube, Ee as defineMhuCube, W as isSafeMetadataHref, q as validateAxes, Y as validateItems };
 
 //# sourceMappingURL=mhu-cube.js.map

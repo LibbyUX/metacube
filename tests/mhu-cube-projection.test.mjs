@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  getAxisEdges,
   getAxisLayout,
   getCategoryCenter,
   getFootprintHalfSize,
@@ -71,6 +72,24 @@ test("getFrameEdges projects all twelve edges of the bounding cube", () => {
 
   assert.equal(edges.length, 12);
   assert.ok(frontEdge, "The front vertical edge is part of the frame.");
+});
+
+test("the low camera keeps floor depth well short of the time axis height on screen", () => {
+  const timeHeight = projectPoint(0, 0, 0).y - projectPoint(0, 1, 0).y;
+  const floorDepth = projectPoint(0, 0, 0).y - projectPoint(1, 0, 1).y;
+
+  assert.ok(floorDepth < timeHeight * 0.4, "Depth must move blocks up the screen far less than time does.");
+  assert.ok(projectPoint(0, 0, 0).y <= 92, "The bottom of the plot stays free for floor labels.");
+});
+
+test("getAxisEdges points every label direction away from the cube", () => {
+  const { time, space, organ } = getAxisEdges();
+  [time, space, organ].forEach(({ normal }) => assert.ok(Math.abs(Math.hypot(normal.x, normal.y) - 1) < 1e-9));
+
+  assert.ok(time.normal.x < -0.9, "Time ticks sit to the left of the left edge.");
+  assert.ok(space.normal.x < 0 && space.normal.y > 0, "Space labels hang below-left of the space edge.");
+  assert.ok(organ.normal.x > 0 && organ.normal.y > 0, "Organ labels hang below-right of the organ edge.");
+  assert.deepEqual(time.end, projectPoint(1, 1, 0));
 });
 
 test("getTimeCoordinate maps the time domain onto the vertical axis", () => {

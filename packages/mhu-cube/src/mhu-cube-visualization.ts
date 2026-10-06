@@ -1,4 +1,5 @@
 import {
+  getAxisEdges,
   getAxisLayout,
   getFrameEdges,
   getTimeCoordinate,
@@ -85,30 +86,34 @@ export function createAxisLabels(axes: MhuCubeAxes) {
   const labels = document.createElement("div");
   labels.className = "mhu-cube__axes";
   labels.setAttribute("aria-hidden", "true");
-  const addLabel = (text: string, className: string, point: Point) => {
+  // Each label sits exactly on its axis position; CSS aligns its box and pushes it outward along the edge's normal.
+  const addLabel = (text: string, className: string, point: Point, normal: Point) => {
     const label = document.createElement("span");
     label.className = className;
     label.textContent = text;
     label.style.left = `${point.x}%`;
     label.style.top = `${point.y}%`;
+    label.style.setProperty("--axis-normal-x", normal.x.toFixed(4));
+    label.style.setProperty("--axis-normal-y", normal.y.toFixed(4));
     labels.append(label);
   };
+  const midpoint = (start: Point, end: Point) => ({ x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 });
 
-  addLabel(axes.time.label, "mhu-cube__axis-title mhu-cube__axis-title--time", { x: 4.5, y: 5 });
-  addLabel(axes.space.label, "mhu-cube__axis-title mhu-cube__axis-title--space", { x: 30, y: 89 });
-  addLabel(axes.organ.label, "mhu-cube__axis-title mhu-cube__axis-title--organ", { x: 84.5, y: 91.5 });
+  const edges = getAxisEdges();
+  const layout = getAxisLayout(axes);
+  addLabel(axes.time.label, "mhu-cube__axis-title mhu-cube__axis-title--time", edges.time.end, edges.time.normal);
+  addLabel(axes.space.label, "mhu-cube__axis-title mhu-cube__axis-title--space", midpoint(edges.space.start, edges.space.end), edges.space.normal);
+  addLabel(axes.organ.label, "mhu-cube__axis-title mhu-cube__axis-title--organ", midpoint(edges.organ.start, edges.organ.end), edges.organ.normal);
   (axes.time.ticks ?? []).forEach((tick) => {
     const point = projectPoint(1, getTimeCoordinate(tick, axes.time), 0);
-    addLabel(NUMBER_FORMAT.format(tick), "mhu-cube__axis-value mhu-cube__axis-value--time", { x: point.x - 5, y: point.y });
+    addLabel(NUMBER_FORMAT.format(tick), "mhu-cube__axis-value mhu-cube__axis-value--time", point, edges.time.normal);
   });
-  const layout = getAxisLayout(axes);
+  // Space and organ labels start exactly where their floor guides meet the frame.
   axes.space.values.forEach((value, index) => {
-    const point = projectPoint(layout.space[index], 0, 0);
-    addLabel(value, "mhu-cube__axis-value mhu-cube__axis-value--space", { x: point.x - 4.5, y: point.y + 1.8 });
+    addLabel(value, "mhu-cube__axis-value mhu-cube__axis-value--space", projectPoint(layout.space[index], 0, 0), edges.space.normal);
   });
   axes.organ.values.forEach((value, index) => {
-    const point = projectPoint(0, 0, layout.organ[index]);
-    addLabel(value, "mhu-cube__axis-value mhu-cube__axis-value--organ", { x: point.x + 2.5, y: point.y + 1.7 });
+    addLabel(value, "mhu-cube__axis-value mhu-cube__axis-value--organ", projectPoint(0, 0, layout.organ[index]), edges.organ.normal);
   });
   return labels;
 }

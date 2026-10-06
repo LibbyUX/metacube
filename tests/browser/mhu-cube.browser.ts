@@ -132,6 +132,34 @@ await test("axes label time, space, and organ with organs in alphabetical order"
   assert(shadow.querySelector(".mhu-cube__frame-guide")?.getAttribute("d")?.split("M").length === 5, "Each interior tick needs a back-wall guide.");
 });
 
+await test("axis labels never overlap each other or the frame and stay inside the component", () => {
+  const labels = [...shadow.querySelectorAll<HTMLElement>(".mhu-cube__axis-title, .mhu-cube__axis-value")]
+    .map((label) => ({ text: label.textContent, rect: label.getBoundingClientRect() }));
+  const frame = shadow.querySelector<SVGSVGElement>(".mhu-cube__frame");
+  const numbers = frame?.querySelector(".mhu-cube__frame-line")?.getAttribute("d")?.match(/-?[\d.]+/g)?.map(Number) ?? [];
+  assert(frame && numbers.length === 48, "The frame should draw twelve edges.");
+  const bounds = frame.getBoundingClientRect();
+  const toScreen = (x: number, y: number) => ({ x: bounds.left + (x / 100) * bounds.width, y: bounds.top + (y / 100) * bounds.height });
+  const edges = Array.from({ length: 12 }, (_, index) => [
+    toScreen(numbers[index * 4], numbers[index * 4 + 1]),
+    toScreen(numbers[index * 4 + 2], numbers[index * 4 + 3]),
+  ]);
+  const crossesEdge = (rect: DOMRect) => edges.some(([start, end]) => Array.from({ length: 101 }, (_, step) => step / 100).some((t) => {
+    const x = start.x + (end.x - start.x) * t;
+    const y = start.y + (end.y - start.y) * t;
+    return x > rect.left && x < rect.right && y > rect.top && y < rect.bottom;
+  }));
+  const host = component.getBoundingClientRect();
+  labels.forEach(({ text, rect }, index) => {
+    assert(!crossesEdge(rect), `Axis label “${text}” overlaps the frame.`);
+    assert(rect.left >= host.left && rect.right <= host.right && rect.bottom <= host.bottom, `Axis label “${text}” spills outside the component.`);
+    labels.slice(index + 1).forEach((other) => {
+      const overlaps = rect.left < other.rect.right && other.rect.left < rect.right && rect.top < other.rect.bottom && other.rect.top < rect.bottom;
+      assert(!overlaps, `Axis labels “${text}” and “${other.text}” overlap.`);
+    });
+  });
+});
+
 await test("block descriptions state the time, space, and organ position", () => {
   const button = shadow.querySelector<HTMLButtonElement>('[data-item-id="two"]');
   const descriptionId = button?.getAttribute("aria-describedby");

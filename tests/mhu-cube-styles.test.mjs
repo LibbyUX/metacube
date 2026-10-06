@@ -84,6 +84,17 @@ test("axis styles name the time, space, and organ axes", () => {
   assert.match(styles, /@media \(forced-colors: active\)[\s\S]*?\.mhu-cube__frame-guide, \.mhu-cube__frame-floor-guide, \.mhu-cube__shadow-drop \{ stroke: GrayText; \}/);
 });
 
+test("axis labels are pushed off the frame along each edge's outward normal", async () => {
+  const projection = await readFile(new URL("../packages/mhu-cube/src/projection.ts", import.meta.url), "utf8");
+
+  assert.match(styles, /transform: translate\(\s*calc\(var\(--_align-x\) \+ var\(--axis-normal-x, 0\) \* var\(--_offset\)\),\s*calc\(var\(--_align-y\) \+ var\(--axis-normal-y, 0\) \* var\(--_offset\)\)\s*\);/);
+  assert.match(styles, /\.mhu-cube__axis-value--space \{ --_align-x: -100%; --_align-y: 0%; \}/);
+  assert.match(styles, /\.mhu-cube__axis-value--organ \{ --_align-x: 0%; --_align-y: 0%; \}/);
+  // Normals are computed for this exact plot shape, so the CSS aspect ratio and projection constant must agree.
+  assert.match(styles, /\.mhu-cube__plot \{[^}]*aspect-ratio: 1000 \/ 868;/);
+  assert.match(projection, /const PLOT_HEIGHT_RATIO = 0\.868;/);
+});
+
 test("block shadows paint beneath every block and age markers appear only when a block is active", () => {
   assert.match(styles, /\.mhu-cube__shadow \{[^}]*z-index: 0;[^}]*overflow: visible;[^}]*pointer-events: none;/);
   assert.match(styles, /\.mhu-cube__time-marker \{ opacity: 0;/);

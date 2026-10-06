@@ -105,6 +105,34 @@ export declare function getAxisLayout(axes: MhuCubeAxes): AxisLayout;
  */
 export declare function getFrameEdges(): Array<[Point, Point]>;
 /**
+ * Finds the on-screen direction pointing straight away from a frame edge, away from the cube.
+ * @param start - One end of the edge in plot percentages.
+ * @param end - The other end of the edge in plot percentages.
+ * @returns A unit vector in screen space, correcting for the plot's non-square percentages.
+ */
+export declare function getOutwardNormal(start: Point, end: Point): Point;
+/**
+ * Locates the three labeled frame edges and the direction their labels sit away from the cube.
+ * @returns For each axis, its edge's start and end points in plot percentages and its outward unit normal.
+ */
+export declare function getAxisEdges(): {
+    time: {
+        start: Point;
+        end: Point;
+        normal: Point;
+    };
+    space: {
+        start: Point;
+        end: Point;
+        normal: Point;
+    };
+    organ: {
+        start: Point;
+        end: Point;
+        normal: Point;
+    };
+};
+/**
  * Converts a time range to a drawn vertical extent, keeping short ranges and single ages cube-height.
  * @param range - Validated time range inside the axis domain.
  * @param axis - Validated time axis with a positive span.
