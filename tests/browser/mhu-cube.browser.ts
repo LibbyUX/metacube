@@ -96,7 +96,7 @@ await test("desktop introduction explains the visualization with semantic dimens
   const wideHeading = intro[0].querySelector<HTMLElement>(".mhu-cube__intro-heading-wide");
   const compactHeading = intro[0].querySelector<HTMLElement>(".mhu-cube__intro-heading-compact");
   assert(visualization && getComputedStyle(visualization).display !== "none", "Visualization guidance should be visible on desktop.");
-  assert(wideHeading?.textContent === "Explore multicube data" && getComputedStyle(wideHeading).display !== "none", "The desktop heading should be visible on desktop.");
+  assert(wideHeading?.textContent === "Explore multiscale data" && getComputedStyle(wideHeading).display !== "none", "The desktop heading should be visible on desktop.");
   assert(compactHeading && getComputedStyle(compactHeading).display === "none", "The compact heading should be hidden on desktop.");
   assert(
     visualization.querySelector(".mhu-cube__intro-summary")?.textContent === "This interactive visualization compares datasets across time, space, and organ. Select a block to view its details.",
@@ -427,7 +427,7 @@ await test("compact mode exposes direct cards and removes the selection step", a
   assert(select && getComputedStyle(select).display === "none", "Cube selection remains exposed in compact mode.");
   assert(details && getComputedStyle(details).display === "none", "Desktop details remain exposed in compact mode.");
   assert(visualization && getComputedStyle(visualization).display === "none", "Visualization guidance remains exposed in compact mode.");
-  assert(heading?.innerText.trim() === "Explore datasets across time, space, and organ", "Compact layouts should show only the compact heading.");
+  assert(heading?.innerText.trim() === "Explore multiscale data", "Compact layouts should show only the compact heading.");
   assert([...shadow.querySelectorAll<HTMLElement>(".mhu-cube__intro p")].every((paragraph) => paragraph.offsetParent === null), "Compact layouts should have no introduction body text.");
   assert(cards.length === items.length && cards.every((card) => getComputedStyle(card).display === "flex"), "Every dataset needs a compact card.");
 });
