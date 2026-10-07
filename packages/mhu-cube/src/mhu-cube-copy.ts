@@ -27,8 +27,8 @@ export interface MhuCubeIntroCopy {
 }
 
 export const MHU_CUBE_INTRO_COPY: MhuCubeIntroCopy = {
-  heading: "Explore multicube data",
-  compactHeading: "Explore datasets across time, space, and organ",
+  heading: "Explore multiscale data",
+  compactHeading: "Explore multiscale data",
   visualization: {
     description: "This interactive visualization compares datasets across time, space, and organ. Select a block to view its details.",
     dimensionHeadings: ["Dimension", "What it represents"],
