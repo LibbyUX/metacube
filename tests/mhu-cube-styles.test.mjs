@@ -124,6 +124,11 @@ test("desktop content precedes the visualization and selected details use a card
   assert.match(styles, /\.mhu-cube__details-card \{[\s\S]*?border: 1px solid[\s\S]*?background: var\(--_surface-container\);[\s\S]*?box-shadow:/);
 });
 
+test("the preview page and component share the lowest container surface", () => {
+  assert.match(previewStyles, /\nbody \{[^}]*background: var\(--mat-sys-surface-container-lowest\);/);
+  assert.match(previewStyles, /\nmhu-cube \{[^}]*--mhu-cube-surface: var\(--mat-sys-surface-container-lowest\);/);
+});
+
 test("responsive introductions swap the heading text and drop visualization guidance on compact layouts", () => {
   assert.match(styles, /\.mhu-cube__intro-heading-compact \{ display: none; \}/);
   assert.match(styles, /@container mhu-cube-host \(max-width: 64rem\)[\s\S]*?\.mhu-cube__intro-heading-wide, \.mhu-cube__intro-visualization \{ display: none; \}/);
