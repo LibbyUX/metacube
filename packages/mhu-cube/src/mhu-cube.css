@@ -67,7 +67,8 @@
   --_gutter-top: 0.5rem;
   --_gutter-right: 0.5rem;
   --_gutter-bottom: 1.25rem;
-  --_gutter-left: 3rem;
+  /* Wide enough for the time title with its unit, such as "Time (years)", which right-aligns with the ticks. */
+  --_gutter-left: 6rem;
   --_gutter-x: calc(var(--_gutter-left) + var(--_gutter-right));
   --_gutter-y: calc(var(--_gutter-top) + var(--_gutter-bottom));
   --_plot-width: min(100cqw, calc((100cqh - var(--_gutter-y)) / var(--_area-ratio, 0.868) + var(--_gutter-x)));

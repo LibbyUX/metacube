@@ -96,10 +96,10 @@ await test("desktop introduction explains the visualization with semantic dimens
   const wideHeading = intro[0].querySelector<HTMLElement>(".mhu-cube__intro-heading-wide");
   const compactHeading = intro[0].querySelector<HTMLElement>(".mhu-cube__intro-heading-compact");
   assert(visualization && getComputedStyle(visualization).display !== "none", "Visualization guidance should be visible on desktop.");
-  assert(wideHeading?.textContent === "Explore multiscale data" && getComputedStyle(wideHeading).display !== "none", "The desktop heading should be visible on desktop.");
+  assert(wideHeading?.textContent === "Explore Multiscale Data" && getComputedStyle(wideHeading).display !== "none", "The desktop heading should be visible on desktop.");
   assert(compactHeading && getComputedStyle(compactHeading).display === "none", "The compact heading should be hidden on desktop.");
   assert(
-    visualization.querySelector(".mhu-cube__intro-summary")?.textContent === "This interactive visualization compares datasets across time, space, and organ. Select a block to view its details.",
+    visualization.querySelector(".mhu-cube__intro-summary")?.textContent === "This interactive visualization compares datasets across time, space, and organs. Select a block to view its details.",
     "Visualization guidance should combine the comparison and selection instructions.",
   );
   const dimensionKey = visualization.querySelector<HTMLDListElement>("dl.mhu-cube__intro-dimensions");
@@ -131,7 +131,7 @@ await test("cube controls have unique names, descriptions, state, and details re
 
 await test("axes label time, space, and organ with organs in alphabetical order", () => {
   const labels = (selector: string) => [...shadow.querySelectorAll(selector)].map((label) => label.textContent).join(",");
-  assert(labels(".mhu-cube__axis-title--time") === "Time", "The time axis title should show its label alone.");
+  assert(labels(".mhu-cube__axis-title--time") === "Time (years)", "The time axis title should append its unit.");
   assert(labels(".mhu-cube__axis-value--time") === "0,20,40,60,80,100", "The time axis should default to five equal steps.");
   assert(labels(".mhu-cube__axis-value--space") === "small,large", "Space values should keep their supplied order.");
   assert(labels(".mhu-cube__axis-value--organ") === "Heart,Liver", "Organ values should be alphabetical.");
@@ -161,9 +161,12 @@ function assertAxisLabelsClear(root: ShadowRoot) {
     return x > rect.left && x < rect.right && y > rect.top && y < rect.bottom;
   }));
   const host = component.getBoundingClientRect();
+  const plot = root.querySelector(".mhu-cube__plot")?.getBoundingClientRect();
+  assert(plot, "The plot is missing.");
   labels.forEach(({ text, rect }, index) => {
     assert(!crossesEdge(rect), `Axis label “${text}” overlaps the frame.`);
     assert(rect.left >= host.left && rect.right <= host.right && rect.bottom <= host.bottom, `Axis label “${text}” spills outside the component.`);
+    assert(rect.left >= plot.left, `Axis label “${text}” reaches past the plot toward the introduction.`);
     labels.slice(index + 1).forEach((other) => {
       const overlaps = rect.left < other.rect.right && other.rect.left < rect.right && rect.top < other.rect.bottom && other.rect.top < rect.bottom;
       assert(!overlaps, `Axis labels “${text}” and “${other.text}” overlap.`);
@@ -427,7 +430,7 @@ await test("compact mode exposes direct cards and removes the selection step", a
   assert(select && getComputedStyle(select).display === "none", "Cube selection remains exposed in compact mode.");
   assert(details && getComputedStyle(details).display === "none", "Desktop details remain exposed in compact mode.");
   assert(visualization && getComputedStyle(visualization).display === "none", "Visualization guidance remains exposed in compact mode.");
-  assert(heading?.innerText.trim() === "Explore multiscale data", "Compact layouts should show only the compact heading.");
+  assert(heading?.innerText.trim() === "Explore Multiscale Data", "Compact layouts should show only the compact heading.");
   assert([...shadow.querySelectorAll<HTMLElement>(".mhu-cube__intro p")].every((paragraph) => paragraph.offsetParent === null), "Compact layouts should have no introduction body text.");
   assert(cards.length === items.length && cards.every((card) => getComputedStyle(card).display === "flex"), "Every dataset needs a compact card.");
 });

@@ -148,7 +148,8 @@ export function createAxisLabels(axes: MhuCubeAxes, view: MhuCubeView) {
 
   const edges = getAxisEdges(view);
   const layout = getAxisLayout(axes);
-  addLabel(axes.time.label, "mhu-cube__axis-title mhu-cube__axis-title--time", edges.time.end, edges.time.normal);
+  const timeTitle = axes.time.unit ? `${axes.time.label} (${axes.time.unit})` : axes.time.label;
+  addLabel(timeTitle, "mhu-cube__axis-title mhu-cube__axis-title--time", edges.time.end, edges.time.normal);
   addFloorTitle(axes.space.label, "space", edges.space);
   addFloorTitle(axes.organ.label, "organ", edges.organ);
   (axes.time.ticks ?? []).forEach((tick) => {
